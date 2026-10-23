@@ -14,6 +14,8 @@
   --jade-wash: #e1ece8;
   --warn: #8a5a00; --warn-wash: #fbf0d9;
   --wood: #2f7d3b; --fire: #b8352a; --earth: #9a6b12; --metal: #6b7378; --water: #1f5f9e;
+  --w0: #e4f0e3; --w1: #f8e3df; --w2: #f3ead6; --w3: #e9ebec; --w4: #e0ebf6;
+  --good: #1f7a4d; --bad: #a3443a;
   --f-han: "Noto Serif SC", "Songti SC", "SimSun", serif;
   --f-body: "IBM Plex Sans Thai", "Sarabun", "Leelawadee UI", system-ui, sans-serif;
   --f-data: "IBM Plex Mono", ui-monospace, monospace;
@@ -21,11 +23,11 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --paper: #121715; --sheet: #19201d; --ink: #e6ebe7; --ink-soft: #9aa7a0; --rule: #2c3631;
   --jade: #6fc0b2; --jade-wash: #1d3330; --warn: #f0c060; --warn-wash: #33290f;
-  --wood: #6cc27a; --fire: #ef7a6d; --earth: #d9a94a; --metal: #a9b2b7; --water: #6aa8e6; color-scheme: dark } }
+  --wood: #6cc27a; --fire: #ef7a6d; --earth: #d9a94a; --metal: #a9b2b7; --water: #6aa8e6; --w0: #1b2b1d; --w1: #33201d; --w2: #2f2716; --w3: #262a2c; --w4: #18263a; --good: #6fd19a; --bad: #f08a7e; color-scheme: dark } }
 :root[data-theme="dark"] {
   --paper: #121715; --sheet: #19201d; --ink: #e6ebe7; --ink-soft: #9aa7a0; --rule: #2c3631;
   --jade: #6fc0b2; --jade-wash: #1d3330; --warn: #f0c060; --warn-wash: #33290f;
-  --wood: #6cc27a; --fire: #ef7a6d; --earth: #d9a94a; --metal: #a9b2b7; --water: #6aa8e6; color-scheme: dark }
+  --wood: #6cc27a; --fire: #ef7a6d; --earth: #d9a94a; --metal: #a9b2b7; --water: #6aa8e6; --w0: #1b2b1d; --w1: #33201d; --w2: #2f2716; --w3: #262a2c; --w4: #18263a; --good: #6fd19a; --bad: #f08a7e; color-scheme: dark }
 
 body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
 .wrap > * { min-width: 0; }
@@ -53,22 +55,58 @@ details summary { cursor: pointer; color: var(--jade); font-weight: 500; }
 .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
 .note { font-size: .82rem; color: var(--ink-soft); }
 
-/* ผังเสา */
-.chart { overflow-x: auto; }
-.pillars { display: grid; grid-template-columns: repeat(6, minmax(92px, 1fr)); min-width: 600px; border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); }
-.col { display: grid; grid-template-rows: auto auto auto auto 1fr; justify-items: center; padding: 12px 6px 14px; gap: 6px; text-align: center; border-left: 1px solid var(--rule); }
-.col:first-child { border-left: 0; }
-.col.extra { background: var(--paper); }
-.col.dm .stem .han { text-decoration: underline 2px var(--jade); text-underline-offset: 6px; }
-.col h3 { margin: 0; font-size: .8rem; font-weight: 500; color: var(--ink-soft); }
-.god { font-size: .72rem; color: var(--jade); min-height: 1.2em; }
-.glyph { display: grid; justify-items: center; line-height: 1.15; }
-.glyph .han { font-family: var(--f-han); font-size: 2.3rem; font-weight: 700; }
-.glyph .th { font-size: .78rem; color: var(--ink-soft); }
-.hidden-stems { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-content: start; }
-.chip { font-size: .72rem; border: 1px solid var(--rule); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
-.chip .han { font-family: var(--f-han); font-weight: 700; }
+/* ผังเสา: 4 เสาหลักเป็นการ์ด + เสาเสริม 2 ต้นแถบข้าง */
+.board { display: grid; grid-template-columns: 1fr 200px; gap: 12px; align-items: stretch; }
+@media (max-width: 760px) { .board { grid-template-columns: 1fr; } }
+.main4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.pc { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 6px 12px; display: grid; justify-items: center; align-content: start; gap: 5px; text-align: center; min-width: 0; }
+.pc.dm { border: 2px solid var(--jade); box-shadow: 0 0 0 4px var(--jade-wash); }
+.pc-h { font-size: .8rem; font-weight: 600; color: var(--ink-soft); }
+.pc.dm .pc-h { color: var(--jade); }
+.tg { font-size: .72rem; line-height: 1.25; min-height: 2.5em; display: grid; align-content: center; }
+.tg b { font-family: var(--f-han); font-weight: 700; font-size: .8rem; }
+.tg span { color: var(--ink-soft); }
+.tile { position: relative; width: min(100%, 72px); aspect-ratio: 1; border-radius: 14px; display: grid; place-items: center; }
+.tile .han { font-family: var(--f-han); font-size: clamp(1.9rem, 6vw, 2.6rem); font-weight: 700; line-height: 1; }
+.tile .bd { position: absolute; right: -4px; bottom: -6px; font-size: .64rem; font-weight: 600; background: var(--sheet); border: 1px solid currentColor; border-radius: 999px; padding: 0 5px; line-height: 1.5; }
+.w0 { background: var(--w0); color: var(--wood) } .w1 { background: var(--w1); color: var(--fire) } .w2 { background: var(--w2); color: var(--earth) } .w3 { background: var(--w3); color: var(--metal) } .w4 { background: var(--w4); color: var(--water) }
+.rd { font-size: .74rem; color: var(--ink-soft); margin-top: 4px; }
+.hs { display: flex; gap: 3px; justify-content: center; flex-wrap: wrap; margin-top: 2px; }
+.hs .mini { display: grid; justify-items: center; width: 26px; border-radius: 6px; padding: 2px 0; font-size: .6rem; line-height: 1.2; }
+.hs .mini b { font-family: var(--f-han); font-size: .95rem; }
+.extra2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--paper); border: 1px dashed var(--rule); border-radius: 12px; padding: 8px; align-content: start; }
+.extra2 .cap { grid-column: 1 / -1; font-size: .74rem; color: var(--ink-soft); text-align: center; }
+.extra2 .pc { padding: 8px 4px; }
+.extra2 .tile { width: min(100%, 56px); }
+.extra2 .tile .han { font-size: 1.9rem; }
 .e0 { color: var(--wood) } .e1 { color: var(--fire) } .e2 { color: var(--earth) } .e3 { color: var(--metal) } .e4 { color: var(--water) }
+.chip { font-size: .72rem; border: 1px solid var(--rule); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+
+/* ผลวิเคราะห์ */
+.insight { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .insight { grid-template-columns: 1fr; } }
+.verdict .kind { font-size: .78rem; color: var(--ink-soft); }
+.verdict .big { font-size: 1.45rem; font-weight: 600; margin: 2px 0 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.verdict .big .han { font-family: var(--f-han); font-size: 1.1rem; color: var(--jade); }
+.gauge { position: relative; margin: 6px 0 2px; }
+.gauge .zones { display: flex; height: 12px; border-radius: 6px; overflow: hidden; }
+.gauge .zones i { display: block; height: 100%; }
+.gauge .mk { position: absolute; top: -5px; width: 4px; height: 22px; margin-left: -2px; background: var(--ink); border-radius: 2px; }
+.gauge .zl { display: flex; font-size: .68rem; color: var(--ink-soft); margin-top: 4px; }
+.gauge .zl span { text-align: center; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.score { font-size: .85rem; color: var(--ink-soft); margin: 6px 0 14px; }
+.score b { color: var(--ink); font-family: var(--f-data); }
+.fu { display: grid; grid-template-columns: max-content 1fr; gap: 8px 12px; align-items: center; }
+.fu .lab { font-size: .85rem; font-weight: 600; }
+.fu .lab.good { color: var(--good); } .fu .lab.bad { color: var(--bad); }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 3px 11px 3px 4px; font-size: .9rem; font-weight: 500; }
+.pill .dot { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-han); font-size: .78rem; font-weight: 700; background: var(--sheet); }
+.pill small { font-size: .7rem; opacity: .85; font-weight: 400; }
+.wheel svg { width: 100%; max-width: 380px; display: block; margin: 0 auto; }
+.wheel text { font-family: var(--f-body); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; font-size: .75rem; color: var(--ink-soft); margin-top: 4px; }
+.legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 4px; }
 
 /* สรุป */
 .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
@@ -100,7 +138,7 @@ footer { color: var(--ink-soft); font-size: .8rem; }
 <div class="wrap">
   <header>
     <h1><span class="han">四柱八字</span>ผังดวงสี่เสา</h1>
-    <p class="sub">ชั้นคำนวณรุ่นแรก ใช้ค่าตั้งต้นตามระบบที่ตกลงกันไว้</p>
+    <p class="sub">หน้าทดสอบ · ผูกดวงและวิเคราะห์โครงสร้างดวง</p>
   </header>
 
   <form id="f" autocomplete="off">
@@ -137,23 +175,25 @@ footer { color: var(--ink-soft); font-size: .8rem; }
 
   <section aria-labelledby="h-chart">
     <h2 id="h-chart">ผังดวง <span id="who"></span></h2>
-    <div class="chart"><div class="pillars" id="pillars"></div></div>
+    <div class="board">
+      <div class="main4" id="pillars"></div>
+      <aside class="extra2" id="extras" aria-label="หลักเสริม"></aside>
+    </div>
+  </section>
+
+  <section class="insight">
+    <div class="panel verdict" id="verdict" aria-live="polite"></div>
+    <div class="panel wheel">
+      <h2>วงจรห้าธาตุของดวงนี้</h2>
+      <div id="wheel"></div>
+      <div class="legend"><span><i style="border-color:var(--ink-soft)"></i>ให้กำเนิด</span><span><i style="border-color:var(--rule);border-top-style:dashed"></i>ข่ม</span><span>ตัวเลข = จำนวนตัวใน 8 อักษร</span></div>
+    </div>
   </section>
 
   <section class="summary">
     <div class="panel">
       <h2>ข้อมูลการคำนวณ</h2>
       <dl id="facts"></dl>
-    </div>
-    <div class="panel">
-      <h2>ธาตุใน 8 อักษร</h2>
-      <div class="bars" id="bars"></div>
-      <p class="note">นับก้านและกิ่งของ 4 เสาหลักแบบหนึ่งตัวต่อหนึ่งคะแนน ยังไม่ถ่วงน้ำหนักตามฤดูและราศีแฝง</p>
-    </div>
-    <div class="panel">
-      <h2>วิเคราะห์โครงสร้างดวง</h2>
-      <dl id="ana"></dl>
-      <p class="note">ยังไม่รวมการแปรธาตุจากการรวม/ชง</p>
     </div>
     <div class="panel" id="warnPanel">
       <h2>ข้อควรระวัง</h2>
@@ -825,19 +865,27 @@ footer { color: var(--ink-soft); font-size: .8rem; }
     const name = $('name').value.trim();
     $('who').innerHTML = name ? `· ${name}${name === 'ตัวอย่าง' ? '<span class="example">ข้อมูลตัวอย่าง</span>' : ''}` : '';
 
-    const cols = [['conception', 'หลักปฏิสนธิ', 'extra'], ['lifePalace', 'หลักลัคนา', 'extra'], ['hour', 'หลักยาม', ''], ['day', 'หลักดิถี', 'dm'], ['month', 'หลักเดือน', ''], ['year', 'หลักปี', '']];
-    $('pillars').innerHTML = cols.map(([k, label, cls]) => {
+    const dmStem = r.pillars.day.stem;
+    const sign = (yang) => (yang ? '+' : '−');
+    const tile = (ch, el, yang) => `<div class="tile w${E(el)}"><span class="han">${ch}</span><span class="bd">${el}${sign(yang)}</span></div>`;
+    const godOf = (code, th) => `<div class="tg"><b>${code}</b><span>${th}</span></div>`;
+    const card = (k, label, full) => {
       const p = r.pillars[k];
-      const stemGod = p.tenGod.code === '日主' ? '日主 ตัวเจ้าชะตา' : `${p.tenGod.code} ${p.tenGod.th}`;
-      const hidden = k === 'conception' || k === 'lifePalace' ? '' : p.hidden.map((s) => {
-        const tg = BaziCore.tenGod(r.pillars.day.stem, s.stem);
-        return `<span class="chip" title="${tg.th}"><span class="han e${E(s.element)}">${s.zh}</span> ${tg.code}</span>`;
-      }).join('');
-      return `<div class="col ${cls}"><h3>${label}</h3><div class="god">${stemGod}</div>
-        <div class="stem">${glyph(BaziCore.STEMS[p.stem], BaziCore.STEMS_TH[p.stem], p.stemElement, p.stemYang)}</div>
-        ${glyph(BaziCore.BRANCHES[p.branch], `${BaziCore.BRANCHES_TH[p.branch]} ${p.animal}`, p.branchElement, p.branchYang)}
-        <div class="hidden-stems">${hidden}</div></div>`;
-    }).join('');
+      const sg = k === 'day' ? godOf('日主', 'ตัวเจ้าชะตา') : godOf(p.tenGod.code, p.tenGod.th);
+      let out = `<div class="pc${k === 'day' ? ' dm' : ''}"><div class="pc-h">${label}</div>${sg}
+        ${tile(BaziCore.STEMS[p.stem], p.stemElement, p.stemYang)}<div class="rd">${BaziCore.STEMS_TH[p.stem]}</div>
+        ${tile(BaziCore.BRANCHES[p.branch], p.branchElement, p.branchYang)}<div class="rd">${BaziCore.BRANCHES_TH[p.branch]} · ${p.animal}</div>`;
+      if (full) {
+        const bg = BaziCore.tenGod(dmStem, p.hidden[0].stem);
+        out += godOf(bg.code, bg.th) + `<div class="hs" title="ราศีแฝง">${p.hidden.map((s) => {
+          const tg = BaziCore.tenGod(dmStem, s.stem);
+          return `<span class="mini w${E(s.element)}" title="${s.zh} ${tg.code} ${tg.th}"><b>${s.zh}</b>${tg.code}</span>`;
+        }).join('')}</div>`;
+      }
+      return out + '</div>';
+    };
+    $('pillars').innerHTML = [['hour', 'ยาม'], ['day', 'ดิถี (วัน)'], ['month', 'เดือน'], ['year', 'ปี']].map(([k, l]) => card(k, l, true)).join('');
+    $('extras').innerHTML = `<div class="cap">หลักเสริม</div>${card('conception', 'ปฏิสนธิ', false)}${card('lifePalace', 'ลัคนา', false)}`;
 
     const dm = r.dayMaster, ct = r.calcTime, mt = r.monthTerm;
     $('facts').innerHTML = `
@@ -848,16 +896,52 @@ footer { color: var(--ink-soft); font-size: .8rem; }
       <dt>เปลี่ยนปีที่</dt><dd>${OPT_TEXT[r.options.yearChange]}</dd>`;
 
     const an = BaziAnalysis.analyze(r);
-    const posTh = { stem: ' (เฉพาะบนก้าน)', branch: ' (เฉพาะในกิ่ง)' };
-    const elList = (l) => l.length ? l.map((x) => `<span class="e${x.element}">${x.th}${x.polarity === 'same' ? ' ขั้วเดียวกับเจ้าชะตา' : x.polarity === 'opposite' ? ' ขั้วตรงข้ามเจ้าชะตา' : ''}${x.position ? posTh[x.position] : ''}</span>`).join(', ') : '—';
-    $('ana').innerHTML = `
-      <dt>ลักษณะดวง</dt><dd>${an.pattern ? `${an.patternTh} <span style="font-family:var(--f-han)">${an.patternZh}</span>` : an.strengthTh}</dd>
-      <dt>คะแนนฝ่ายช่วย</dt><dd class="mono">${an.score.upper} + ${an.score.lower} = ${an.score.total}</dd>
-      <dt>ธาตุให้คุณ</dt><dd>${elList(an.favorable)}</dd>
-      <dt>ธาตุให้โทษ</dt><dd>${elList(an.unfavorable)}</dd>`;
+    const dmEl = BaziCore.STEM_ELEMENT[dmStem];
+    const polStem = (pol) => BaziCore.STEMS[pol === 'same' ? dmStem : dmStem ^ 1];
+    const posTh = { stem: 'เฉพาะบนก้าน', branch: 'เฉพาะในกิ่ง' };
+    const pill = (x) => `<span class="pill w${x.element}"><span class="dot">${x.polarity ? polStem(x.polarity) : '木火土金水'[x.element]}</span>${x.th}${x.polarity ? `<small>${x.polarity === 'same' ? 'ขั้วเดียวกับเจ้าชะตา' : 'ขั้วตรงข้าม'}</small>` : ''}${x.position ? `<small>${posTh[x.position]}</small>` : ''}</span>`;
+    const Z = [[0, 3.125, 'อ่อน', 'var(--w4)'], [3.125, 4.375, 'ค่อนอ่อน', 'var(--w0)'], [4.375, 4.875, 'สมดุล', 'var(--jade-wash)'], [4.875, 8, 'แข็งแรง', 'var(--w1)']];
+    const pct = (v) => Math.max(0, Math.min(100, v / 8 * 100));
+    const sc = an.score;
+    $('verdict').innerHTML = `
+      <div class="kind">${an.pattern ? 'ดวงพิเศษ' : 'ดวงปกติ · กำลังของเจ้าชะตา'}</div>
+      <div class="big">${an.pattern ? `${an.patternTh} <span class="han">${an.patternZh}</span>` : `ดวง${an.strengthTh}`}</div>
+      <div class="gauge" role="img" aria-label="คะแนนฝ่ายช่วย ${sc.total}">
+        <div class="zones">${Z.map(([a, b, , c]) => `<i style="width:${pct(b) - pct(a)}%;background:${c}"></i>`).join('')}</div>
+        <div class="mk" style="left:${pct(sc.total)}%"></div>
+        <div class="zl">${Z.map(([a, b, n]) => `<span style="width:${pct(b) - pct(a)}%">${n}</span>`).join('')}</div>
+      </div>
+      <div class="score">คะแนนฝ่ายช่วย ราศีบน <b>${sc.upper}</b> + ราศีล่าง <b>${sc.lower}</b> = <b>${sc.total}</b></div>
+      <div class="fu">
+        <span class="lab good">ธาตุให้คุณ</span><div class="pills">${an.favorable.map(pill).join('') || '—'}</div>
+        <span class="lab bad">ธาตุให้โทษ</span><div class="pills">${an.unfavorable.map(pill).join('') || '—'}</div>
+      </div>
+      <h2 style="margin-top:18px">กำลังธาตุตามฤดูเกิด</h2>
+      <div class="bars">${(() => { const mx = Math.max(...an.seasonal.map((x) => x.value), 1); return [0, 1, 2, 3, 4].map((e) => { const v = an.seasonal.find((x) => x.element === e).value; return `<div class="bar e${e}"><span>${BaziCore.ELEMENTS[e]}</span><span class="track"><span class="fill" style="display:block;width:${v / mx * 100}%"></span></span><span class="mono" style="color:var(--ink)">${v}</span></div>`; }).join(''); })()}</div>
+      <p class="note">จำนวนตัวในดวง ถ่วงน้ำหนักตามธาตุของเดือนเกิด · ยังไม่รวมการแปรธาตุจากการรวม/ชงของกิ่ง</p>`;
 
-    const max = Math.max(...r.elementCount.map((e) => e.count), 1);
-    $('bars').innerHTML = r.elementCount.map((e, i) => `<div class="bar e${i}"><span>${e.element}</span><span class="track"><span class="fill" style="display:block;width:${e.count / max * 100}%"></span></span><span class="mono" style="color:var(--ink)">${e.count}</span></div>`).join('');
+    // วงจรห้าธาตุ: เรียงตามวงให้กำเนิด ไม้ → ไฟ → ดิน → ทอง → น้ำ
+    const REL = ['ธาตุเดียวกัน', 'ธาตุถ่ายเท', 'ธาตุทรัพย์', 'ธาตุอำนาจ', 'ธาตุให้กำเนิด'];
+    const COL = ['var(--wood)', 'var(--fire)', 'var(--earth)', 'var(--metal)', 'var(--water)'];
+    const cx = 190, cy = 188, R = 112, nr = 36;
+    const P = [0, 1, 2, 3, 4].map((i) => { const t = -Math.PI / 2 + i * 2 * Math.PI / 5; return [cx + R * Math.cos(t), cy + R * Math.sin(t)]; });
+    const isF = (e) => an.favorable.some((x) => x.element === e), isU = (e) => an.unfavorable.some((x) => x.element === e);
+    const seg = (a, b, gap) => { const [x1, y1] = P[a], [x2, y2] = P[b], d = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / d, uy = (y2 - y1) / d; return [x1 + ux * gap, y1 + uy * gap, x2 - ux * (gap + 4), y2 - uy * (gap + 4)]; };
+    let svg = `<svg viewBox="0 0 380 372" role="img" aria-label="วงจรห้าธาตุ เจ้าชะตาธาตุ${BaziCore.ELEMENTS[dmEl]}"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-soft)"/></marker></defs>`;
+    for (let i = 0; i < 5; i++) { const [a, b, c, d] = seg(i, (i + 2) % 5, nr + 6); svg += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--rule)" stroke-width="1.2" stroke-dasharray="4 4"/>`; }
+    for (let i = 0; i < 5; i++) { const [a, b, c, d] = seg(i, (i + 1) % 5, nr + 4); svg += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--ink-soft)" stroke-width="1.4" marker-end="url(#ar)"/>`; }
+    for (let e = 0; e < 5; e++) {
+      const [x, y] = P[e], dm = e === dmEl, f = isF(e), u = isU(e);
+      const st = f && u ? 'ดี/ร้าย' : f ? 'ให้คุณ' : u ? 'ให้โทษ' : '';
+      const stc = f && !u ? 'var(--good)' : u && !f ? 'var(--bad)' : 'var(--ink-soft)';
+      svg += `<g><circle cx="${x}" cy="${y}" r="${nr}" fill="var(--w${e})" stroke="${COL[e]}" stroke-width="${dm ? 3.5 : 1.5}"/>
+        ${dm ? `<circle cx="${x}" cy="${y}" r="${nr + 6}" fill="none" stroke="var(--jade)" stroke-width="1.5" stroke-dasharray="3 3"/>` : ''}
+        <text x="${x}" y="${y - 2}" text-anchor="middle" font-size="15" font-weight="600" fill="${COL[e]}">${BaziCore.ELEMENTS[e]}</text>
+        <text x="${x}" y="${y + 16}" text-anchor="middle" font-size="13" fill="var(--ink)">${r.elementCount[e].count}</text>
+        <text x="${x}" y="${y + (y > cy ? nr + 20 : -nr - 24)}" text-anchor="middle" font-size="13" fill="var(--ink-soft)">${dm ? 'เจ้าชะตา' : REL[(e - dmEl + 5) % 5]}</text>
+        ${st ? `<text x="${x}" y="${y + (y > cy ? nr + 37 : -nr - 8)}" text-anchor="middle" font-size="13" font-weight="600" fill="${stc}">${st}</text>` : ''}</g>`;
+    }
+    $('wheel').innerHTML = svg + '</svg>';
 
     $('warns').innerHTML = r.warnings.length ? r.warnings.map((w) => `<div class="warn">${w}</div>`).join('') : '<p class="note" style="margin:0">เวลาเกิดไม่อยู่ใกล้รอยต่อของปี เดือน หรือยาม ผลไม่อ่อนไหวต่อความคลาดเคลื่อนของเวลาเกิดเล็กน้อย</p>';
 
