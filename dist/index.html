@@ -228,6 +228,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .tabs button:hover { color: var(--ink); }
 .page { display: grid; gap: 22px; }
 .page[hidden] { display: none; }
+.page > * { min-width: 0; }
 /* วัยจร: การ์ดกดเลือกได้ + รายละเอียดช่วงที่เลือก */
 .luck li { padding: 0; }
 .luck li button { all: unset; box-sizing: border-box; width: 100%; height: 100%; display: grid; gap: 3px; justify-items: center; padding: 10px 6px 12px; cursor: pointer; border-radius: 9px; }
@@ -252,6 +253,22 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
   .lpill { grid-auto-flow: column; justify-content: start; }
   .lpill .tile { width: 60px; }
 }
+
+/* ความสัมพันธ์ ภาคี/ปะทะ */
+.rels { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+.rel { display: grid; gap: 2px; border-radius: 10px; padding: 8px 12px; border-left: 4px solid; background: var(--paper); }
+.rel.k-plus { border-left-color: var(--good); }
+.rel.k-minus { border-left-color: var(--bad); }
+.rel .rt { font-weight: 600; }
+.rel.k-plus .rt { color: var(--good); } .rel.k-minus .rt { color: var(--bad); }
+.rel .rt .han { font-family: var(--f-han); font-weight: 700; color: var(--ink-soft); font-size: .9em; }
+.rel .rm { font-size: .9rem; }
+.rel .rn { font-size: .88rem; color: var(--ink-soft); }
+.rh { font-size: 1rem; margin: 16px 0 8px; }
+.decades { display: flex; gap: 6px; overflow-x: auto; padding: 4px 2px 10px; scrollbar-width: thin; }
+.dc { background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); font-weight: 500; white-space: nowrap; min-height: 40px; padding: 6px 12px; }
+.dc .han { font-family: var(--f-han); font-weight: 700; }
+.dc.sel { background: var(--jade); color: var(--sheet); border-color: var(--jade); }
 </style>
 
 <div class="wrap">
@@ -301,6 +318,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     <button type="button" role="tab" id="t-chart" data-page="chart" aria-controls="p-chart">ผังดวง</button>
     <button type="button" role="tab" id="t-analysis" data-page="analysis" aria-controls="p-analysis">วิเคราะห์ดวง</button>
     <button type="button" role="tab" id="t-luck" data-page="luck" aria-controls="p-luck">วัยจร</button>
+    <button type="button" role="tab" id="t-year" data-page="year" aria-controls="p-year">ปีจร</button>
   </nav>
 
   <div class="page" id="p-chart" role="tabpanel" aria-labelledby="t-chart">
@@ -310,6 +328,10 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="main4" id="pillars"></div>
         <aside class="extra2" id="extras" aria-label="หลักเสริม"></aside>
       </div>
+    </section>
+    <section class="panel">
+      <h2>ความสัมพันธ์ภายในดวง</h2>
+      <div class="rels" id="natalRels"></div>
     </section>
     <section class="summary">
       <div class="panel">
@@ -341,6 +363,16 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
       <div class="luck"><ol id="luck"></ol></div>
     </section>
     <section class="panel ldetail" id="luckDetail" aria-live="polite"></section>
+  </div>
+
+  <div class="page" id="p-year" role="tabpanel" aria-labelledby="t-year" hidden>
+    <section aria-labelledby="h-year">
+      <h2 id="h-year">ปีจร 流年</h2>
+      <p class="sub">เลือกช่วงวัยจร แล้วกดปีที่ต้องการดู · ปีจรเริ่มที่<span id="ycName"></span></p>
+      <div class="decades" id="decades" role="group" aria-label="ช่วงวัยจร"></div>
+      <div class="luck"><ol id="years"></ol></div>
+    </section>
+    <section class="panel ldetail" id="yearDetail" aria-live="polite"></section>
   </div>
 
   <footer>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
@@ -695,6 +727,16 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
             elementCount: ELEMENTS.map((e, i) => ({ element: e, count: counts[i] })),
             monthTerm: { start: Object.assign(termName(mm, monthType), fromMin(monthTermStart)), next: Object.assign(termName(nm[1], monthType), fromMin(monthTermNext)) },
             luck: { forward, takeAge, takeMonth, takeDay, periods: luck },
+            // ปีจร: ปีที่ Y เริ่มที่จุดเปลี่ยนปีตามตัวเลือก (ตังจี่ของปี Y−1 เป็นค่าตั้งต้น)
+            annual: (fromY, toY) => {
+                const out = [];
+                for (let y = fromY; y <= toY; y++) {
+                    const i = mod(y - 4, 60), ap = makePillar(i % 10, i % 12);
+                    ap.tenGod = tenGod(dayP.stem, ap.stem);
+                    out.push({ year: y, pillar: ap, start: fromMin(yearStart(y)), end: fromMin(yearStart(y + 1)), age: y - Y });
+                }
+                return out;
+            },
             warnings
         };
     }
@@ -978,6 +1020,108 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
 </script>
 <script>
+// interactions.js — ความสัมพันธ์ระหว่างก้านและกิ่ง: ภาคี ปะทะ การลงโทษ การทำร้าย
+// รหัสก้าน 0..9 = 甲..癸, กิ่ง 0..11 = 子..亥, ธาตุ 0 ไม้ 1 ไฟ 2 ดิน 3 ทอง 4 น้ำ (เหมือน BaziCore)
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'));
+    else root.BaziInteractions = factory(root.BaziCore);
+})(typeof self !== 'undefined' ? self : this, function (B) {
+    'use strict';
+
+    const EL = ['ไม้', 'ไฟ', 'ดิน', 'ทอง', 'น้ำ'];
+    // ชนิดความสัมพันธ์: kind ใช้จัดสี (+ ส่งเสริม/รวม, − ขัดแย้ง)
+    const TYPES = {
+        stemCombo: { zh: '天干合', th: 'ก้านรวม', kind: '+' },
+        stemClash: { zh: '天干冲', th: 'ก้านปะทะ', kind: '−' },
+        trio: { zh: '三合', th: 'ภาคีสามประสาน', kind: '+' },
+        season: { zh: '三會', th: 'ภาคีฤดู', kind: '+' },
+        halfTrio: { zh: '半合', th: 'ภาคีครึ่ง', kind: '+' },
+        pair: { zh: '六合', th: 'ภาคีคู่', kind: '+' },
+        clash: { zh: '六冲', th: 'ปะทะ (ชง)', kind: '−' },
+        punish: { zh: '刑', th: 'การลงโทษ (เฮ้ง)', kind: '−' },
+        selfPunish: { zh: '自刑', th: 'ลงโทษตัวเอง', kind: '−' },
+        harm: { zh: '六害', th: 'การทำร้าย (ไห่)', kind: '−' }
+    };
+
+    const STEM_COMBO = [[0, 5, 2], [1, 6, 3], [2, 7, 4], [3, 8, 0], [4, 9, 1]]; // 甲己土 乙庚金 丙辛水 丁壬木 戊癸火
+    const STEM_CLASH = [[0, 6], [1, 7], [2, 8], [3, 9]];                           // 甲庚 乙辛 丙壬 丁癸
+    const TRIO = [[[8, 0, 4], 4], [[11, 3, 7], 0], [[2, 6, 10], 1], [[5, 9, 1], 3]]; // 申子辰水 亥卯未木 寅午戌火 巳酉丑金 (ตัวกลางคือ index 1)
+    const SEASON = [[[2, 3, 4], 0], [[5, 6, 7], 1], [[8, 9, 10], 3], [[11, 0, 1], 4]];
+    const PAIR = [[0, 1, 2], [2, 11, 0], [3, 10, 1], [4, 9, 3], [5, 8, 4], [6, 7, 1]]; // 子丑土 寅亥木 卯戌火 辰酉金 巳申水 午未火
+    const HARM = [[0, 7], [1, 6], [2, 5], [3, 4], [8, 11], [9, 10]];
+    const PUNISH3 = [[2, 5, 8], [1, 10, 7]];                                        // 寅巳申 丑戌未
+    const SELF = [4, 6, 9, 11];                                                     // 辰午酉亥
+
+    const same2 = (a, b, x, y) => (a === x && b === y) || (a === y && b === x);
+
+    // items: [{ key, label, stem, branch }] · focus: key ที่ต้องมีส่วนร่วม (เช่น วัยจร/ปีจร) หรือ null = ทุกคู่
+    function find(items, focus) {
+        const out = [];
+        const add = (type, members, element, note) => {
+            if (focus && !members.some((m) => m.key === focus)) return;
+            out.push(Object.assign({ type, members: members.map((m) => ({ key: m.key, label: m.label })), element: element == null ? null : element, elementTh: element == null ? null : EL[element], note: note || null }, TYPES[type]));
+        };
+        const n = items.length;
+        // ก้าน
+        for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+            const a = items[i], b = items[j];
+            for (const [x, y, e] of STEM_COMBO) if (same2(a.stem, b.stem, x, y)) add('stemCombo', [a, b], e, `${B.STEMS[a.stem]}${B.STEMS[b.stem]} รวมเป็นธาตุ${EL[e]}`);
+            for (const [x, y] of STEM_CLASH) if (same2(a.stem, b.stem, x, y)) add('stemClash', [a, b], null, `${B.STEMS[a.stem]}${B.STEMS[b.stem]}`);
+        }
+        // กิ่ง: กลุ่มสามตัว (ภาคีครบแล้วไม่นับครึ่งภาคีซ้ำในกลุ่มเดียวกัน)
+        const fullTrio = new Set();
+        const pick = (bset) => bset.map((b) => items.filter((m) => m.branch === b));
+        for (const [set, e] of TRIO) {
+            const g = pick(set);
+            if (g.every((x) => x.length)) { add('trio', g.map((x) => x[0]), e, `${set.map((b) => B.BRANCHES[b]).join('')} รวมเป็นธาตุ${EL[e]}`); fullTrio.add(set.join()); }
+        }
+        for (const [set, e] of SEASON) {
+            const g = pick(set);
+            if (g.every((x) => x.length)) add('season', g.map((x) => x[0]), e, `${set.map((b) => B.BRANCHES[b]).join('')} รวมเป็นธาตุ${EL[e]}`);
+        }
+        for (const [set, e] of TRIO) {
+            if (fullTrio.has(set.join())) continue;
+            const mid = set[1];
+            for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+                const a = items[i], b = items[j];
+                const other = a.branch === mid ? b.branch : b.branch === mid ? a.branch : -1;
+                if (other !== set[0] && other !== set[2]) continue;
+                add('halfTrio', [a, b], e, `${B.BRANCHES[mid]}${B.BRANCHES[other]} ภาคีครึ่งธาตุ${EL[e]}`);
+            }
+        }
+        for (const set of PUNISH3) {
+            const g = pick(set);
+            const present = g.filter((x) => x.length);
+            if (present.length >= 2) add('punish', present.map((x) => x[0]), null, `${set.filter((b, i) => g[i].length).map((b) => B.BRANCHES[b]).join('')}${present.length === 3 ? ' ครบชุด' : ''}`);
+        }
+        // กิ่ง: เป็นคู่
+        for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
+            const a = items[i], b = items[j], x = a.branch, y = b.branch, pr = `${B.BRANCHES[x]}${B.BRANCHES[y]}`;
+            for (const [p, q, e] of PAIR) if (same2(x, y, p, q)) add('pair', [a, b], e, `${pr} รวมเป็นธาตุ${EL[e]}`);
+            if ((x + 6) % 12 === y) add('clash', [a, b], null, pr);
+            if (same2(x, y, 0, 3)) add('punish', [a, b], null, `${pr} (ลงโทษไร้มารยาท)`);
+            if (x === y && SELF.includes(x)) add('selfPunish', [a, b], null, pr);
+            for (const [p, q] of HARM) if (same2(x, y, p, q)) add('harm', [a, b], null, pr);
+        }
+        return out;
+    }
+
+    // ผังดวงเดิม 4 เสาหลัก
+    const NATAL = [['year', 'ปี'], ['month', 'เดือน'], ['day', 'วัน'], ['hour', 'ยาม']];
+    function natalItems(chart) {
+        return NATAL.map(([k, l]) => ({ key: k, label: l, stem: chart.pillars[k].stem, branch: chart.pillars[k].branch }));
+    }
+    function natal(chart) { return find(natalItems(chart), null); }
+    // เสาจร (วัยจรหรือปีจร) เทียบกับดวงเดิม และเสาจรอื่นที่ส่งมา
+    function withTransit(chart, transits, focus) {
+        return find(natalItems(chart).concat(transits), focus);
+    }
+
+    return { find, natal, withTransit, TYPES };
+});
+
+</script>
+<script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
   const $ = (id) => document.getElementById(id);
@@ -991,14 +1135,15 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
   }
 
-  let luckSel = null;
+  let luckSel = null, yearSel = null;
+  const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ปะทะ หรือการลงโทษ</p>';
   const G_TH = { M: 'ชาย', F: 'หญิง' };
   function setForm(open) {
     $('f').hidden = !open; $('bbar').hidden = open;
     $('edit').setAttribute('aria-expanded', String(open));
   }
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
-  const PAGES = ['chart', 'analysis', 'luck'];
+  const PAGES = ['chart', 'analysis', 'luck', 'year'];
   function show(pg) {
     if (!PAGES.includes(pg)) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
@@ -1151,13 +1296,61 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
           </div>
         </div>
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b> — ก้าน${rr.a > 0 ? 'เป็นธาตุให้คุณ' : rr.a < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'} กิ่ง${rr.b > 0 ? 'เป็นธาตุให้คุณ' : rr.b < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'}</div>
+        <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
+        <div class="rels">${relHTML(BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'))}</div>
         <div class="soon">คำทำนายละเอียดของช่วงนี้ (การงาน การเงิน ความสัมพันธ์ สุขภาพ) จะแสดงที่นี่ · กำลังพัฒนา</div>`;
     };
     drawLuck();
     $('luck').onclick = (ev) => { const b = ev.target.closest('button[data-i]'); if (!b) return; luckSel = Number(b.dataset.i); drawLuck(); if (window.matchMedia('(max-width: 600px)').matches) $('luckDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+
+    // ---------- ปีจร ----------
+    const decadeOf = (y) => L.periods.findIndex((p, i) => y >= p.start.year && (i === L.periods.length - 1 || y < L.periods[i + 1].start.year));
+    const thisYear = new Date().getFullYear();
+    if (yearSel == null) yearSel = thisYear;
+    const firstY = L.periods[0].start.year, lastY = L.periods[L.periods.length - 1].start.year + 9;
+    if (yearSel < firstY - 20 || yearSel > lastY) yearSel = Math.max(firstY, Math.min(lastY, thisYear));
+    $('ycName').textContent = ' ' + OPT_TEXT[r.options.yearChange];
+    const drawYears = () => {
+      const di = decadeOf(yearSel);
+      $('decades').innerHTML = (di < 0 ? '<button type="button" class="dc sel" data-y="' + yearSel + '" aria-pressed="true">ก่อนเข้าวัยจร</button>' : '') + L.periods.map((p, i) =>
+        `<button type="button" class="dc${i === di ? ' sel' : ''}" data-y="${p.start.year}" aria-pressed="${i === di}"><span class="han">${p.pillar.zh}</span> ${p.start.year}</button>`).join('');
+      const y0 = di < 0 ? yearSel - (yearSel - (firstY - 10)) % 10 : L.periods[di].start.year;
+      const ys = r.annual(y0, y0 + 9);
+      $('years').innerHTML = ys.map((a) => {
+        const q = a.pillar, rt = RATE(rateOf(q).sum);
+        return `<li class="${a.year === thisYear ? 'now' : ''}${a.year === yearSel ? ' sel' : ''}"><button type="button" data-y="${a.year}" aria-pressed="${a.year === yearSel}">
+          <span class="age">${a.year} · อายุ ${a.age}</span>
+          <span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>
+          <span class="date">${BaziCore.STEMS_TH[q.stem]}${BaziCore.BRANCHES_TH[q.branch]} · ${q.animal}</span>
+          <span class="rate ${rt[0]}">${rt[1]}</span>
+          ${a.year === thisYear ? '<span class="tag">ปีนี้</span>' : ''}</button></li>`;
+      }).join('');
+      const a = r.annual(yearSel, yearSel)[0], q = a.pillar, rr = rateOf(q), rt = RATE(rr.sum), bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
+      const lp = di >= 0 ? L.periods[di].pillar : null;
+      const trans = [{ key: 'yr', label: 'ปีจร', stem: q.stem, branch: q.branch }];
+      if (lp) trans.unshift({ key: 'luck', label: 'วัยจร', stem: lp.stem, branch: lp.branch });
+      $('yearDetail').innerHTML = `
+        <h2>ปี ${a.year} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>ปี${q.animal} · อายุ ${a.age} ปี · ${a.start.day}/${a.start.month}/${a.start.year} – ${a.end.day}/${a.end.month}/${a.end.year}${lp ? ` · อยู่ในวัยจร ${lp.zh}` : ' · ยังไม่เข้าวัยจร'}</small></h2>
+        <div class="lgrid">
+          <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
+          <div class="lrows">
+            <div class="lrow"><span class="k">ก้าน</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(rr.a)}</span></div>
+            <div class="lrow"><span class="k">กิ่ง</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(rr.b)}</span></div>
+          </div>
+        </div>
+        <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
+        <h3 class="rh">ความสัมพันธ์กับดวงเดิม${lp ? 'และวัยจร' : ''}</h3>
+        <div class="rels">${relHTML(BaziInteractions.withTransit(r, trans, 'yr'))}</div>
+        <div class="soon">คำทำนายของปีนี้จะแสดงที่นี่ · กำลังพัฒนา</div>`;
+    };
+    drawYears();
+    $('years').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('yearDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); };
+
+    $('natalRels').innerHTML = relHTML(BaziInteractions.natal(r));
   }
 
-  $('f').addEventListener('submit', (e) => { e.preventDefault(); luckSel = null; render(); setForm(false); });
+  $('f').addEventListener('submit', (e) => { e.preventDefault(); luckSel = null; yearSel = null; render(); setForm(false); });
   ['date', 'time', 'place', 'yearChange', 'ziHour', 'luckMethod', 'monthSystem', 'solar', 'preg', 'gM', 'gF'].forEach((id) => $(id).addEventListener('change', render));
   render();
   setForm(false);

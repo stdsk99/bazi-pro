@@ -59,5 +59,15 @@ eq('ดวงตัวอย่าง 3 = ดิถีอ่อนปานก�
 eq('ดวงตัวอย่าง 3 ธาตุดี/ร้าย', [els(a3.favorable), els(a3.unfavorable)], ['ทอง น้ำ+', 'ดิน น้ำ- ไฟ ไม้']);
 eq('ดวงตัวอย่าง 2 (8.16) = ดิถีอ่อน ใช้ไม้ไฟ', [a2.pattern, a2.strength, els(a2.favorable)], [0, 3, 'ไฟ ไม้']);
 
+// --- ภาคี ปะทะ การลงโทษ ---
+const I = require('../js/interactions.js');
+const it = (arr) => arr.map(([s, b], i) => ({ key: 'k' + i, label: 'k' + i, stem: s, branch: b }));
+const types = (l) => l.map((x) => x.type).sort().join(',');
+eq('寅午戌 ภาคีสามประสาน + 甲己 ก้านรวม + 甲庚 ก้านปะทะ', types(I.find(it([[0, 2], [5, 6], [6, 10]]))), 'stemClash,stemCombo,trio');
+eq('子午 ปะทะ', types(I.find(it([[0, 0], [2, 6]]))), 'clash');
+eq('子卯 ลงโทษ', types(I.find(it([[0, 0], [2, 3]]))), 'punish');
+eq('午午 ลงโทษตัวเอง', types(I.find(it([[0, 6], [2, 6]]))), 'selfPunish');
+eq('ปีจรเริ่มที่ตังจี่ปีก่อน', (() => { const a = calc(2014, 8, 25, 9, 35).annual(2026, 2026)[0]; return [a.pillar.zh, a.start.year, a.start.month]; })(), ['丙午', 2025, 12]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

@@ -218,6 +218,16 @@
             elementCount: ELEMENTS.map((e, i) => ({ element: e, count: counts[i] })),
             monthTerm: { start: Object.assign(termName(mm, monthType), fromMin(monthTermStart)), next: Object.assign(termName(nm[1], monthType), fromMin(monthTermNext)) },
             luck: { forward, takeAge, takeMonth, takeDay, periods: luck },
+            // ปีจร: ปีที่ Y เริ่มที่จุดเปลี่ยนปีตามตัวเลือก (ตังจี่ของปี Y−1 เป็นค่าตั้งต้น)
+            annual: (fromY, toY) => {
+                const out = [];
+                for (let y = fromY; y <= toY; y++) {
+                    const i = mod(y - 4, 60), ap = makePillar(i % 10, i % 12);
+                    ap.tenGod = tenGod(dayP.stem, ap.stem);
+                    out.push({ year: y, pillar: ap, start: fromMin(yearStart(y)), end: fromMin(yearStart(y + 1)), age: y - Y });
+                }
+                return out;
+            },
             warnings
         };
     }
