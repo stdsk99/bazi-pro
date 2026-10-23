@@ -289,6 +289,12 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .rblock.el h3 { color: inherit; }
 
 /* การ์ดพื้นดวง */
+.more summary { font-size: .88rem; margin-top: 4px; width: fit-content; }
+.more[open] summary { margin-bottom: 6px; }
+.more dl { grid-template-columns: max-content 1fr; gap: 6px 12px; background: var(--paper); border-radius: 8px; padding: 10px 12px; }
+.more dt { color: var(--ink-soft); font-size: .9rem; font-weight: 500; }
+.more dd { font-size: .95rem; line-height: 1.6; }
+@media (max-width: 600px) { .more dl { grid-template-columns: 1fr; gap: 0; } .more dd { margin-bottom: 8px; } }
 .basis { border-left: 4px solid var(--jade); }
 .basis h2 { font-size: 1.2rem; }
 .bsl { grid-template-columns: max-content 1fr; gap: 10px 16px; margin-bottom: 14px; }
@@ -652,7 +658,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); };
 
     $('natalRels').innerHTML = relHTML(BaziInteractions.natal(r));
-    $('basis').innerHTML = BaziNarrative.summary(r, an).map((x) => `<dt>${x.label}</dt><dd>${x.text}<span class="src">ที่มา: ${x.source}</span></dd>`).join('');
+    $('basis').innerHTML = BaziNarrative.summary(r, an, BaziInteractions.natal(r)).map((x) => `<dt>${x.label}</dt><dd>${x.text}${x.more && x.more.length ? `<details class="more"><summary>อ่านเพิ่ม</summary><dl>${x.more.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>` : ''}<span class="src">ที่มา: ${x.source}</span></dd>`).join('');
 
     // ---------- คำทำนาย ----------
     const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);

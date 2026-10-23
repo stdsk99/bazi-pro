@@ -85,6 +85,7 @@
         { sys: 'ไต กระเพาะปัสสาวะ กระดูก หู และระบบสืบพันธุ์', tip: 'ดื่มน้ำให้พอ ไม่ทำงานจนอ่อนเพลียสะสม' }
     ];
     const SEASON_OF = (b) => [5, 6, 7].includes(b) ? 'hot' : [11, 0, 1].includes(b) ? 'cold' : null;
+    const REL_TH_REL = ['ธาตุเดียวกัน', 'ธาตุถ่ายเท', 'ธาตุทรัพย์', 'ธาตุอำนาจ', 'ธาตุให้กำเนิด'];
     const POS_TH = { year: 'หลักปี', month: 'หลักเดือน', day: 'หลักวัน', hour: 'หลักยาม' };
 
     function tenGodScores(chart) {
@@ -269,17 +270,66 @@
         4: 'แรงกดดันหนัก ใช้ฝีมือและผลงานของตัวเองเป็นเครื่องมือรับมือ' };
     const PATTERN_SHORT = { follow: 'ไม่ฝืนพึ่งตัวเอง ไปได้ดีเมื่อไหลตามพลังที่แรงที่สุดในดวง', dominant: 'พลังรวมศูนย์ ไปได้ดีเมื่อไปตามกระแสหลักของดวง',
         transform: 'ตัวตนหลายมิติ ปรับบทบาทได้ดี', twoElements: 'ชีวิตวนอยู่กับสองพลังหลักในดวง', resource: 'มีผู้สนับสนุนมาก ระวังการพึ่งพาจนขาดแรงผลักดัน' };
-    function summary(chart, an) {
-        const dm = chart.pillars.day.stem, dmEl = B.STEM_ELEMENT[dm], D = DAY_MASTER[dm];
+    // รายละเอียดเพิ่มของธาตุประจำตัว: แรงจูงใจ วิธีทำงาน ความสัมพันธ์
+    const DM_MORE = [
+        { motive: 'อยากเติบโต ได้รับการยอมรับ และเป็นที่พึ่งของคนอื่น', work: 'วางแผนระยะยาว ชอบงานที่มีทิศทางชัดและได้ขยายสิ่งที่สร้างไว้', love: 'จริงจังและซื่อตรง ให้ความมั่นคงกับคนรัก แต่อาจไม่ค่อยแสดงความอ่อนโยน' },
+        { motive: 'อยากมีที่ทางที่ปลอดภัยและความสัมพันธ์ที่ดีรอบตัว', work: 'ประสานงานเก่ง หาทางออกแบบยืดหยุ่น ทำงานร่วมกับคนอื่นได้ดี', love: 'ใส่ใจ อ่อนโยน ต้องการคนรักที่มั่นคงเป็นหลักให้พึ่งพิง' },
+        { motive: 'อยากเป็นที่รู้จัก ได้ให้ และได้เห็นผลงานส่องสว่าง', work: 'ริเริ่มเร็ว จุดประกายคนอื่นได้ดี เหมาะกับงานที่ต้องพบคนและนำเสนอ', love: 'เปิดเผย ให้เต็มที่ ชอบความสัมพันธ์ที่อบอุ่นและมีชีวิตชีวา' },
+        { motive: 'อยากเข้าใจสิ่งต่างๆ อย่างลึกซึ้ง และเป็นคนสำคัญของคนใกล้ตัว', work: 'ละเอียด ทำงานที่ต้องใช้ความคิดและความประณีตได้ดี ทำต่อเนื่องได้นาน', love: 'ใส่ใจรายละเอียดเล็กๆ ของคนรัก ต้องการความรู้สึกปลอดภัยทางใจ' },
+        { motive: 'อยากมีความมั่นคงและเป็นหลักที่คนอื่นไว้ใจ', work: 'ทำงานหนักแน่น รักษาระบบ รับผิดชอบงานใหญ่ได้ ไม่หวั่นไหวกับแรงกดดัน', love: 'ซื่อสัตย์ มั่นคง แสดงความรักผ่านการดูแลมากกว่าคำพูด' },
+        { motive: 'อยากให้คนรอบตัวเติบโตและมีชีวิตที่ดี', work: 'บ่มเพาะคนและงาน จัดการรายละเอียดเก่ง เหมาะกับงานสนับสนุนและงานบริการ', love: 'เอาใจใส่ ยอมเสียสละ แต่ต้องระวังการเก็บความน้อยใจไว้คนเดียว' },
+        { motive: 'อยากพิสูจน์ความสามารถและทำสิ่งที่ถูกต้อง', work: 'ลงมือเด็ดขาด แก้ปัญหายากได้ดี เหมาะกับงานที่ต้องตัดสินใจและรับผิดชอบสูง', love: 'ปกป้องคนรัก รักจริงจัง แต่ควรระวังคำพูดที่ตรงเกินไป' },
+        { motive: 'อยากได้รับการยอมรับในคุณค่าและความประณีตของตัวเอง', work: 'ใส่ใจคุณภาพ มาตรฐานสูง เหมาะกับงานที่ต้องความละเอียดและภาพลักษณ์', love: 'ต้องการความรักที่ให้เกียรติและเห็นคุณค่า อ่อนไหวต่อคำวิจารณ์จากคนใกล้ตัว' },
+        { motive: 'อยากมีอิสระ ได้เรียนรู้ และได้ไปในที่ใหม่ๆ', work: 'คิดเชิงกลยุทธ์ รับข้อมูลได้มาก ปรับแผนเร็ว เหมาะกับงานที่เปลี่ยนแปลงตลอด', love: 'ต้องการพื้นที่ส่วนตัวและคนรักที่เข้าใจความเป็นอิสระ' },
+        { motive: 'อยากเข้าใจผู้คนและสร้างสิ่งที่มีความหมาย', work: 'ทำงานเงียบแต่ลึก ช่างสังเกต เหมาะกับงานวิเคราะห์ งานสร้างสรรค์ และงานดูแลคน', love: 'อ่อนโยน เข้าใจความรู้สึก แต่อาจเก็บความกังวลจนอีกฝ่ายไม่รู้' }
+    ];
+    // สภาพของเจ้าชะตาในฤดูเกิด 旺相休囚死 (เทียบธาตุเจ้าชะตากับธาตุกิ่งเดือน)
+    const SEASON_STATE = [
+        { zh: '旺', th: 'ถึงฤดูของตัวเอง', text: 'เกิดในฤดูที่ธาตุของตัวเองครองอยู่ พลังพื้นฐานเต็ม มีความมั่นใจและยืนหยัดได้ด้วยตัวเอง' },
+        { zh: '相', th: 'ได้ฤดูหนุน', text: 'เกิดในฤดูที่ให้กำเนิดธาตุของตัวเอง ได้แรงหนุนจากสภาพแวดล้อมตั้งแต่ต้น พลังเติบโตต่อเนื่อง' },
+        { zh: '休', th: 'ฤดูพักพลัง', text: 'เกิดในฤดูที่ธาตุของตัวเองต้องให้กำเนิดสิ่งอื่น พลังถูกใช้ไปกับการสร้างสรรค์และการให้ ควรรู้จักเติมพลังตัวเอง' },
+        { zh: '囚', th: 'ฤดูต้องออกแรง', text: 'เกิดในฤดูของธาตุที่ตัวเองต้องควบคุม ต้องออกแรงจัดการสิ่งรอบตัวอยู่เสมอ ได้ผลตอบแทนเมื่อพยายาม' },
+        { zh: '死', th: 'ฤดูกดดัน', text: 'เกิดในฤดูของธาตุที่ข่มธาตุตัวเอง สภาพแวดล้อมกดดันตั้งแต่ต้น หล่อหลอมให้อดทนและมีวินัย ต้องการแรงหนุนจากธาตุที่ช่วยเสริม' }
+    ];
+
+    function summary(chart, an, rels) {
+        rels = rels || [];
+        const P = chart.pillars, dm = P.day.stem, dmEl = B.STEM_ELEMENT[dm], D = DAY_MASTER[dm], M = DM_MORE[dm];
         const out = [];
-        out.push({ label: 'คุณคือ', text: `${B.STEMS[dm]} ${B.ELEMENTS[dmEl]}${dm % 2 ? 'หยิน' : 'หยาง'} เปรียบได้กับ${D.image} — ${DM_SHORT[dm]}`, source: `ก้านหลักวัน ${B.STEMS[dm]}` });
+        // 1. ตัวตน
+        out.push({ label: 'คุณคือ', text: `${B.STEMS[dm]} ${B.ELEMENTS[dmEl]}${dm % 2 ? 'หยิน' : 'หยาง'} เปรียบได้กับ${D.image} — ${DM_SHORT[dm]}`, source: `ก้านหลักวัน ${B.STEMS[dm]}`,
+            more: [['นิสัย', D.core], ['แรงจูงใจ', M.motive], ['วิธีทำงาน', M.work], ['ความรัก', M.love], ['ควรระวัง', D.care]] });
+        // 2. ฤดูเกิด
+        const mEl = B.BRANCH_ELEMENT[P.month.branch], st = SEASON_STATE[(dmEl - mEl + 5) % 5 === 0 ? 0 : (dmEl - mEl + 5) % 5 === 1 ? 1 : (mEl - dmEl + 5) % 5 === 1 ? 2 : (mEl - dmEl + 5) % 5 === 2 ? 3 : 4];
+        const ss = SEASON_OF(P.month.branch), cnt = chart.elementCount.map((x) => x.count);
+        const clim = ss === 'hot' ? (cnt[4] ? 'เกิดฤดูร้อน ดวงมีน้ำช่วยปรับอากาศ' : 'เกิดฤดูร้อนและดวงไม่มีน้ำ ต้องระวังความใจร้อนและความเหนื่อยล้า') : ss === 'cold' ? (cnt[1] ? 'เกิดฤดูหนาว ดวงมีไฟให้ความอบอุ่น' : 'เกิดฤดูหนาวและดวงไม่มีไฟ อาจเก็บตัวหรือขาดแรงกระตุ้น') : '';
+        out.push({ label: 'ฤดูเกิด', text: `${st.th} (${st.zh}) — ธาตุ${B.ELEMENTS[dmEl]}เกิดในเดือนธาตุ${B.ELEMENTS[mEl]}`, source: `กิ่งเดือน ${B.BRANCHES[P.month.branch]}`,
+            more: [['ความหมาย', st.text]].concat(clim ? [['ธาตุปรับอากาศ', clim]] : []) });
+        // 3. กำลังดวง
         const pg = patternGroup(an.pattern);
-        out.push(pg ? { label: 'ลักษณะดวง', text: `${an.patternTh} — ${PATTERN_SHORT[pg]}`, source: an.patternZh }
-            : { label: 'กำลังดวง', text: `${an.strengthTh} — ${STRENGTH_SHORT[an.strength]}`, source: `คะแนนฝ่ายช่วย ${an.score.total}` });
+        out.push(pg ? { label: 'ลักษณะดวง', text: `${an.patternTh} — ${PATTERN_SHORT[pg]}`, source: an.patternZh, more: [['ความหมาย', PATTERN[pg]]] }
+            : { label: 'กำลังดวง', text: `${an.strengthTh} — ${STRENGTH_SHORT[an.strength]}`, source: `คะแนนฝ่ายช่วย ${an.score.upper} + ${an.score.lower} = ${an.score.total}`, more: [['ความหมาย', STRENGTH[an.strength]]] });
+        // 4. ธาตุให้คุณ
         const favEls = [...new Set(an.favorable.filter((x) => !x.position).map((x) => x.element))];
-        if (favEls.length) out.push({ label: 'ธาตุที่ช่วยเสริม', text: favEls.map((e) => `${B.ELEMENTS[e]} (สี${ELEMENT_LIFE[e].colors.split(' ')[0]} ${ELEMENT_LIFE[e].dir})`).join(' · '), source: 'ธาตุให้คุณ', elements: favEls });
-        const mm = B.tenGod(dm, chart.pillars.month.hidden[0].stem), g = GROUPS[GROUP_OF[mm.code]];
-        out.push({ label: 'จุดเด่น', text: `${g.name} — ${g.strong.split(' ').slice(0, 3).join(' ')}`, source: `ปราณหลักกิ่งเดือน ${mm.code}` });
+        if (favEls.length) out.push({ label: 'ธาตุที่ช่วยเสริม', text: favEls.map((e) => `${B.ELEMENTS[e]} (สี${ELEMENT_LIFE[e].colors.split(' ')[0]} ${ELEMENT_LIFE[e].dir})`).join(' · '), source: 'ธาตุให้คุณ', elements: favEls,
+            more: favEls.map((e) => [`ธาตุ${B.ELEMENTS[e]}`, `สี ${ELEMENT_LIFE[e].colors} · ${ELEMENT_LIFE[e].dir} · ${ELEMENT_LIFE[e].env} · สายงาน: ${ELEMENT_LIFE[e].work}`]) });
+        // 5. ธาตุให้โทษ
+        const REL_MEAN = ['ความดื้อและการแข่งขัน', 'ความคิดที่ฟุ้งหรือคำพูดที่แรง', 'ภาระจากเงินและการไล่ตามผลประโยชน์', 'แรงกดดันและความเครียด', 'การพึ่งพาและความเฉื่อย'];
+        const unfEls = [...new Set(an.unfavorable.filter((x) => !x.position && !x.polarity).map((x) => x.element))];
+        if (unfEls.length) out.push({ label: 'ใช้แต่พอดี', text: unfEls.map((e) => B.ELEMENTS[e]).join(' · '), source: 'ธาตุให้โทษ',
+            more: unfEls.map((e) => [`ธาตุ${B.ELEMENTS[e]}`, `ในดวงนี้คือ${REL_TH_REL[(e - dmEl + 5) % 5]} ถ้ามากเกินมักนำมาซึ่ง${REL_MEAN[(e - dmEl + 5) % 5]} · สีที่ควรใช้แต่น้อย: ${ELEMENT_LIFE[e].colors}`]) });
+        // 6. จุดเด่นและสิ่งที่ขาด
+        const mm = B.tenGod(dm, P.month.hidden[0].stem), g = GROUPS[GROUP_OF[mm.code]];
+        const { sc } = tenGodScores(chart);
+        const strongG = sc.map((v, i) => [v, i]).filter(([v, i]) => v >= 2.5 && i !== GROUP_OF[mm.code]).map(([, i]) => GROUPS[i]);
+        out.push({ label: 'จุดเด่น', text: `${g.name} — ${g.strong.split(' ').slice(0, 3).join(' ')}`, source: `ปราณหลักกิ่งเดือน ${mm.code}`,
+            more: [['แกนของดวง', `${mm.code} (${TG_MEAN[mm.code]}) ${g.strong}`]].concat(strongG.map((x) => [`เด่นรองลงมา`, `${x.name} (${x.zh}): ${x.strong}`])) });
+        const missing = [1, 2, 3, 4].filter((i) => sc[i] === 0).map((i) => GROUPS[i]);
+        if (missing.length) out.push({ label: 'สิ่งที่ขาด', text: missing.map((x) => x.name).join(' · '), source: 'ไม่พบสิบเทพกลุ่มนี้ในดวง', more: missing.map((x) => [x.name, x.none]) });
+        // 7. ความสัมพันธ์สำคัญ
+        const key = rels.filter((r) => r.members.some((m) => m.key === 'day' || m.key === 'month'));
+        if (key.length) out.push({ label: 'จุดเชื่อม/จุดปะทะ', text: key.slice(0, 3).map((r) => `${r.th} ${r.note.split(' ')[0]}`).join(' · '), source: 'ความสัมพันธ์ที่เกี่ยวกับหลักวันหรือหลักเดือน',
+            more: key.map((r) => [r.th, `${r.members.map((m) => 'หลัก' + m.label).join(' กับ ')}: ${r.kind === '+' ? 'เรื่องของหลักเหล่านี้เชื่อมโยงและเกื้อหนุนกัน' : 'เรื่องของหลักเหล่านี้มักมีความเปลี่ยนแปลงหรือแรงเสียดทาน'}${r.element != null ? ` (รวมเป็นธาตุ${r.elementTh})` : ''}`]) });
         return out;
     }
 
