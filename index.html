@@ -287,6 +287,15 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .rblock.el { border-radius: 10px; padding: 10px 14px; border-bottom: 0; }
 .rblock.el p, .rblock.el h3 { color: var(--ink); }
 .rblock.el h3 { color: inherit; }
+
+/* การ์ดพื้นดวง */
+.basis { border-left: 4px solid var(--jade); }
+.basis h2 { font-size: 1.2rem; }
+.bsl { grid-template-columns: max-content 1fr; gap: 10px 16px; margin-bottom: 14px; }
+.bsl dt { font-weight: 600; color: var(--jade); font-size: .95rem; padding-top: 1px; }
+.bsl dd { font-size: 1.02rem; line-height: 1.65; }
+.bsl .src { display: block; font-size: .78rem; color: var(--ink-soft); }
+@media (max-width: 600px) { .bsl { grid-template-columns: 1fr; gap: 2px; } .bsl dd { margin-bottom: 10px; } }
 </style>
 
 <div class="wrap">
@@ -348,9 +357,10 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <aside class="extra2" id="extras" aria-label="หลักเสริม"></aside>
       </div>
     </section>
-    <section class="panel">
-      <h2>ความสัมพันธ์ภายในดวง</h2>
-      <div class="rels" id="natalRels"></div>
+    <section class="panel basis" aria-labelledby="h-basis">
+      <h2 id="h-basis">พื้นดวงของคุณ</h2>
+      <dl class="bsl" id="basis"></dl>
+      <button type="button" class="ghost" id="toRead">อ่านคำทำนายละเอียด</button>
     </section>
     <section class="summary">
       <div class="panel">
@@ -361,6 +371,10 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <h2>ข้อควรระวัง</h2>
         <div class="warns" id="warns"></div>
       </div>
+    </section>
+    <section class="panel">
+      <h2>ความสัมพันธ์ภายในดวง</h2>
+      <div class="rels" id="natalRels"></div>
     </section>
   </div>
 
@@ -430,6 +444,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('f').hidden = !open; $('bbar').hidden = open;
     $('edit').setAttribute('aria-expanded', String(open));
   }
+  $('toRead').addEventListener('click', () => { readSel = 'self'; render(); show('read'); window.scrollTo({ top: 0 }); });
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
   const PAGES = ['chart', 'analysis', 'read', 'luck', 'year'];
   function show(pg) {
@@ -636,6 +651,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); };
 
     $('natalRels').innerHTML = relHTML(BaziInteractions.natal(r));
+    $('basis').innerHTML = BaziNarrative.summary(r, an).map((x) => `<dt>${x.label}</dt><dd>${x.text}<span class="src">ที่มา: ${x.source}</span></dd>`).join('');
 
     // ---------- คำทำนาย ----------
     const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);

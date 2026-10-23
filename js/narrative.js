@@ -260,5 +260,28 @@
         return sections;
     }
 
-    return { natal, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
+    // ---------- การ์ดสรุปพื้นดวง (หน้าผังดวง) ----------
+    const DM_SHORT = ['ตรง มีหลักการ อยากเติบโต เป็นที่พึ่งของคนรอบข้าง', 'อ่อนโยน ปรับตัวเก่ง เข้ากับคนง่าย', 'เปิดเผย อบอุ่น กระตือรือร้น ใจกว้าง',
+        'ละเอียดอ่อน ช่างสังเกต อบอุ่นแบบเงียบๆ', 'หนักแน่น มั่นคง น่าเชื่อถือ', 'เอื้อเฟื้อ ใจเย็น ชอบดูแลคนอื่น', 'เด็ดขาด กล้าหาญ ตรงไปตรงมา',
+        'ประณีต รักความสวยงาม มีมาตรฐานสูง', 'ฉลาด มองการณ์ไกล ชอบอิสระ', 'ช่างคิด มีจินตนาการ เข้าใจความรู้สึกคน'];
+    const STRENGTH_SHORT = { 1: 'พึ่งตัวเองได้ดี ต้องการเป้าหมายและงานท้าทายเป็นทางระบายพลัง', 6: 'กำลังสมดุล รับมือได้ทั้งงานเดี่ยวและงานทีม',
+        2: 'ทำได้ดีเมื่อมีทีมและผู้ใหญ่หนุน ควรรับภาระให้พอดีกำลัง', 3: 'ควรอาศัยความรู้และผู้อุปถัมภ์เป็นฐาน ไม่แบกภาระเกินตัว',
+        4: 'แรงกดดันหนัก ใช้ฝีมือและผลงานของตัวเองเป็นเครื่องมือรับมือ' };
+    const PATTERN_SHORT = { follow: 'ไม่ฝืนพึ่งตัวเอง ไปได้ดีเมื่อไหลตามพลังที่แรงที่สุดในดวง', dominant: 'พลังรวมศูนย์ ไปได้ดีเมื่อไปตามกระแสหลักของดวง',
+        transform: 'ตัวตนหลายมิติ ปรับบทบาทได้ดี', twoElements: 'ชีวิตวนอยู่กับสองพลังหลักในดวง', resource: 'มีผู้สนับสนุนมาก ระวังการพึ่งพาจนขาดแรงผลักดัน' };
+    function summary(chart, an) {
+        const dm = chart.pillars.day.stem, dmEl = B.STEM_ELEMENT[dm], D = DAY_MASTER[dm];
+        const out = [];
+        out.push({ label: 'คุณคือ', text: `${B.STEMS[dm]} ${B.ELEMENTS[dmEl]}${dm % 2 ? 'หยิน' : 'หยาง'} เปรียบได้กับ${D.image} — ${DM_SHORT[dm]}`, source: `ก้านหลักวัน ${B.STEMS[dm]}` });
+        const pg = patternGroup(an.pattern);
+        out.push(pg ? { label: 'ลักษณะดวง', text: `${an.patternTh} — ${PATTERN_SHORT[pg]}`, source: an.patternZh }
+            : { label: 'กำลังดวง', text: `${an.strengthTh} — ${STRENGTH_SHORT[an.strength]}`, source: `คะแนนฝ่ายช่วย ${an.score.total}` });
+        const favEls = [...new Set(an.favorable.filter((x) => !x.position).map((x) => x.element))];
+        if (favEls.length) out.push({ label: 'ธาตุที่ช่วยเสริม', text: favEls.map((e) => `${B.ELEMENTS[e]} (สี${ELEMENT_LIFE[e].colors.split(' ')[0]} ${ELEMENT_LIFE[e].dir})`).join(' · '), source: 'ธาตุให้คุณ', elements: favEls });
+        const mm = B.tenGod(dm, chart.pillars.month.hidden[0].stem), g = GROUPS[GROUP_OF[mm.code]];
+        out.push({ label: 'จุดเด่น', text: `${g.name} — ${g.strong.split(' ').slice(0, 3).join(' ')}`, source: `ปราณหลักกิ่งเดือน ${mm.code}` });
+        return out;
+    }
+
+    return { natal, summary, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
 });
