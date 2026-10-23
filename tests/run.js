@@ -83,5 +83,7 @@ eq('คำทำนายวัยจรมีภาพรวม เรื่อ
 
 eq('ชื่อสิบเทพตามระบบอ้างอิง', [B.tenGod(0, 9).th, B.tenGod(0, 6).th, B.tenGod(0, 5).th], ['เสริมหลัก', 'พิฆาต', 'โชคลาภ']);
 
+eq('วังคู่ครองแยกสิบเทพ 10 ตัว', (() => { const r = calc(1990, 1, 15, 10, 30); const b = N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks[2]; return b.items[0][0].startsWith('คู่ครอง (ราศีล่าง 辰 เสริมรอง'); })(), true);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
