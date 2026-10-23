@@ -8,7 +8,7 @@
   --paper: #f2f3ee;      /* กระดาษสีหยกอ่อน */
   --sheet: #fbfcf8;
   --ink: #1c2420;
-  --ink-soft: #55615b;
+  --ink-soft: #4a5650;
   --rule: #d4d9d0;
   --jade: #1f5e57;       /* สีหลัก */
   --jade-wash: #e1ece8;
@@ -103,7 +103,7 @@ details summary { cursor: pointer; color: var(--jade); font-weight: 500; }
 .pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 999px; padding: 3px 11px 3px 4px; font-size: .9rem; font-weight: 500; }
 .pill .dot { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-family: var(--f-han); font-size: .78rem; font-weight: 700; background: var(--sheet); }
 .pill small { font-size: .7rem; opacity: .85; font-weight: 400; }
-.wheel svg { width: 100%; max-width: 380px; display: block; margin: 0 auto; }
+.wheel svg { width: 100%; max-width: 420px; display: block; margin: 0 auto; }
 .wheel text { font-family: var(--f-body); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; font-size: .75rem; color: var(--ink-soft); margin-top: 4px; }
 .legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 4px; }
@@ -133,6 +133,79 @@ dt { color: var(--ink-soft); font-size: .88rem; } dd { margin: 0; }
 .example { font-size: .75rem; color: var(--jade); border: 1px solid var(--jade); border-radius: 999px; padding: 1px 8px; margin-left: 8px; vertical-align: middle; }
 footer { color: var(--ink-soft); font-size: .8rem; }
 @media (prefers-reduced-motion: no-preference) { .fill { transition: width .3s ease; } }
+
+/* ===== อ่านง่าย + ปรับตามขนาดจอ ===== */
+body { font-size: 16px; line-height: 1.6; -webkit-text-size-adjust: 100%; }
+h1 { font-size: clamp(1.4rem, 4.5vw, 1.75rem); }
+h2 { font-size: 1.12rem; }
+.sub { font-size: .95rem; }
+.label { font-size: .85rem; letter-spacing: 0; }
+.note { font-size: .88rem; line-height: 1.6; }
+input, select, button { min-height: 44px; font-size: 1rem; }
+.seg label { padding: 9px 16px; display: grid; place-items: center; }
+.pc-h { font-size: .92rem; }
+.tg { font-size: .8rem; line-height: 1.35; }
+.tg b { font-size: .9rem; }
+.rd { font-size: .85rem; }
+.tile .bd { font-size: .72rem; }
+.hs .mini { width: 30px; font-size: .68rem; }
+.hs .mini b { font-size: 1.05rem; }
+.extra2 .cap { font-size: .85rem; }
+.verdict .kind { font-size: .88rem; }
+.verdict .big { font-size: clamp(1.35rem, 4.5vw, 1.7rem); }
+.gauge .zones { height: 14px; border-radius: 7px; }
+.gauge .zl { font-size: .78rem; }
+.score { font-size: .95rem; }
+.fu .lab { font-size: .95rem; }
+.pill { font-size: 1rem; padding: 4px 12px 4px 4px; }
+.pill .dot { width: 26px; height: 26px; font-size: .88rem; }
+.pill small { font-size: .78rem; }
+.bar { font-size: .95rem; grid-template-columns: 3.2em 1fr 1.6em; }
+.legend { font-size: .85rem; }
+dt { font-size: .92rem; }
+.warn { font-size: .95rem; }
+footer { font-size: .85rem; }
+
+/* วัยจร: การ์ดที่ตัดขึ้นบรรทัดใหม่ได้ ไม่ต้องเลื่อนข้าง */
+.luck { overflow: visible; }
+.luck ol { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); min-width: 0; gap: 8px; border: 0; background: none; }
+.luck li { border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); padding: 10px 6px 12px; }
+.luck li.now { border: 2px solid var(--jade); background: var(--jade-wash); }
+.luck .han { font-size: 1.7rem; }
+.luck .age { font-size: .9rem; }
+.luck .date { font-size: .82rem; }
+.luck .god { font-size: .8rem; color: var(--ink-soft); line-height: 1.35; }
+.tag { font-size: .78rem; padding: 1px 9px; }
+
+
+.zkey { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .85rem; margin-top: 8px; }
+.zkey i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; border: 1px solid var(--rule); }
+.zkey small { color: var(--ink-soft); font-family: var(--f-data); font-size: .78rem; }
+.luck ol { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+@media (max-width: 600px) { .luck ol { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wheel svg { max-width: none; } }
+@media (max-width: 600px) {
+  .wrap { gap: 18px; }
+  form { padding: 14px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; }
+  .row .f:first-child, .row .f:has(#place), .row button { grid-column: 1 / -1; }
+  .row input, .row select { width: 100%; }
+  .seg { display: grid; grid-template-columns: 1fr 1fr; }
+  .main4 { gap: 5px; }
+  .pc { padding: 8px 3px 10px; border-radius: 10px; }
+  .pc.dm { box-shadow: none; }
+  .tg span { display: block; font-size: .74rem; }
+  .tile { border-radius: 10px; }
+  .tile .bd { right: -2px; font-size: .66rem; padding: 0 4px; }
+  .rd { font-size: .8rem; }
+  .hs .mini { width: 26px; font-size: .62rem; }
+  dl { grid-template-columns: 1fr; gap: 2px; }
+  dd { margin-bottom: 8px; }
+  .fu { grid-template-columns: 1fr; gap: 6px; }
+}
+@media (max-width: 360px) {
+  .tg span { display: none; }
+}
 </style>
 
 <div class="wrap">
@@ -282,7 +355,8 @@ footer { color: var(--ink-soft); font-size: .8rem; }
       <div class="gauge" role="img" aria-label="คะแนนฝ่ายช่วย ${sc.total}">
         <div class="zones">${Z.map(([a, b, , c]) => `<i style="width:${pct(b) - pct(a)}%;background:${c}"></i>`).join('')}</div>
         <div class="mk" style="left:${pct(sc.total)}%"></div>
-        <div class="zl">${Z.map(([a, b, n]) => `<span style="width:${pct(b) - pct(a)}%">${n}</span>`).join('')}</div>
+      </div>
+      <div class="zkey">${Z.map(([a, b, n, c], i) => `<span><i style="background:${c}"></i>${n} <small>${['≤ 3', '3.25–4.25', '4.5–4.75', '≥ 5'][i]}</small></span>`).join('')}
       </div>
       <div class="score">คะแนนฝ่ายช่วย ราศีบน <b>${sc.upper}</b> + ราศีล่าง <b>${sc.lower}</b> = <b>${sc.total}</b></div>
       <div class="fu">
@@ -296,11 +370,11 @@ footer { color: var(--ink-soft); font-size: .8rem; }
     // วงจรห้าธาตุ: เรียงตามวงให้กำเนิด ไม้ → ไฟ → ดิน → ทอง → น้ำ
     const REL = ['ธาตุเดียวกัน', 'ธาตุถ่ายเท', 'ธาตุทรัพย์', 'ธาตุอำนาจ', 'ธาตุให้กำเนิด'];
     const COL = ['var(--wood)', 'var(--fire)', 'var(--earth)', 'var(--metal)', 'var(--water)'];
-    const cx = 190, cy = 188, R = 112, nr = 36;
+    const cx = 200, cy = 196, R = 116, nr = 38;
     const P = [0, 1, 2, 3, 4].map((i) => { const t = -Math.PI / 2 + i * 2 * Math.PI / 5; return [cx + R * Math.cos(t), cy + R * Math.sin(t)]; });
     const isF = (e) => an.favorable.some((x) => x.element === e), isU = (e) => an.unfavorable.some((x) => x.element === e);
     const seg = (a, b, gap) => { const [x1, y1] = P[a], [x2, y2] = P[b], d = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / d, uy = (y2 - y1) / d; return [x1 + ux * gap, y1 + uy * gap, x2 - ux * (gap + 4), y2 - uy * (gap + 4)]; };
-    let svg = `<svg viewBox="0 0 380 372" role="img" aria-label="วงจรห้าธาตุ เจ้าชะตาธาตุ${BaziCore.ELEMENTS[dmEl]}"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-soft)"/></marker></defs>`;
+    let svg = `<svg viewBox="0 0 400 396" role="img" aria-label="วงจรห้าธาตุ เจ้าชะตาธาตุ${BaziCore.ELEMENTS[dmEl]}"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-soft)"/></marker></defs>`;
     for (let i = 0; i < 5; i++) { const [a, b, c, d] = seg(i, (i + 2) % 5, nr + 6); svg += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--rule)" stroke-width="1.2" stroke-dasharray="4 4"/>`; }
     for (let i = 0; i < 5; i++) { const [a, b, c, d] = seg(i, (i + 1) % 5, nr + 4); svg += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--ink-soft)" stroke-width="1.4" marker-end="url(#ar)"/>`; }
     for (let e = 0; e < 5; e++) {
@@ -309,10 +383,10 @@ footer { color: var(--ink-soft); font-size: .8rem; }
       const stc = f && !u ? 'var(--good)' : u && !f ? 'var(--bad)' : 'var(--ink-soft)';
       svg += `<g><circle cx="${x}" cy="${y}" r="${nr}" fill="var(--w${e})" stroke="${COL[e]}" stroke-width="${dm ? 3.5 : 1.5}"/>
         ${dm ? `<circle cx="${x}" cy="${y}" r="${nr + 6}" fill="none" stroke="var(--jade)" stroke-width="1.5" stroke-dasharray="3 3"/>` : ''}
-        <text x="${x}" y="${y - 2}" text-anchor="middle" font-size="15" font-weight="600" fill="${COL[e]}">${BaziCore.ELEMENTS[e]}</text>
-        <text x="${x}" y="${y + 16}" text-anchor="middle" font-size="13" fill="var(--ink)">${r.elementCount[e].count}</text>
-        <text x="${x}" y="${y + (y > cy ? nr + 20 : -nr - 24)}" text-anchor="middle" font-size="13" fill="var(--ink-soft)">${dm ? 'เจ้าชะตา' : REL[(e - dmEl + 5) % 5]}</text>
-        ${st ? `<text x="${x}" y="${y + (y > cy ? nr + 37 : -nr - 8)}" text-anchor="middle" font-size="13" font-weight="600" fill="${stc}">${st}</text>` : ''}</g>`;
+        <text x="${x}" y="${y - 2}" text-anchor="middle" font-size="17" font-weight="600" fill="${COL[e]}">${BaziCore.ELEMENTS[e]}</text>
+        <text x="${x}" y="${y + 16}" text-anchor="middle" font-size="15" fill="var(--ink)">${r.elementCount[e].count}</text>
+        <text x="${x}" y="${y + (y > cy ? nr + 23 : -nr - 29)}" text-anchor="middle" font-size="15.5" fill="var(--ink-soft)">${dm ? 'เจ้าชะตา' : REL[(e - dmEl + 5) % 5]}</text>
+        ${st ? `<text x="${x}" y="${y + (y > cy ? nr + 42 : -nr - 10)}" text-anchor="middle" font-size="15.5" font-weight="600" fill="${stc}">${st}</text>` : ''}</g>`;
     }
     $('wheel').innerHTML = svg + '</svg>';
 
@@ -331,7 +405,7 @@ footer { color: var(--ink-soft); font-size: .8rem; }
         <span class="age">อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} ด.` : ''}</span>
         <span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>
         <span class="date">${BaziCore.STEMS_TH[q.stem]}${BaziCore.BRANCHES_TH[q.branch]}</span>
-        <span class="date">${q.tenGod.code}</span>
+        <span class="god">${q.tenGod.code}<br>${q.tenGod.th}</span>
         <span class="date mono">${p.start.day}/${p.start.month}/${p.start.year}</span>
         ${cur ? '<span class="tag">ตอนนี้</span>' : ''}</li>`;
     }).join('');
