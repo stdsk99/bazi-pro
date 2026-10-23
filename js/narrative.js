@@ -55,6 +55,36 @@
         { name: 'อำนาจและความรับผิดชอบ', zh: '官杀', rel: 'ธาตุอำนาจ', strong: 'มีวินัย รับผิดชอบ เคารพกฎ เหมาะกับตำแหน่งที่ต้องดูแลคนหรือระบบ', over: 'อาจรู้สึกกดดัน เครียดกับความคาดหวัง หรือถูกควบคุมมากเกินไป', none: 'ชอบความอิสระ ไม่ชอบถูกบังคับ ควรตั้งกรอบและวินัยให้ตัวเอง' },
         { name: 'ความรู้และผู้อุปถัมภ์', zh: '印', rel: 'ธาตุให้กำเนิด', strong: 'รักการเรียนรู้ มีเมตตา ได้รับการสนับสนุนจากผู้ใหญ่ ครอบครัว หรือสถาบัน', over: 'อาจพึ่งพาจนขาดแรงผลักดัน หรือคิดมากจนไม่ลงมือ', none: 'ต้องสร้างฐานความรู้และหาผู้สนับสนุนด้วยตัวเอง' }
     ];
+
+    // ---------- ความหมายสิบเทพแบบสั้น และบทบาทของแต่ละหลัก ----------
+    const TG_MEAN = {
+        '比肩': 'ความเป็นตัวของตัวเอง เพื่อนและพี่น้องที่เท่าเทียม', '劫财': 'การแข่งขัน คนที่เข้ามาแบ่งปันหรือแย่งชิง',
+        '食神': 'ความสุข ฝีมือ ความคิดสร้างสรรค์แบบนุ่มนวล', '伤官': 'ความคิดแหวกแนว การแสดงออกที่แรง ไม่ชอบกรอบ',
+        '偏财': 'ลาภ ทรัพย์ที่มาเป็นครั้งคราว การค้าและความใจกว้าง', '正财': 'ทรัพย์ประจำ รายได้มั่นคง ความรับผิดชอบเรื่องเงิน',
+        '七杀': 'แรงกดดัน ความท้าทาย อำนาจที่ต้องต่อสู้มา', '正官': 'ตำแหน่ง ระเบียบ ชื่อเสียงที่มั่นคง',
+        '偏印': 'ความรู้เฉพาะทาง ความคิดลึก ญาณหยั่งรู้', '正印': 'ผู้อุปถัมภ์ การศึกษา ความเมตตา'
+    };
+    const PILLAR_ROLE = {
+        year: { name: 'หลักปี', age: 'วัยเด็ก ราวอายุ 1–16 ปี', who: 'บรรพบุรุษ ครอบครัวตอนต้น และสังคมรอบตัวในวัยเด็ก' },
+        month: { name: 'หลักเดือน', age: 'วัยเรียนถึงเริ่มทำงาน ราวอายุ 17–32 ปี', who: 'พ่อแม่ พี่น้อง และสภาพแวดล้อมการเติบโต' },
+        day: { name: 'หลักวัน', age: 'วัยกลางคน ราวอายุ 33–48 ปี', who: 'ตัวเจ้าชะตา (ก้าน) และคู่ครอง (กิ่ง ซึ่งเรียกว่าวังคู่ครอง)' },
+        hour: { name: 'หลักยาม', age: 'วัยหลัง ราวอายุ 49 ปีขึ้นไป', who: 'บุตร ลูกน้อง และผลงานที่ทิ้งไว้' }
+    };
+    const CAREER = [
+        'งานที่ทำร่วมกับทีมหรือหุ้นส่วน งานขายและงานที่อาศัยเครือข่าย การกีฬา หรือธุรกิจที่ลงมือเอง',
+        'งานสร้างสรรค์ ศิลปะ สื่อ การสอนทักษะ ที่ปรึกษา อาชีพอิสระ และงานที่ใช้ฝีมือหรือความคิดใหม่',
+        'ธุรกิจและการค้า การเงิน การลงทุน การจัดซื้อ และงานบริหารทรัพยากร',
+        'ราชการ องค์กรขนาดใหญ่ การบริหาร กฎหมาย งานที่มีสายบังคับบัญชาและความรับผิดชอบชัดเจน',
+        'วิชาการ การศึกษา งานวิจัย การแพทย์และสุขภาพ ศาสนา และงานที่อาศัยความรู้หรือใบรับรอง'
+    ];
+    const ORGAN = [
+        { sys: 'ตับ ถุงน้ำดี เส้นเอ็น และดวงตา', tip: 'พักผ่อนให้พอ ลดความเครียดสะสม' },
+        { sys: 'หัวใจ ระบบไหลเวียนเลือด และลำไส้เล็ก', tip: 'ดูแลความดัน การนอน และไม่หักโหมจนเกินไป' },
+        { sys: 'กระเพาะอาหาร ม้าม และระบบย่อยอาหาร', tip: 'กินให้ตรงเวลา ระวังอาหารหนักและความกังวล' },
+        { sys: 'ปอด ระบบทางเดินหายใจ ลำไส้ใหญ่ และผิวหนัง', tip: 'ระวังฝุ่นควันและอากาศแห้ง ออกกำลังกายสม่ำเสมอ' },
+        { sys: 'ไต กระเพาะปัสสาวะ กระดูก หู และระบบสืบพันธุ์', tip: 'ดื่มน้ำให้พอ ไม่ทำงานจนอ่อนเพลียสะสม' }
+    ];
+    const SEASON_OF = (b) => [5, 6, 7].includes(b) ? 'hot' : [11, 0, 1].includes(b) ? 'cold' : null;
     const POS_TH = { year: 'หลักปี', month: 'หลักเดือน', day: 'หลักวัน', hour: 'หลักยาม' };
 
     function tenGodScores(chart) {
@@ -75,7 +105,8 @@
     const listTh = (arr) => arr.length <= 1 ? (arr[0] || '') : arr.length === 2 ? `${arr[0]}และ${arr[1]}` : arr.slice(0, -1).join(' ') + ' และ' + arr[arr.length - 1];
     const elName = (x) => x.th + (x.polarity ? (x.polarity === 'same' ? ` (${x.stemZh})` : ` (${x.stemZh})`) : '');
 
-    function natal(chart, an) {
+    function natal(chart, an, rels) {
+        rels = rels || [];
         const dm = chart.pillars.day.stem, dmEl = B.STEM_ELEMENT[dm], D = DAY_MASTER[dm];
         const sections = [];
         const fav = an.favorable.map((x) => Object.assign({}, x, { stemZh: B.STEMS[x.polarity === 'same' ? dm : dm ^ 1] }));
@@ -128,6 +159,104 @@
         }
         for (let g = 1; g < 5; g++) if (sc[g] === 0) s3.push({ text: `ดวงนี้ไม่มีกลุ่ม${GROUPS[g].name} (${GROUPS[g].zh}) เลย ${GROUPS[g].none}`, source: `ไม่พบ${GROUPS[g].rel}ทั้งบนก้านและในราศีแฝง` });
         sections.push({ id: 'gods', title: 'จุดเด่นจากสิบเทพ', blocks: s3 });
+        // helpers สำหรับหัวข้อเชิงลึก
+        const P = chart.pillars, male = (chart.input && chart.input.gender) !== 'F';
+        const favE = (e, stemIdx) => fav.some((x) => x.element === e && (!x.polarity || stemIdx == null || (x.polarity === 'same') === ((stemIdx % 2) === (dm % 2))));
+        const unfE = (e, stemIdx) => unf.some((x) => x.element === e && (!x.polarity || stemIdx == null || (x.polarity === 'same') === ((stemIdx % 2) === (dm % 2))));
+        const judge = (e, st) => favE(e, st) && !unfE(e, st) ? 1 : unfE(e, st) && !favE(e, st) ? -1 : 0;
+        const tgOf = (stem) => B.tenGod(dm, stem);
+        const groupFav = (g) => favE(relEl(g), g === 0 ? dm : null) && !unfE(relEl(g), g === 0 ? dm : null);
+        const groupUnf = (g) => unfE(relEl(g), g === 0 ? dm : null) && !favE(relEl(g), g === 0 ? dm : null);
+        const relsOf = (key) => rels.filter((r) => r.members.some((m) => m.key === key));
+        const relText = (r, key) => {
+            const others = r.members.filter((m) => m.key !== key).map((m) => m.label).join(' ');
+            if (r.type === 'clash') return `กิ่งปะทะกับหลัก${others} มักหมายถึงความเปลี่ยนแปลง การเคลื่อนย้าย หรือความไม่ลงรอยในเรื่องของหลักนี้`;
+            if (r.type === 'stemClash') return `ก้านปะทะกับหลัก${others} เรื่องที่แสดงออกภายนอกมักมีความเห็นต่างหรือแรงเสียดทาน`;
+            if (r.type === 'punish' || r.type === 'selfPunish') return `มีการลงโทษ (${r.note}) กับหลัก${others || 'เดียวกัน'} มักหมายถึงเรื่องจุกจิก ความกดดัน หรือการตำหนิที่ต้องระวัง`;
+            if (r.type === 'harm') return `มีการทำร้าย (${r.note}) กับหลัก${others} ระวังความระแวงหรือความสัมพันธ์ที่ไม่ราบรื่น`;
+            if (r.kind === '+') return `${r.th} กับหลัก${others}${r.element != null ? ` (รวมเป็นธาตุ${r.elementTh})` : ''} เรื่องของสองหลักนี้เชื่อมโยงและเกื้อหนุนกัน`;
+            return '';
+        };
+
+        // 4. ช่วงชีวิตตาม 4 หลัก
+        const s4 = [];
+        for (const k of ['year', 'month', 'day', 'hour']) {
+            const R = PILLAR_ROLE[k], p = P[k], bt = tgOf(p.hidden[0].stem);
+            const bJ = judge(B.BRANCH_ELEMENT[p.branch], p.hidden[0].stem), sJ = k === 'day' ? null : judge(B.STEM_ELEMENT[p.stem], p.stem);
+            const sum = sJ == null ? bJ : sJ + bJ;
+            const tone = sum > 0 ? 'โดยรวมเป็นธาตุให้คุณ เรื่องของหลักนี้จึงมักได้แรงหนุน' : sum < 0 ? 'โดยรวมเป็นธาตุให้โทษ เรื่องของหลักนี้จึงมักมีบทเรียนหรือความท้าทาย' : 'มีทั้งธาตุให้คุณและให้โทษ เรื่องของหลักนี้จึงมีทั้งแรงหนุนและอุปสรรค';
+            const stemPart = k === 'day' ? `ก้าน ${B.STEMS[p.stem]} คือตัวเจ้าชะตาเอง` : `ก้าน ${B.STEMS[p.stem]} เป็น ${p.tenGod.code} (${TG_MEAN[p.tenGod.code]})`;
+            const rl = relsOf(k).map((r) => relText(r, k)).filter(Boolean);
+            const items = [['บอกเรื่อง', R.who], ['ก้าน', stemPart.replace(/^ก้าน /, '')], ['กิ่ง', `${B.BRANCHES[p.branch]} ปราณหลักเป็น ${bt.code} (${TG_MEAN[bt.code]})`], ['ภาพรวม', tone]];
+            rl.forEach((t, i) => items.push([i === 0 ? 'ความสัมพันธ์' : '', t]));
+            s4.push({ title: `${R.name} · ${R.age}`, items, text: `${R.name}บอกเรื่อง${R.who} ${stemPart} ${tone}`, source: `${R.name} ${p.zh}${rl.length ? ' · ' + relsOf(k).map((r) => r.th).join(', ') : ''}` });
+        }
+        sections.push({ id: 'stages', title: 'ช่วงชีวิตตาม 4 หลัก', blocks: s4 });
+
+        // 5. การงาน
+        const s5 = [];
+        const favGroups = [0, 1, 2, 3, 4].filter(groupFav);
+        s5.push({ text: `แนวงานพื้นฐานมาจากแกนของดวงคือ ${monthMain.code} (${TG_MEAN[monthMain.code]}) จึงเหมาะกับ${CAREER[mg]}`, source: `ปราณหลักกิ่งเดือน ${chart.pillars.month.hidden[0].zh} เป็น ${monthMain.code}` });
+        if (favGroups.length) s5.push({ text: `สายงานที่ช่วยเสริมดวงคือกลุ่มที่เป็นธาตุให้คุณ: ${favGroups.map((g) => `${GROUPS[g].name} (${CAREER[g]})`).join(' · ')}`, source: `กลุ่มสิบเทพที่เป็นธาตุให้คุณ: ${favGroups.map((g) => GROUPS[g].zh).join(' ')}` });
+        const vis = ['year', 'month', 'hour'].map((k) => P[k].tenGod.code);
+        const hasG = (g) => sc[g] >= 1;
+        if (hasG(1) && hasG(2) && groupFav(2)) s5.push({ text: 'ดวงมีทั้งธาตุถ่ายเทและธาตุทรัพย์ต่อกันเป็นสาย (食伤生财) ความคิดและฝีมือแปลงเป็นรายได้ได้ดี เหมาะกับงานที่ขายความสามารถของตัวเอง', source: '食伤 และ 财 อยู่ในดวง และธาตุทรัพย์ให้คุณ' });
+        if (hasG(3) && hasG(4) && (groupFav(4) || groupFav(3))) s5.push({ text: 'ดวงมีธาตุอำนาจและธาตุให้กำเนิดหนุนกัน (官印相生) เติบโตได้ดีในองค์กรหรือระบบที่ให้คุณค่ากับความรู้และความรับผิดชอบ', source: '官杀 และ 印 อยู่ในดวง' });
+        if (vis.includes('伤官') && vis.includes('正官')) s5.push({ text: 'มี 伤官 และ 正官 ปรากฏบนก้านพร้อมกัน (伤官见官) ระวังความขัดแย้งกับผู้บังคับบัญชาหรือกฎระเบียบ ควรเลือกงานที่มีอิสระทางความคิด', source: 'ก้าน 伤官 และ 正官 อยู่ในดวง' });
+        if (vis.includes('七杀') && !hasG(4) && !hasG(1)) s5.push({ text: 'มี 七杀 บนก้านโดยไม่มีธาตุให้กำเนิดหรือธาตุถ่ายเทมาช่วยรับ งานมักมาพร้อมแรงกดดันสูง ควรสร้างทักษะเฉพาะทางเป็นเกราะ', source: 'ก้าน 七杀 ไม่มี 印 และ 食伤' });
+        sections.push({ id: 'career', title: 'การงาน', blocks: s5 });
+
+        // 6. การเงิน
+        const s6 = [];
+        const wealthStems = ['year', 'month', 'hour'].filter((k) => GROUP_OF[P[k].tenGod.code] === 2);
+        const wealthHidden = ['year', 'month', 'day', 'hour'].filter((k) => P[k].hidden.some((h) => GROUP_OF[tgOf(h.stem).code] === 2));
+        if (!wealthStems.length && !wealthHidden.length) s6.push({ text: 'ดวงนี้ไม่มีธาตุทรัพย์ปรากฏ เรื่องเงินจึงมาจากความสามารถหลักของตัวเองมากกว่าโชค ต้องอาศัยการวางแผนและวินัยทางการเงิน และจะดีขึ้นในวัยจรหรือปีจรที่ธาตุทรัพย์เข้ามา', source: `ไม่พบธาตุ${B.ELEMENTS[relEl(2)]} (ธาตุทรัพย์) ในดวง` });
+        else {
+            const kind = sc[2] >= 2.5 ? 'มาก' : 'พอประมาณ';
+            const tone = groupFav(2) ? 'และเป็นธาตุให้คุณ ทรัพย์จึงเป็นสิ่งที่ส่งเสริมชีวิต หาได้และรักษาได้' : groupUnf(2) ? 'แต่เป็นธาตุให้โทษ เงินมักมาพร้อมภาระ ควรเน้นความมั่นคงมากกว่าการเสี่ยง' : '';
+            s6.push({ text: `ดวงนี้มีธาตุทรัพย์${kind} ${tone}`, source: `ธาตุทรัพย์ (${B.ELEMENTS[relEl(2)]}) ที่ ${[...wealthStems.map((k) => 'ก้าน' + POS_TH[k]), ...wealthHidden.map((k) => 'ราศีแฝง' + POS_TH[k])].join(', ')}` });
+            if (wealthStems.length) s6.push({ text: 'ธาตุทรัพย์ปรากฏบนก้าน ทรัพย์และโอกาสเห็นได้ชัด แต่คนรอบข้างก็เห็นด้วย ควรระวังการใช้จ่ายและการถูกขอแบ่ง', source: wealthStems.map((k) => `ก้าน${POS_TH[k]} ${P[k].tenGod.code}`).join(', ') });
+            else s6.push({ text: 'ธาตุทรัพย์อยู่ในราศีแฝงเท่านั้น เป็นทรัพย์ที่ไม่แสดงออก มักเก็บออมเงียบๆ และมีรายได้ที่คนอื่นไม่ค่อยรู้', source: 'ธาตุทรัพย์อยู่ในกิ่งเท่านั้น' });
+            if (sc[0] >= 2.5 && groupUnf(0)) s6.push({ text: 'กลุ่มเพื่อนและคู่แข่งมีมากและเป็นธาตุให้โทษ (比劫夺财) ระวังการร่วมทุน การค้ำประกัน และการให้ยืมเงิน', source: '比劫 เด่นและให้โทษ' });
+            if (hasG(1)) s6.push({ text: 'มีธาตุถ่ายเทช่วยสร้างทรัพย์ รายได้ที่ดีที่สุดมาจากฝีมือและผลงานของตัวเอง', source: '食伤 อยู่ในดวง' });
+            const vault = ['year', 'month', 'day', 'hour'].filter((k) => [1, 4, 7, 10].includes(P[k].branch) && P[k].hidden.some((h) => GROUP_OF[tgOf(h.stem).code] === 2));
+            if (vault.length) s6.push({ text: 'มีกิ่งดินที่เก็บธาตุทรัพย์ไว้ข้างใน ตำราเรียกว่าคลังทรัพย์ (财库) มักเก็บสะสมได้ดีเมื่อมีวินัย', source: vault.map((k) => `กิ่ง${POS_TH[k]} ${B.BRANCHES[P[k].branch]}`).join(', ') });
+        }
+        sections.push({ id: 'money', title: 'การเงิน', blocks: s6 });
+
+        // 7. ความรักและคู่ครอง
+        const s7 = [];
+        const db = P.day.branch, dbt = tgOf(P.day.hidden[0].stem), dbJ = judge(B.BRANCH_ELEMENT[db], P.day.hidden[0].stem);
+        s7.push({ text: `วังคู่ครองคือกิ่งวัน ${B.BRANCHES[db]} มีปราณหลักเป็น ${dbt.code} (${TG_MEAN[dbt.code]}) ${dbJ > 0 ? 'และเป็นธาตุให้คุณ คู่ครองมักเป็นแรงหนุนของชีวิต' : dbJ < 0 ? 'และเป็นธาตุให้โทษ ความสัมพันธ์ต้องอาศัยความเข้าใจและการปรับตัวมากกว่าปกติ' : ''}`, source: `กิ่งหลักวัน ${B.BRANCHES[db]}` });
+        if (GROUP_OF[dbt.code] === (male ? 2 : 3)) s7.push({ text: `ปราณหลักของวังคู่ครองเป็นดาวคู่ครองพอดี (${dbt.code}) ตำราถือว่าเรื่องคู่ครองชัดเจน คู่ครองมีบทบาทสำคัญในชีวิต`, source: `กิ่งวัน ${B.BRANCHES[db]} ปราณหลัก ${dbt.code}` });
+        const starG = male ? 2 : 3, starName = male ? 'ธาตุทรัพย์ (ดาวภรรยา)' : 'ธาตุอำนาจ (ดาวสามี)';
+        const starAt = ['year', 'month', 'day', 'hour'].filter((k) => (k !== 'day' && GROUP_OF[P[k].tenGod.code] === starG) || P[k].hidden.some((h, i) => i === 0 && GROUP_OF[tgOf(h.stem).code] === starG));
+        if (!starAt.length) s7.push({ text: `ไม่พบ${starName}ที่ชัดเจนในดวง เรื่องคู่ครองมักมาช้าหรือต้องใช้เวลาเลือก จะเด่นขึ้นในช่วงวัยจรหรือปีจรที่ธาตุนี้เข้ามา`, source: `ไม่พบ${starName}บนก้านหรือปราณหลัก` });
+        else {
+            const near = starAt.includes('day') || starAt.includes('month');
+            s7.push({ text: `${starName} อยู่ที่${starAt.map((k) => POS_TH[k]).join(' ')}${near ? ' ใกล้ตัวเจ้าชะตา ความสัมพันธ์มักเริ่มจากคนใกล้ตัว ที่ทำงาน หรือคนที่ครอบครัวรู้จัก' : ' อยู่ห่างจากหลักวัน คู่ครองอาจมาจากต่างถิ่นหรือพบกันช้า'}${starAt.length >= 3 ? ' ดาวคู่ครองมีหลายตำแหน่ง มีคนเข้ามาในชีวิตมาก ควรชัดเจนเรื่องความสัมพันธ์' : ''}`, source: `${starName}: ${starAt.map((k) => POS_TH[k]).join(', ')}` });
+        }
+        relsOf('day').filter((r) => ['clash', 'punish', 'harm', 'selfPunish'].includes(r.type)).forEach((r) => s7.push({ text: `วังคู่ครองมี${r.th}กับหลัก${r.members.filter((m) => m.key !== 'day').map((m) => m.label).join(' ')} ช่วงที่ปะทะถูกกระตุ้นโดยวัยจรหรือปีจร ควรใส่ใจความสัมพันธ์เป็นพิเศษ`, source: `${r.th} ${r.note}` }));
+        relsOf('day').filter((r) => r.type === 'pair' || r.type === 'halfTrio').forEach((r) => s7.push({ text: `วังคู่ครองมี${r.th}กับหลัก${r.members.filter((m) => m.key !== 'day').map((m) => m.label).join(' ')} ความสัมพันธ์มีแรงดึงดูดและผูกพันกับเรื่องของหลักนั้น`, source: `${r.th} ${r.note}` }));
+        sections.push({ id: 'love', title: 'ความรักและคู่ครอง', blocks: s7 });
+
+        // 8. สุขภาพ
+        const s8 = [];
+        const A = an.seasonal.map((x) => ({ e: x.element, v: x.value }));
+        const hi = A.reduce((a, b) => (b.v > a.v ? b : a)), lo = A.filter((x) => x.v === 0);
+        s8.push({ text: `ธาตุ${B.ELEMENTS[hi.e]}มีกำลังมากที่สุดในดวง ควรดูแล${ORGAN[hi.e].sys}ไม่ให้ทำงานหนักเกิน ${ORGAN[hi.e].tip}`, source: `กำลังธาตุตามฤดู: ${B.ELEMENTS[hi.e]} ${hi.v}` });
+        lo.forEach((x) => s8.push({ text: `ธาตุ${B.ELEMENTS[x.e]}ไม่มีในดวง ส่วนที่สัมพันธ์กับธาตุนี้คือ${ORGAN[x.e].sys} ควรใส่ใจเป็นพิเศษ ${ORGAN[x.e].tip}`, source: `ไม่พบธาตุ${B.ELEMENTS[x.e]}ใน 8 อักษร` }));
+        s8.push({ text: 'หมายเหตุ: เป็นข้อสังเกตตามหลักห้าธาตุ ไม่ใช่การวินิจฉัยทางการแพทย์ หากมีอาการควรปรึกษาแพทย์', source: 'หลักห้าธาตุกับอวัยวะ' });
+        sections.push({ id: 'health', title: 'สุขภาพ', blocks: s8 });
+
+        // 9. ฤดูเกิด (調候)
+        const s9 = [];
+        const ss = SEASON_OF(P.month.branch), cnt = chart.elementCount.map((x) => x.count);
+        if (ss === 'hot') s9.push({ text: `เกิดในฤดูร้อน (กิ่งเดือน ${B.BRANCHES[P.month.branch]}) ดวงต้องการน้ำมาปรับอากาศให้ชุ่มชื้น ${cnt[4] ? `ดวงมีน้ำ ${cnt[4]} ตัว ช่วยผ่อนความร้อนได้` : 'ดวงไม่มีน้ำ จึงอาจใจร้อนหรือเหนื่อยง่าย ช่วงที่น้ำเข้ามาจะช่วยให้สมดุลขึ้น'}`, source: `กิ่งเดือน ${B.BRANCHES[P.month.branch]} · หลัก 調候` });
+        else if (ss === 'cold') s9.push({ text: `เกิดในฤดูหนาว (กิ่งเดือน ${B.BRANCHES[P.month.branch]}) ดวงต้องการไฟมาให้ความอบอุ่น ${cnt[1] ? `ดวงมีไฟ ${cnt[1]} ตัว ช่วยให้อบอุ่นได้` : 'ดวงไม่มีไฟ จึงอาจเก็บตัวหรือขาดแรงกระตุ้น ช่วงที่ไฟเข้ามาจะช่วยให้มีชีวิตชีวาขึ้น'}`, source: `กิ่งเดือน ${B.BRANCHES[P.month.branch]} · หลัก 調候` });
+        else s9.push({ text: `เกิดในฤดูที่อากาศไม่ร้อนหรือหนาวจัด (กิ่งเดือน ${B.BRANCHES[P.month.branch]}) จึงไม่ต้องอาศัยธาตุปรับอากาศเป็นพิเศษ`, source: `กิ่งเดือน ${B.BRANCHES[P.month.branch]}` });
+        sections.push({ id: 'season', title: 'ฤดูเกิดและธาตุปรับอากาศ', blocks: s9 });
+
         return sections;
     }
 

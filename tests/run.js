@@ -72,8 +72,8 @@ eq('ปีจรเริ่มที่ตังจี่ปีก่อน', (
 let a1Chart;
 // --- คำทำนาย ---
 const N = require('../js/narrative.js');
-const rd = N.natal(a1Chart = calc(2014, 8, 25, 9, 35), An.analyze(a1Chart));
-eq('คำทำนายมี 3 หัวข้อ และทุกย่อหน้ามีที่มา', [rd.length, rd.every((s) => s.blocks.every((b) => b.source))], [3, true]);
+const rd = N.natal(a1Chart = calc(2014, 8, 25, 9, 35), An.analyze(a1Chart), I.natal(a1Chart));
+eq('คำทำนายมี 9 หัวข้อ และทุกย่อหน้ามีที่มา', [rd.length, rd.every((s) => s.blocks.every((b) => b.source))], [9, true]);
 
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

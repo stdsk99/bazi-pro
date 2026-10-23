@@ -271,6 +271,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .dc.sel { background: var(--jade); color: var(--sheet); border-color: var(--jade); }
 
 /* คำทำนาย */
+#readNav { flex-wrap: wrap; overflow: visible; padding-bottom: 0; }
 .ritems { grid-template-columns: max-content 1fr; gap: 4px 14px; }
 .ritems dt { color: var(--ink-soft); }
 .ritems dd { color: var(--ink); }
@@ -376,6 +377,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
   <div class="page" id="p-read" role="tabpanel" aria-labelledby="t-read" hidden>
     <div class="draft">ฉบับร่าง · ข้อความแม่แบบตามตำรามาตรฐาน รอผู้เชี่ยวชาญตรวจแก้ · ทุกย่อหน้าบอกที่มาในดวง</div>
+    <div class="decades" id="readNav" role="group" aria-label="หัวข้อคำทำนาย"></div>
     <div id="reading" class="reading"></div>
   </div>
 
@@ -421,7 +423,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
   }
 
-  let luckSel = null, yearSel = null;
+  let luckSel = null, yearSel = null, readSel = null;
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ปะทะ หรือการลงโทษ</p>';
   const G_TH = { M: 'ชาย', F: 'หญิง' };
   function setForm(open) {
@@ -637,8 +639,15 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
     // ---------- คำทำนาย ----------
     const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
-    $('reading').innerHTML = BaziNarrative.natal(r, an).map((sec) => `<section class="panel rsec" id="r-${sec.id}"><h2>${esc(sec.title)}</h2>${sec.blocks.map((b) =>
-      `<div class="rblock${b.element != null ? ' el w' + b.element : ''}">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.items ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : `<p>${esc(b.text)}</p>`}${b.source ? `<p class="src">ที่มา: ${esc(b.source)}</p>` : ''}</div>`).join('')}</section>`).join('');
+    const secs = BaziNarrative.natal(r, an, BaziInteractions.natal(r));
+    if (!readSel || (readSel !== 'all' && !secs.some((x) => x.id === readSel))) readSel = secs[0].id;
+    const drawRead = () => {
+      $('readNav').innerHTML = secs.map((x) => `<button type="button" class="dc${x.id === readSel ? ' sel' : ''}" data-r="${x.id}" aria-pressed="${x.id === readSel}">${esc(x.title)}</button>`).join('') + `<button type="button" class="dc${readSel === 'all' ? ' sel' : ''}" data-r="all" aria-pressed="${readSel === 'all'}">ทั้งหมด</button>`;
+      $('reading').innerHTML = secs.filter((x) => readSel === 'all' || x.id === readSel).map((sec) => `<section class="panel rsec" id="r-${sec.id}"><h2>${esc(sec.title)}</h2>${sec.blocks.map((b) =>
+        `<div class="rblock${b.element != null ? ' el w' + b.element : ''}">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.items ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : `<p>${esc(b.text)}</p>`}${b.source ? `<p class="src">ที่มา: ${esc(b.source)}</p>` : ''}</div>`).join('')}</section>`).join('');
+    };
+    drawRead();
+    $('readNav').onclick = (ev) => { const bt = ev.target.closest('button[data-r]'); if (!bt) return; readSel = bt.dataset.r; drawRead(); };
   }
 
   $('f').addEventListener('submit', (e) => { e.preventDefault(); luckSel = null; yearSel = null; render(); setForm(false); });
