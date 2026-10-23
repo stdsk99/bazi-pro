@@ -320,6 +320,29 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
 .pred { display: grid; gap: 0; }
 .badge { font-size: .72rem; font-weight: 500; background: var(--warn-wash); color: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
+.bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
+#printView { display: none; }
+@media print {
+  @page { size: A4; margin: 14mm 12mm; }
+  body { background: #fff !important; }
+  .wrap { display: none !important; }
+  #printView { display: block; color: #1c2420; font-size: 11pt; line-height: 1.6; }
+  #printView .ph { border-bottom: 2px solid #1d6b57; padding-bottom: 6px; margin-bottom: 12px; }
+  #printView .ph h1 { font-size: 18pt; margin: 0; }
+  #printView .ph p { margin: 2px 0 0; color: #55615b; }
+  #printView h2 { font-size: 14pt; margin: 18px 0 8px; color: #1d6b57; break-after: avoid; }
+  #printView h3 { font-size: 11.5pt; margin: 8px 0 4px; break-after: avoid; }
+  #printView .pbreak { break-before: page; }
+  #printView .board { display: block; }
+  #printView .extra2 { display: none; }
+  #printView .main4 { break-inside: avoid; }
+  #printView .rel, #printView .panel, #printView .ritems dt { break-inside: avoid; box-shadow: none; }
+  #printView .panel { border: 1px solid #d9ddd6; border-radius: 6px; padding: 8px 12px; margin: 8px 0; background: #fff; }
+  #printView .ritems dt { break-after: avoid; }
+  #printView .src { color: #6b7570; font-size: 9pt; }
+  #printView .pnote { color: #6b7570; font-size: 9pt; margin-top: 16px; border-top: 1px solid #d9ddd6; padding-top: 6px; }
+  #printView .more > summary { display: none; }
+}
 </style>
 
 <div class="wrap">
@@ -330,7 +353,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
   <div class="birthbar" id="bbar" hidden>
     <div class="bsum" id="bsum"></div>
-    <button type="button" class="ghost" id="edit" aria-controls="f" aria-expanded="false">แก้ไขข้อมูลเกิด</button>
+    <div class="bbtn"><button type="button" class="ghost" id="print">พิมพ์ / บันทึก PDF</button><button type="button" class="ghost" id="edit" aria-controls="f" aria-expanded="false">แก้ไขข้อมูลเกิด</button></div>
   </div>
 
   <form id="f" autocomplete="off">
@@ -441,6 +464,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
   <footer>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
 </div>
+
+<div id="printView" aria-hidden="true"></div>
 
 <script>
 // astro.js — ดาราศาสตร์ที่จำเป็นสำหรับการผูกดวง
@@ -1705,9 +1730,10 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         const lineT = (code, j) => {
             const t = TRANSIT_GOD[code], g = male ? t.man : t.woman;
             let txt = j > 0 ? t.good : j < 0 ? t.bad : `${t.good} · ในช่วงที่ไม่เป็นใจ: ${t.bad}`;
-            if (g) { const m = [j >= 0 && g.good, j <= 0 && g.bad].filter(Boolean); if (m.length) txt += ` · ${male ? 'สำหรับผู้ชาย' : 'สำหรับผู้หญิง'}: ${m.join(' หรือ')}`; }
+            if (g) { const m = [j >= 0 && g.good, j <= 0 && g.bad].filter((x) => x && !seenG.has(x)); m.forEach((x) => seenG.add(x)); if (m.length) txt += ` · ${male ? 'สำหรับผู้ชาย' : 'สำหรับผู้หญิง'}: ${m.join(' หรือ')}`; }
             return txt;
         };
+        const seenG = new Set();
         const JW = (j) => j > 0 ? 'ให้คุณ' : j < 0 ? 'ให้โทษ' : 'ทั้งให้คุณและให้โทษ';
         if (cS === cB) items.push([`${TRANSIT_GOD[cS].topic} (${kind === 'luck' ? 'ตลอดช่วง' : 'ตลอดปี'} · ${JW(Math.sign(a + b))})`, lineT(cS, Math.sign(a + b))]);
         else for (const [code, j, when] of [[cS, a, half[0]], [cB, b, half[1]]]) items.push([`${TRANSIT_GOD[code].topic} (${when} · ${JW(j)})`, lineT(code, j)]);
@@ -1730,6 +1756,10 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
             if (np.stem === tp.stem && np.branch === tp.branch) { hit.unshift([`ซ้ำ${PN[k]}: ${PILLAR_PLAIN[k]}`, `${what}ซ้ำกับ${PN[k]}ทุกตัว เรื่อง${PILLAR_PLAIN[k]}จึงเด่นขึ้นเป็นพิเศษ ทั้งด้านดีและด้านที่ต้องระวังตามที่พื้นดวงบอกไว้`]); srcX.push(`ซ้ำ${PN[k]} ${np.zh} (伏吟)`); }
             else if ((np.branch + 6) % 12 === tp.branch && (B.STEM_ELEMENT[tp.stem] + 2) % 5 === B.STEM_ELEMENT[np.stem]) { hit.unshift([`บนปะทะ-ล่างชง ${PN[k]}: ${PILLAR_PLAIN[k]}`, `เรื่อง${PILLAR_PLAIN[k]}มีโอกาสเปลี่ยนแปลงครั้งใหญ่ ควรเตรียมตัวและไม่ประมาท`]); srcX.push(`บนปะทะ-ล่างชง ${PN[k]} ${np.zh} (反吟)`); }
         }
+        // รวมรายการที่ข้อความเหมือนกัน เช่น บนภาคีสองคู่ที่ให้ผลแบบเดียวกัน
+        const merged = [];
+        for (const [k, v] of hit) { const m = merged.find((x) => x[1] === v && x[0].split(':')[0] === k.split(':')[0]); if (m) m[0] += ` และ${k.split(': ').slice(1).join(': ')}`; else merged.push([k, v]); }
+        hit.length = 0; hit.push(...merged);
         if (hit.length) out.push({ title: 'ผลต่อหลักดวง', text: '', items: hit, source: srcX.concat(rels.map((r) => `${r.th} ${r.note}`)).join(', ') });
         // คำแนะนำ
         const favEls = [...new Set(fav.filter((x) => !x.position).map((x) => x.element))];
@@ -1847,7 +1877,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
   }
 
-  let luckSel = null, yearSel = null, readSel = null;
+  let luckSel = null, yearSel = null, readSel = null, buildPrint = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${escH(b.sub)}</p>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ชง เฮ้ง ไห่ หรือผั่ว</p>';
@@ -1857,6 +1887,15 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('edit').setAttribute('aria-expanded', String(open));
   }
   $('toRead').addEventListener('click', () => { readSel = 'self'; render(); show('read'); window.scrollTo({ top: 0 }); });
+  $('print').addEventListener('click', () => {
+    if (!buildPrint) return;
+    buildPrint();
+    const root = document.documentElement, prev = root.getAttribute('data-theme');
+    root.setAttribute('data-theme', 'light');
+    const done = () => { if (prev == null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', prev); window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    window.print();
+  });
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
   const PAGES = ['chart', 'analysis', 'read', 'luck', 'year'];
   function show(pg) {
@@ -2077,6 +2116,28 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         `<div class="rblock${b.element != null ? ' el w' + b.element : ''}">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${esc(b.sub)}</p>` : ''}${b.items ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : `<p>${esc(b.text)}</p>`}${b.source ? `<p class="src">ที่มา: ${esc(b.source)}</p>` : ''}</div>`).join('')}</section>`).join('');
     };
     drawRead();
+    // ---------- พิมพ์ / PDF ----------
+    buildPrint = () => {
+      const lp = curIdx >= 0 ? L.periods[curIdx] : null, ya = r.annual(thisYear, thisYear)[0];
+      const trY = [{ key: 'yr', label: 'ปีจร', stem: ya.pillar.stem, branch: ya.pillar.branch }];
+      const ld = lp ? decadeOf(thisYear) : -1;
+      if (ld >= 0) trY.unshift({ key: 'luck', label: 'วัยจร', stem: L.periods[ld].pillar.stem, branch: L.periods[ld].pillar.branch });
+      const secHTML = (sec) => `<section class="rsec"><h2>${esc(sec.title)}</h2>${blocksHTML(sec.blocks)}</section>`;
+      const basisHTML = BaziNarrative.summary(r, an, BaziInteractions.natal(r)).map((x) => `<div class="bitem"><dt>${x.label}</dt><dd>${x.text}${x.more && x.more.length ? `<dl class="ritems">${x.more.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>` : ''}<span class="src">ที่มา: ${x.source}</span></dd></div>`).join('');
+      const today = new Date();
+      $('printView').innerHTML = `
+        <div class="ph"><h1>ผังดวงสี่เสา ${esc(name || '')}</h1><p>เกิด ${d}/${m}/${y} เวลา ${pad(h)}:${pad(mi)} น. · ${G_TH[g]} · ${esc($('place').selectedOptions[0].text)} · ดิถี ${dm.zh} ${dm.th} ${dm.element}${dm.yang ? 'หยาง' : 'หยิน'}</p></div>
+        <h2>ผังดวง</h2><div class="board"><div class="main4">${$('pillars').innerHTML}</div></div>
+        <div class="panel"><h3>${an.pattern ? `ดวงพิเศษ: ${an.patternTh}` : `กำลังดวง: ดวง${an.strengthTh}`} · คะแนนฝ่ายช่วย ${sc.total}</h3>
+          <p>ธาตุให้คุณ: ${an.favorable.map((x) => x.th).join(' ') || '—'} · ธาตุให้โทษ: ${an.unfavorable.map((x) => x.th).join(' ') || '—'}</p></div>
+        <h2>พื้นดวงของคุณ</h2><dl class="bsl">${basisHTML}</dl>
+        <h2>ความสัมพันธ์ภายในดวง</h2><div class="rels">${relHTML(BaziInteractions.natal(r))}</div>
+        <div class="pbreak"></div>
+        ${secs.map(secHTML).join('')}
+        ${lp ? `<div class="pbreak"></div><h2>วัยจรปัจจุบัน ${lp.pillar.zh} · อายุ ${lp.ageAtStart.years}–${lp.ageAtStart.years + 10} ปี (${lp.start.day}/${lp.start.month}/${lp.start.year} – ${lp.end.day}/${lp.end.month}/${lp.end.year})</h2>${blocksHTML(BaziNarrative.transit(r, an, lp.pillar, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: lp.pillar.stem, branch: lp.pillar.branch }], 'luck'), 'luck'))}` : ''}
+        <h2>ปีจร ${thisYear} ${ya.pillar.zh} ปี${ya.pillar.animal}</h2>${blocksHTML(BaziNarrative.transit(r, an, ya.pillar, 'year', BaziInteractions.withTransit(r, trY, 'yr'), 'yr'))}
+        <p class="pnote">พิมพ์เมื่อ ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()} · คำทำนายเป็นฉบับร่างตามหลักห้าธาตุ ใช้ประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์ การเงิน หรือกฎหมาย</p>`;
+    };
     $('readNav').onclick = (ev) => { const bt = ev.target.closest('button[data-r]'); if (!bt) return; readSel = bt.dataset.r; drawRead(); };
   }
 

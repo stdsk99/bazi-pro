@@ -512,9 +512,10 @@
         const lineT = (code, j) => {
             const t = TRANSIT_GOD[code], g = male ? t.man : t.woman;
             let txt = j > 0 ? t.good : j < 0 ? t.bad : `${t.good} · ในช่วงที่ไม่เป็นใจ: ${t.bad}`;
-            if (g) { const m = [j >= 0 && g.good, j <= 0 && g.bad].filter(Boolean); if (m.length) txt += ` · ${male ? 'สำหรับผู้ชาย' : 'สำหรับผู้หญิง'}: ${m.join(' หรือ')}`; }
+            if (g) { const m = [j >= 0 && g.good, j <= 0 && g.bad].filter((x) => x && !seenG.has(x)); m.forEach((x) => seenG.add(x)); if (m.length) txt += ` · ${male ? 'สำหรับผู้ชาย' : 'สำหรับผู้หญิง'}: ${m.join(' หรือ')}`; }
             return txt;
         };
+        const seenG = new Set();
         const JW = (j) => j > 0 ? 'ให้คุณ' : j < 0 ? 'ให้โทษ' : 'ทั้งให้คุณและให้โทษ';
         if (cS === cB) items.push([`${TRANSIT_GOD[cS].topic} (${kind === 'luck' ? 'ตลอดช่วง' : 'ตลอดปี'} · ${JW(Math.sign(a + b))})`, lineT(cS, Math.sign(a + b))]);
         else for (const [code, j, when] of [[cS, a, half[0]], [cB, b, half[1]]]) items.push([`${TRANSIT_GOD[code].topic} (${when} · ${JW(j)})`, lineT(code, j)]);
@@ -537,6 +538,10 @@
             if (np.stem === tp.stem && np.branch === tp.branch) { hit.unshift([`ซ้ำ${PN[k]}: ${PILLAR_PLAIN[k]}`, `${what}ซ้ำกับ${PN[k]}ทุกตัว เรื่อง${PILLAR_PLAIN[k]}จึงเด่นขึ้นเป็นพิเศษ ทั้งด้านดีและด้านที่ต้องระวังตามที่พื้นดวงบอกไว้`]); srcX.push(`ซ้ำ${PN[k]} ${np.zh} (伏吟)`); }
             else if ((np.branch + 6) % 12 === tp.branch && (B.STEM_ELEMENT[tp.stem] + 2) % 5 === B.STEM_ELEMENT[np.stem]) { hit.unshift([`บนปะทะ-ล่างชง ${PN[k]}: ${PILLAR_PLAIN[k]}`, `เรื่อง${PILLAR_PLAIN[k]}มีโอกาสเปลี่ยนแปลงครั้งใหญ่ ควรเตรียมตัวและไม่ประมาท`]); srcX.push(`บนปะทะ-ล่างชง ${PN[k]} ${np.zh} (反吟)`); }
         }
+        // รวมรายการที่ข้อความเหมือนกัน เช่น บนภาคีสองคู่ที่ให้ผลแบบเดียวกัน
+        const merged = [];
+        for (const [k, v] of hit) { const m = merged.find((x) => x[1] === v && x[0].split(':')[0] === k.split(':')[0]); if (m) m[0] += ` และ${k.split(': ').slice(1).join(': ')}`; else merged.push([k, v]); }
+        hit.length = 0; hit.push(...merged);
         if (hit.length) out.push({ title: 'ผลต่อหลักดวง', text: '', items: hit, source: srcX.concat(rels.map((r) => `${r.th} ${r.note}`)).join(', ') });
         // คำแนะนำ
         const favEls = [...new Set(fav.filter((x) => !x.position).map((x) => x.element))];
