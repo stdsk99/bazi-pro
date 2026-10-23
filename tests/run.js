@@ -24,10 +24,10 @@ eq('วัน 1949-10-01 = 甲子', calc(1949, 10, 1, 12, 0).pillars.day.zh, '�
 eq('วัน 2000-01-01 = 戊午', calc(2000, 1, 1, 12, 0).pillars.day.zh, '戊午');
 eq('วัน 1900-02-20 = 甲子', calc(1900, 2, 20, 12, 0).pillars.day.zh, '甲子');
 
-// --- เปลี่ยนปีที่ลิบชุน: 立春 2024 = 4 ก.พ. 15:27 เวลาไทย ---
+// --- เปลี่ยนปีที่ลิบชุง: 立春 2024 = 4 ก.พ. 15:27 เวลาไทย ---
 const lc = { yearChange: 'lichun' };
-eq('ก่อนลิบชุน 1 นาที', P(calc(2024, 2, 4, 15, 26, 'M', lc)), '癸卯 乙丑 戊戌 庚申');
-eq('ตรงนาทีลิบชุน = ปีใหม่', P(calc(2024, 2, 4, 15, 27, 'M', lc)), '甲辰 丙寅 戊戌 庚申');
+eq('ก่อนลิบชุง 1 นาที', P(calc(2024, 2, 4, 15, 26, 'M', lc)), '癸卯 乙丑 戊戌 庚申');
+eq('ตรงนาทีลิบชุง = ปีใหม่', P(calc(2024, 2, 4, 15, 27, 'M', lc)), '甲辰 丙寅 戊戌 庚申');
 
 // --- เปลี่ยนปีที่ตังจี่ (ค่าตั้งต้น): 冬至 2024 ≈ 21 ธ.ค. 16:20 เวลาไทย ---
 eq('ก่อนตังจี่', calc(2024, 12, 21, 16, 19).pillars.year.zh, '甲辰');
@@ -88,6 +88,8 @@ eq('วังคู่ครองแยกสิบเทพ 10 ตัว', (()
 eq('หลักเดือนแยกราศีบน/ล่างตามสิบเทพ', (() => { const r = calc(1990, 1, 15, 10, 30); const b = N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks[1]; return b.items[0][1].startsWith('มีระเบียบ') && b.items[1][1].startsWith('แม่คอยดูแล'); })(), true);
 
 eq('หลักปีและหลักยามแยกตามสิบเทพ', (() => { const r = calc(1990, 1, 15, 10, 30); const bl = N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks; return [bl[0].items[1][1].startsWith('แม่หรือผู้ใหญ่ฝ่ายหญิง'), bl[3].items[1][1].startsWith('ลูกหลานเข้มแข็ง')]; })(), [true, true]);
+
+eq('ประโยคเฉพาะผู้ชายแสดงเฉพาะดวงผู้ชาย', ['M', 'F'].map((g) => { const r = calc(1990, 1, 15, 10, 30, g); return N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks[3].items[1][1].includes('สำหรับผู้ชาย'); }), [true, false]);
 
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

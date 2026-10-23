@@ -350,7 +350,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
       <summary>ตัวเลือกการคำนวณ</summary>
       <div class="opts">
         <div class="f"><label class="label" for="yearChange">เปลี่ยนปีที่</label>
-          <select id="yearChange"><option value="winterSolstice">ตังจี่ 冬至 ~22 ธ.ค. (ค่าตั้งต้น)</option><option value="lichun">ลิบชุน 立春 ~4 ก.พ.</option><option value="summerSolstice">แฮ่จี่ 夏至 ~21 มิ.ย.</option></select></div>
+          <select id="yearChange"><option value="winterSolstice">ตังจี่ 冬至 ~22 ธ.ค. (ค่าตั้งต้น)</option><option value="lichun">ลิบชุง 立春 ~4 ก.พ.</option><option value="summerSolstice">แฮ่จี่ 夏至 ~21 มิ.ย.</option></select></div>
         <div class="f"><label class="label" for="ziHour">ยามจื้อ (23.00–24.00 น.)</label>
           <select id="ziHour"><option value="midnight">วันเปลี่ยน 24.00 น. (ค่าตั้งต้น)</option><option value="at23">วันเปลี่ยน 23.00 น.</option></select></div>
         <div class="f"><label class="label" for="luckMethod">วิธีคิดอายุเริ่มวัยจร</label>
@@ -361,7 +361,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
           <select id="solar"><option value="0">เวลามาตรฐาน (ค่าตั้งต้น)</option><option value="1">เวลาเทียบกับพระอาทิตย์</option></select></div>
         <div class="f"><label class="label" for="preg">จำนวนเดือนตั้งครรภ์ (หลักปฏิสนธิ)</label><input id="preg" type="number" min="7" max="11" value="9"></div>
       </div>
-      <p class="note">สารทต้นเดือน (节 เจี๋ย) เช่น ลิบชุน 立春 ~4 ก.พ. ใช้เป็นจุดเริ่มเดือนตามตำรามาตรฐาน · สารทกลางเดือน (中气 จงชี่) เช่น อู๋จุ้ย 雨水 ~19 ก.พ. ใช้ในบางสำนัก</p>
+      <p class="note">สารทต้นเดือน (节 เจี๋ย) เช่น ลิบชุง 立春 ~4 ก.พ. ใช้เป็นจุดเริ่มเดือนตามตำรามาตรฐาน · สารทกลางเดือน (中气 จงชี่) เช่น อู๋จุ้ย 雨水 ~19 ก.พ. ใช้ในบางสำนัก</p>
       <p class="note">สถานที่เกิดมีผลเฉพาะเมื่อเลือก "เวลาเทียบกับพระอาทิตย์" ทุกจังหวัดใช้เวลามาตรฐานไทย UTC+7</p>
     </details>
   </form>
@@ -456,7 +456,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
   const E = (name) => BaziCore.ELEMENTS.indexOf(name);
   const pad = (n) => String(n).padStart(2, '0');
   const fmt = (d) => `${d.day}/${d.month}/${d.year} ${pad(d.hour)}:${pad(d.minute)}`;
-  const OPT_TEXT = { winterSolstice: 'ตังจี่ 冬至', lichun: 'ลิบชุน 立春', summerSolstice: 'แฮ่จี่ 夏至' };
+  const OPT_TEXT = { winterSolstice: 'ตังจี่ 冬至', lichun: 'ลิบชุง 立春', summerSolstice: 'แฮ่จี่ 夏至' };
 
   function glyph(ch, th, el, yang) {
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
