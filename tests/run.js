@@ -85,5 +85,7 @@ eq('ชื่อสิบเทพตามระบบอ้างอิง', [
 
 eq('วังคู่ครองแยกสิบเทพ 10 ตัว', (() => { const r = calc(1990, 1, 15, 10, 30); const b = N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks[2]; return b.items[0][0].startsWith('คู่ครอง (ราศีล่าง 辰 เสริมรอง'); })(), true);
 
+eq('หลักเดือนแยกราศีบน/ล่างตามสิบเทพ', (() => { const r = calc(1990, 1, 15, 10, 30); const b = N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks[1]; return b.items[0][1].startsWith('มีระเบียบ') && b.items[1][1].startsWith('แม่คอยดูแล'); })(), true);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
