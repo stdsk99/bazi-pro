@@ -71,9 +71,14 @@ details summary { cursor: pointer; color: var(--jade); font-weight: 500; }
 .tile .bd { position: absolute; right: -4px; bottom: -6px; font-size: .64rem; font-weight: 600; background: var(--sheet); border: 1px solid currentColor; border-radius: 999px; padding: 0 5px; line-height: 1.5; }
 .w0 { background: var(--w0); color: var(--wood) } .w1 { background: var(--w1); color: var(--fire) } .w2 { background: var(--w2); color: var(--earth) } .w3 { background: var(--w3); color: var(--metal) } .w4 { background: var(--w4); color: var(--water) }
 .rd { font-size: .74rem; color: var(--ink-soft); margin-top: 4px; }
-.hs { display: flex; gap: 3px; justify-content: center; flex-wrap: wrap; margin-top: 2px; }
-.hs .mini { display: grid; justify-items: center; width: 26px; border-radius: 6px; padding: 2px 0; font-size: .6rem; line-height: 1.2; }
-.hs .mini b { font-family: var(--f-han); font-size: .95rem; }
+.hsbox { width: 100%; border-top: 1px dashed var(--rule); margin-top: 4px; padding-top: 6px; display: grid; gap: 4px; }
+.hsbox .cap { font-size: .74rem; color: var(--ink-soft); }
+.hs { display: grid; gap: 4px; }
+.hs .mini { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px; border-radius: 8px; padding: 3px 6px; text-align: left; line-height: 1.2; }
+.hs .mini b { font-family: var(--f-han); font-size: 1.15rem; }
+.hs .mini span { display: grid; font-size: .74rem; }
+.hs .mini em { font-style: normal; font-family: var(--f-han); font-weight: 700; font-size: .72rem; opacity: .85; }
+.hs .mini i { font-style: normal; color: var(--ink); }
 .extra2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--paper); border: 1px dashed var(--rule); border-radius: 12px; padding: 8px; align-content: start; }
 .extra2 .cap { grid-column: 1 / -1; font-size: .74rem; color: var(--ink-soft); text-align: center; }
 .extra2 .pc { padding: 8px 4px; }
@@ -148,8 +153,6 @@ input, select, button { min-height: 44px; font-size: 1rem; }
 .tg b { font-size: .9rem; }
 .rd { font-size: .85rem; }
 .tile .bd { font-size: .72rem; }
-.hs .mini { width: 30px; font-size: .68rem; }
-.hs .mini b { font-size: 1.05rem; }
 .extra2 .cap { font-size: .85rem; }
 .verdict .kind { font-size: .88rem; }
 .verdict .big { font-size: clamp(1.35rem, 4.5vw, 1.7rem); }
@@ -198,7 +201,9 @@ footer { font-size: .85rem; }
   .tile { border-radius: 10px; }
   .tile .bd { right: -2px; font-size: .66rem; padding: 0 4px; }
   .rd { font-size: .8rem; }
-  .hs .mini { width: 26px; font-size: .62rem; }
+  .hs .mini { gap: 3px; padding: 3px 3px; }
+  .hs .mini b { font-size: 1rem; }
+  .hs .mini span { font-size: .68rem; }
   dl { grid-template-columns: 1fr; gap: 2px; }
   dd { margin-bottom: 8px; }
   .fu { grid-template-columns: 1fr; gap: 6px; }
@@ -312,6 +317,7 @@ footer { font-size: .85rem; }
     $('who').innerHTML = name ? `· ${name}${name === 'ตัวอย่าง' ? '<span class="example">ข้อมูลตัวอย่าง</span>' : ''}` : '';
 
     const dmStem = r.pillars.day.stem;
+    const SHORT = { '比肩': 'เพื่อน', '劫财': 'คู่แข่ง', '食神': 'ผลงาน', '伤官': 'ความคิด', '偏财': 'ลาภ', '正财': 'ทรัพย์', '七杀': 'กดดัน', '正官': 'ตำแหน่ง', '偏印': 'ความรู้', '正印': 'อุปถัมภ์' };
     const sign = (yang) => (yang ? '+' : '−');
     const tile = (ch, el, yang) => `<div class="tile w${E(el)}"><span class="han">${ch}</span><span class="bd">${el}${sign(yang)}</span></div>`;
     const godOf = (code, th) => `<div class="tg"><b>${code}</b><span>${th}</span></div>`;
@@ -323,10 +329,10 @@ footer { font-size: .85rem; }
         ${tile(BaziCore.BRANCHES[p.branch], p.branchElement, p.branchYang)}<div class="rd">${BaziCore.BRANCHES_TH[p.branch]} · ${p.animal}</div>`;
       if (full) {
         const bg = BaziCore.tenGod(dmStem, p.hidden[0].stem);
-        out += godOf(bg.code, bg.th) + `<div class="hs" title="ราศีแฝง">${p.hidden.map((s) => {
+        out += godOf(bg.code, bg.th) + `<div class="hsbox"><div class="cap">ราศีแฝง</div><div class="hs">${p.hidden.map((s) => {
           const tg = BaziCore.tenGod(dmStem, s.stem);
-          return `<span class="mini w${E(s.element)}" title="${s.zh} ${tg.code} ${tg.th}"><b>${s.zh}</b>${tg.code}</span>`;
-        }).join('')}</div>`;
+          return `<span class="mini w${E(s.element)}" title="${s.zh} ${BaziCore.STEMS_TH[s.stem]} ${s.element} · ${tg.code} ${tg.th}"><b>${s.zh}</b><span><em>${tg.code}</em><i>${SHORT[tg.code]}</i></span></span>`;
+        }).join('')}</div></div>`;
       }
       return out + '</div>';
     };
