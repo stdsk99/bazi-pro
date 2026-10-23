@@ -500,8 +500,8 @@
         const judge = (e, st) => favE(e, st) && !unfE(e, st) ? 1 : unfE(e, st) && !favE(e, st) ? -1 : 0;
         const sEl = B.STEM_ELEMENT[tp.stem], bEl = B.BRANCH_ELEMENT[tp.branch], bMain = tp.hidden[0].stem;
         const a = judge(sEl, tp.stem), b = judge(bEl, bMain), sum = a + b;
-        const what = kind === 'luck' ? 'ช่วงนี้' : 'ปีนี้';
-        const half = kind === 'luck' ? ['5 ปีแรก', '5 ปีหลัง'] : ['ครึ่งปีแรก', 'ครึ่งปีหลัง'];
+        const what = kind === 'luck' ? 'ช่วงนี้' : kind === 'month' ? 'เดือนนี้' : 'ปีนี้';
+        const half = kind === 'luck' ? ['5 ปีแรก', '5 ปีหลัง'] : kind === 'month' ? ['ครึ่งเดือนแรก', 'ครึ่งเดือนหลัง'] : ['ครึ่งปีแรก', 'ครึ่งปีหลัง'];
         const out = [];
         const overall = sum >= 2 ? `${what}เป็นช่วงที่ส่งเสริมคุณ ทั้ง${half[0]}และ${half[1]}ได้ธาตุที่ช่วยเสริมดวง` : sum <= -2 ? `${what}เป็นช่วงที่ต้องระวัง ทั้ง${half[0]}และ${half[1]}เป็นธาตุที่ดวงไม่ต้องการ ควรตั้งรับมากกว่ารุก`
             : a > b ? `${what}เริ่มต้นดี ${half[0]}ได้แรงหนุน แต่ ${half[1]}ต้องระวังมากขึ้น` : b > a ? `${what}เริ่มต้นช้า ${half[0]}ต้องอดทน แล้ว ${half[1]}จะดีขึ้น` : `${what}มีทั้งเรื่องดีและเรื่องที่ต้องระวังพอๆ กัน`;
@@ -517,11 +517,11 @@
         };
         const seenG = new Set();
         const JW = (j) => j > 0 ? 'ให้คุณ' : j < 0 ? 'ให้โทษ' : 'ทั้งให้คุณและให้โทษ';
-        if (cS === cB) items.push([`${TRANSIT_GOD[cS].topic} (${kind === 'luck' ? 'ตลอดช่วง' : 'ตลอดปี'} · ${JW(Math.sign(a + b))})`, lineT(cS, Math.sign(a + b))]);
+        if (cS === cB) items.push([`${TRANSIT_GOD[cS].topic} (${kind === 'luck' ? 'ตลอดช่วง' : kind === 'month' ? 'ตลอดเดือน' : 'ตลอดปี'} · ${JW(Math.sign(a + b))})`, lineT(cS, Math.sign(a + b))]);
         else for (const [code, j, when] of [[cS, a, half[0]], [cB, b, half[1]]]) items.push([`${TRANSIT_GOD[code].topic} (${when} · ${JW(j)})`, lineT(code, j)]);
         out.push({ title: 'เรื่องที่เด่นขึ้น', text: '', items, source: `ราศีบน ${B.STEMS[tp.stem]} เป็น ${cS} · ราศีล่าง ${B.BRANCHES[tp.branch]} ราศีแฝงหลักเป็น ${cB}` });
         // เรื่องในชีวิตที่ถูกกระทบ
-        const PL = Object.assign({ luck: 'ช่วงวัยจรที่อยู่' }, PILLAR_PLAIN);
+        const PL = Object.assign({ luck: 'ช่วงวัยจรที่อยู่', yr: 'ปีจรนี้' }, PILLAR_PLAIN);
         const hit = [];
         for (const r of rels) {
             const o = listTh([...new Set(r.members.filter((m) => m.key !== focus).map((m) => PL[m.key]).filter(Boolean))]);

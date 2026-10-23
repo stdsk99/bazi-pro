@@ -229,6 +229,21 @@
                 }
                 return out;
             },
+            // เดือนจร: เดือนที่เริ่ม (ที่สารทเปลี่ยนเดือน) ภายในปีจร Y
+            monthly: (Yr) => {
+                const a = yearStart(Yr), b = yearStart(Yr + 1), out = [];
+                for (let gy = Yr - 1; gy <= Yr + 1; gy++) for (let gm = 1; gm <= 12; gm++) {
+                    const s = term(gy, gm, monthType);
+                    if (s < a || s >= b) continue;
+                    const ser = gy * 12 + gm - (1984 * 12 + 2);
+                    let br = mod(2 + ser, 12); if (o.southern) br = mod(br + 6, 12);
+                    const mp = makePillar(mod(2 + ser, 10), br);
+                    mp.tenGod = tenGod(dayP.stem, mp.stem);
+                    const n = gm === 12 ? term(gy + 1, 1, monthType) : term(gy, gm + 1, monthType);
+                    out.push({ pillar: mp, term: termName(gm, monthType), start: fromMin(s), end: fromMin(n), startMin: s });
+                }
+                return out.sort((x, y) => x.startMin - y.startMin);
+            },
             warnings
         };
     }

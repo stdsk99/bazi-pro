@@ -320,6 +320,9 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
 .pred { display: grid; gap: 0; }
 .badge { font-size: .72rem; font-weight: 500; background: var(--warn-wash); color: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
+.msec { margin-top: 22px; }
+.mluck ol { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+@media (max-width: 760px) { .mluck ol { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
 #printView { display: none; }
 @media print {
@@ -460,6 +463,12 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
       <div class="luck"><ol id="years"></ol></div>
     </section>
     <section class="panel ldetail" id="yearDetail" aria-live="polite"></section>
+    <section aria-labelledby="h-month" class="msec">
+      <h2 id="h-month">เดือนจร 流月 <span id="mYear"></span></h2>
+      <p class="sub">เดือนจรเริ่มที่สารทเปลี่ยนเดือน กดเดือนที่ต้องการดู</p>
+      <div class="luck mluck"><ol id="months"></ol></div>
+    </section>
+    <section class="panel ldetail" id="monthDetail" aria-live="polite"></section>
   </div>
 
   <footer>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
@@ -826,6 +835,21 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
                     out.push({ year: y, pillar: ap, start: fromMin(yearStart(y)), end: fromMin(yearStart(y + 1)), age: y - Y });
                 }
                 return out;
+            },
+            // เดือนจร: เดือนที่เริ่ม (ที่สารทเปลี่ยนเดือน) ภายในปีจร Y
+            monthly: (Yr) => {
+                const a = yearStart(Yr), b = yearStart(Yr + 1), out = [];
+                for (let gy = Yr - 1; gy <= Yr + 1; gy++) for (let gm = 1; gm <= 12; gm++) {
+                    const s = term(gy, gm, monthType);
+                    if (s < a || s >= b) continue;
+                    const ser = gy * 12 + gm - (1984 * 12 + 2);
+                    let br = mod(2 + ser, 12); if (o.southern) br = mod(br + 6, 12);
+                    const mp = makePillar(mod(2 + ser, 10), br);
+                    mp.tenGod = tenGod(dayP.stem, mp.stem);
+                    const n = gm === 12 ? term(gy + 1, 1, monthType) : term(gy, gm + 1, monthType);
+                    out.push({ pillar: mp, term: termName(gm, monthType), start: fromMin(s), end: fromMin(n), startMin: s });
+                }
+                return out.sort((x, y) => x.startMin - y.startMin);
             },
             warnings
         };
@@ -1718,8 +1742,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         const judge = (e, st) => favE(e, st) && !unfE(e, st) ? 1 : unfE(e, st) && !favE(e, st) ? -1 : 0;
         const sEl = B.STEM_ELEMENT[tp.stem], bEl = B.BRANCH_ELEMENT[tp.branch], bMain = tp.hidden[0].stem;
         const a = judge(sEl, tp.stem), b = judge(bEl, bMain), sum = a + b;
-        const what = kind === 'luck' ? 'ช่วงนี้' : 'ปีนี้';
-        const half = kind === 'luck' ? ['5 ปีแรก', '5 ปีหลัง'] : ['ครึ่งปีแรก', 'ครึ่งปีหลัง'];
+        const what = kind === 'luck' ? 'ช่วงนี้' : kind === 'month' ? 'เดือนนี้' : 'ปีนี้';
+        const half = kind === 'luck' ? ['5 ปีแรก', '5 ปีหลัง'] : kind === 'month' ? ['ครึ่งเดือนแรก', 'ครึ่งเดือนหลัง'] : ['ครึ่งปีแรก', 'ครึ่งปีหลัง'];
         const out = [];
         const overall = sum >= 2 ? `${what}เป็นช่วงที่ส่งเสริมคุณ ทั้ง${half[0]}และ${half[1]}ได้ธาตุที่ช่วยเสริมดวง` : sum <= -2 ? `${what}เป็นช่วงที่ต้องระวัง ทั้ง${half[0]}และ${half[1]}เป็นธาตุที่ดวงไม่ต้องการ ควรตั้งรับมากกว่ารุก`
             : a > b ? `${what}เริ่มต้นดี ${half[0]}ได้แรงหนุน แต่ ${half[1]}ต้องระวังมากขึ้น` : b > a ? `${what}เริ่มต้นช้า ${half[0]}ต้องอดทน แล้ว ${half[1]}จะดีขึ้น` : `${what}มีทั้งเรื่องดีและเรื่องที่ต้องระวังพอๆ กัน`;
@@ -1735,11 +1759,11 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         };
         const seenG = new Set();
         const JW = (j) => j > 0 ? 'ให้คุณ' : j < 0 ? 'ให้โทษ' : 'ทั้งให้คุณและให้โทษ';
-        if (cS === cB) items.push([`${TRANSIT_GOD[cS].topic} (${kind === 'luck' ? 'ตลอดช่วง' : 'ตลอดปี'} · ${JW(Math.sign(a + b))})`, lineT(cS, Math.sign(a + b))]);
+        if (cS === cB) items.push([`${TRANSIT_GOD[cS].topic} (${kind === 'luck' ? 'ตลอดช่วง' : kind === 'month' ? 'ตลอดเดือน' : 'ตลอดปี'} · ${JW(Math.sign(a + b))})`, lineT(cS, Math.sign(a + b))]);
         else for (const [code, j, when] of [[cS, a, half[0]], [cB, b, half[1]]]) items.push([`${TRANSIT_GOD[code].topic} (${when} · ${JW(j)})`, lineT(code, j)]);
         out.push({ title: 'เรื่องที่เด่นขึ้น', text: '', items, source: `ราศีบน ${B.STEMS[tp.stem]} เป็น ${cS} · ราศีล่าง ${B.BRANCHES[tp.branch]} ราศีแฝงหลักเป็น ${cB}` });
         // เรื่องในชีวิตที่ถูกกระทบ
-        const PL = Object.assign({ luck: 'ช่วงวัยจรที่อยู่' }, PILLAR_PLAIN);
+        const PL = Object.assign({ luck: 'ช่วงวัยจรที่อยู่', yr: 'ปีจรนี้' }, PILLAR_PLAIN);
         const hit = [];
         for (const r of rels) {
             const o = listTh([...new Set(r.members.filter((m) => m.key !== focus).map((m) => PL[m.key]).filter(Boolean))]);
@@ -1877,7 +1901,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
   }
 
-  let luckSel = null, yearSel = null, readSel = null, buildPrint = null;
+  let luckSel = null, yearSel = null, monthSel = null, readSel = null, buildPrint = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${escH(b.sub)}</p>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ชง เฮ้ง ไห่ หรือผั่ว</p>';
@@ -2098,10 +2122,47 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, trans, 'yr'))}</div>
         <h3 class="rh">คำทำนายปีนี้ <span class="badge">ฉบับร่าง</span></h3>
         <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'year', BaziInteractions.withTransit(r, trans, 'yr'), 'yr'))}</div>`;
+      drawMonths(trans);
     };
+    // ---------- เดือนจร ----------
+    const MTH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const drawMonths = (trans) => {
+      const ms = r.monthly(yearSel), nowMin = Date.now();
+      const isNow = (x) => { const a = new Date(x.start.year, x.start.month - 1, x.start.day, x.start.hour, x.start.minute), b = new Date(x.end.year, x.end.month - 1, x.end.day, x.end.hour, x.end.minute); return a <= nowMin && nowMin < b; };
+      const curM = ms.findIndex(isNow);
+      if (monthSel == null || monthSel >= ms.length) monthSel = curM >= 0 ? curM : 0;
+      $('mYear').textContent = `ปี ${yearSel}`;
+      $('months').innerHTML = ms.map((x, i) => {
+        const q = x.pillar, rt = RATE(rateOf(q).sum);
+        return `<li class="${i === curM ? 'now' : ''}${i === monthSel ? ' sel' : ''}"><button type="button" data-m="${i}" aria-pressed="${i === monthSel}">
+          <span class="age">${x.start.day} ${MTH[x.start.month - 1]} ${x.start.year}</span>
+          <span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>
+          <span class="date">เดือน${q.animal}</span>
+          <span class="rate ${rt[0]}">${rt[1]}</span>
+          ${i === curM ? '<span class="tag">เดือนนี้</span>' : ''}</button></li>`;
+      }).join('');
+      const x = ms[monthSel], q = x.pillar, rr = rateOf(q), rt = RATE(rr.sum), bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
+      const tm = trans.concat([{ key: 'mo', label: 'เดือนจร', stem: q.stem, branch: q.branch }]);
+      const rels = BaziInteractions.withTransit(r, tm, 'mo');
+      $('monthDetail').innerHTML = `
+        <h2>เดือน${q.animal} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>${x.term.th} ${x.term.zh} · ${x.start.day}/${x.start.month}/${x.start.year} – ${x.end.day}/${x.end.month}/${x.end.year}</small></h2>
+        <div class="lgrid">
+          <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
+          <div class="lrows">
+            <div class="lrow"><span class="k">ราศีบน</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(rr.a)}</span></div>
+            <div class="lrow"><span class="k">ราศีล่าง</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(rr.b)}</span></div>
+          </div>
+        </div>
+        <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
+        <h3 class="rh">ความสัมพันธ์กับดวงเดิม วัยจร และปีจร</h3>
+        <div class="rels">${relHTML(rels)}</div>
+        <h3 class="rh">คำทำนายเดือนนี้ <span class="badge">ฉบับร่าง</span></h3>
+        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'month', rels, 'mo'))}</div>`;
+    };
+    $('months').onclick = (ev) => { const b = ev.target.closest('button[data-m]'); if (!b) return; monthSel = Number(b.dataset.m); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('monthDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     drawYears();
-    $('years').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('yearDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
-    $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); };
+    $('years').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); monthSel = null; drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('yearDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); monthSel = null; drawYears(); };
 
     $('natalRels').innerHTML = relHTML(BaziInteractions.natal(r));
     $('basis').innerHTML = BaziNarrative.summary(r, an, BaziInteractions.natal(r)).map((x) => `<div class="bitem"><dt>${x.label}</dt><dd>${x.text}${x.more && x.more.length ? `<details class="more"><summary>อ่านเพิ่ม</summary><dl>${x.more.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>` : ''}<span class="src">ที่มา: ${x.source}</span></dd></div>`).join('');
@@ -2141,7 +2202,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('readNav').onclick = (ev) => { const bt = ev.target.closest('button[data-r]'); if (!bt) return; readSel = bt.dataset.r; drawRead(); };
   }
 
-  $('f').addEventListener('submit', (e) => { e.preventDefault(); luckSel = null; yearSel = null; render(); setForm(false); });
+  $('f').addEventListener('submit', (e) => { e.preventDefault(); luckSel = null; yearSel = null; monthSel = null; render(); setForm(false); });
   ['date', 'time', 'place', 'yearChange', 'ziHour', 'luckMethod', 'monthSystem', 'solar', 'preg', 'gM', 'gF'].forEach((id) => $(id).addEventListener('change', render));
   render();
   setForm(false);

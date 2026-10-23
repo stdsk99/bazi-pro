@@ -93,5 +93,7 @@ eq('ประโยคเฉพาะผู้ชายแสดงเฉพา�
 
 eq('ปีจรแยกสิบเทพ (ปี 丙午 ดิถี 庚 ผู้หญิง)', (() => { const r = calc(1990, 1, 15, 10, 30, 'F'), y = r.annual(2026, 2026)[0]; const t = N.transit(r, An.analyze(r), y.pillar, 'year', [], 'year2').find((b) => b.title === 'เรื่องที่เด่นขึ้น'); return [t.items[0][0].startsWith('อำนาจ การแข่งขัน'), t.items[1][1].includes('สำหรับผู้หญิง')]; })(), [true, true]);
 
+eq('เดือนจรปี 2026 (เปลี่ยนปีที่ลิบชุง) 庚寅..辛丑 12 เดือน', (() => { const r = calc(1990, 1, 15, 10, 30, 'M', { yearChange: 'lichun' }); const ms = r.monthly(2026); return [ms.length, ms[0].pillar.zh, ms[11].pillar.zh]; })(), [12, '庚寅', '辛丑']);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
