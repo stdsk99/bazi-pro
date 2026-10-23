@@ -269,6 +269,23 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .dc { background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); font-weight: 500; white-space: nowrap; min-height: 40px; padding: 6px 12px; }
 .dc .han { font-family: var(--f-han); font-weight: 700; }
 .dc.sel { background: var(--jade); color: var(--sheet); border-color: var(--jade); }
+
+/* คำทำนาย */
+.ritems { grid-template-columns: max-content 1fr; gap: 4px 14px; }
+.ritems dt { color: var(--ink-soft); }
+.ritems dd { color: var(--ink); }
+@media (max-width: 600px) { .ritems { grid-template-columns: 1fr; gap: 0; } .ritems dd { margin-bottom: 6px; } }
+.draft { background: var(--warn-wash); color: var(--warn); border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
+.reading { display: grid; gap: 16px; }
+.rsec h2 { font-size: 1.2rem; margin-bottom: 12px; }
+.rblock { padding: 2px 0 12px; border-bottom: 1px solid var(--rule); margin-bottom: 12px; max-width: 72ch; }
+.rblock:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 0; }
+.rblock p { margin: 0; font-size: 1.02rem; line-height: 1.8; color: var(--ink); }
+.rblock .src { font-size: .82rem; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
+.rblock h3 { font-size: 1rem; margin: 0 0 4px; }
+.rblock.el { border-radius: 10px; padding: 10px 14px; border-bottom: 0; }
+.rblock.el p, .rblock.el h3 { color: var(--ink); }
+.rblock.el h3 { color: inherit; }
 </style>
 
 <div class="wrap">
@@ -317,6 +334,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
   <nav class="tabs" role="tablist" aria-label="เมนู">
     <button type="button" role="tab" id="t-chart" data-page="chart" aria-controls="p-chart">ผังดวง</button>
     <button type="button" role="tab" id="t-analysis" data-page="analysis" aria-controls="p-analysis">วิเคราะห์ดวง</button>
+    <button type="button" role="tab" id="t-read" data-page="read" aria-controls="p-read">คำทำนาย</button>
     <button type="button" role="tab" id="t-luck" data-page="luck" aria-controls="p-luck">วัยจร</button>
     <button type="button" role="tab" id="t-year" data-page="year" aria-controls="p-year">ปีจร</button>
   </nav>
@@ -356,6 +374,11 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     </section>
   </div>
 
+  <div class="page" id="p-read" role="tabpanel" aria-labelledby="t-read" hidden>
+    <div class="draft">ฉบับร่าง · ข้อความแม่แบบตามตำรามาตรฐาน รอผู้เชี่ยวชาญตรวจแก้ · ทุกย่อหน้าบอกที่มาในดวง</div>
+    <div id="reading" class="reading"></div>
+  </div>
+
   <div class="page" id="p-luck" role="tabpanel" aria-labelledby="t-luck" hidden>
     <section aria-labelledby="h-luck">
       <h2 id="h-luck">วัยจร 大运</h2>
@@ -383,6 +406,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 <script src="js/analysis-tables.js"></script>
 <script src="js/analysis.js"></script>
 <script src="js/interactions.js"></script>
+<script src="js/narrative.js"></script>
 <script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
@@ -405,7 +429,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('edit').setAttribute('aria-expanded', String(open));
   }
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
-  const PAGES = ['chart', 'analysis', 'luck', 'year'];
+  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year'];
   function show(pg) {
     if (!PAGES.includes(pg)) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
@@ -610,6 +634,11 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); };
 
     $('natalRels').innerHTML = relHTML(BaziInteractions.natal(r));
+
+    // ---------- คำทำนาย ----------
+    const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+    $('reading').innerHTML = BaziNarrative.natal(r, an).map((sec) => `<section class="panel rsec" id="r-${sec.id}"><h2>${esc(sec.title)}</h2>${sec.blocks.map((b) =>
+      `<div class="rblock${b.element != null ? ' el w' + b.element : ''}">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.items ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : `<p>${esc(b.text)}</p>`}${b.source ? `<p class="src">ที่มา: ${esc(b.source)}</p>` : ''}</div>`).join('')}</section>`).join('');
   }
 
   $('f').addEventListener('submit', (e) => { e.preventDefault(); luckSel = null; yearSel = null; render(); setForm(false); });
