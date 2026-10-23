@@ -91,5 +91,7 @@ eq('หลักปีและหลักยามแยกตามสิบ�
 
 eq('ประโยคเฉพาะผู้ชายแสดงเฉพาะดวงผู้ชาย', ['M', 'F'].map((g) => { const r = calc(1990, 1, 15, 10, 30, g); return N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks[3].items[1][1].includes('สำหรับผู้ชาย'); }), [true, false]);
 
+eq('ปีจรแยกสิบเทพ (ปี 丙午 ดิถี 庚 ผู้หญิง)', (() => { const r = calc(1990, 1, 15, 10, 30, 'F'), y = r.annual(2026, 2026)[0]; const t = N.transit(r, An.analyze(r), y.pillar, 'year', [], 'year2').find((b) => b.title === 'เรื่องที่เด่นขึ้น'); return [t.items[0][0].startsWith('อำนาจ การแข่งขัน'), t.items[1][1].includes('สำหรับผู้หญิง')]; })(), [true, true]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
