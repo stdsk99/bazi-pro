@@ -87,5 +87,7 @@ eq('วังคู่ครองแยกสิบเทพ 10 ตัว', (()
 
 eq('หลักเดือนแยกราศีบน/ล่างตามสิบเทพ', (() => { const r = calc(1990, 1, 15, 10, 30); const b = N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks[1]; return b.items[0][1].startsWith('มีระเบียบ') && b.items[1][1].startsWith('แม่คอยดูแล'); })(), true);
 
+eq('หลักปีและหลักยามแยกตามสิบเทพ', (() => { const r = calc(1990, 1, 15, 10, 30); const bl = N.natal(r, An.analyze(r), I.natal(r)).find((x) => x.id === 'stages').blocks; return [bl[0].items[1][1].startsWith('แม่หรือผู้ใหญ่ฝ่ายหญิง'), bl[3].items[1][1].startsWith('ลูกหลานเข้มแข็ง')]; })(), [true, true]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
