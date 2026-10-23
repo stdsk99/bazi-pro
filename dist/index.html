@@ -332,11 +332,12 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="f"><label class="label" for="luckMethod">วิธีคิดอายุเริ่มวัยจร</label>
           <select id="luckMethod"><option value="standard">นับจากวันเปลี่ยนปี (ค่าตั้งต้น)</option><option value="academic">นับจากวันเกิด ตามตำรา</option><option value="proportional">สัดส่วนช่วงเดือน นับละเอียดเป็นวัน</option></select></div>
         <div class="f"><label class="label" for="monthSystem">ระบบเดือนและยาม</label>
-          <select id="monthSystem"><option value="standard">มาตรฐาน (เปลี่ยนเดือนที่ 节)</option><option value="zhongqi">เปลี่ยนเดือนที่ 中气</option></select></div>
+          <select id="monthSystem"><option value="standard">มาตรฐาน: เปลี่ยนเดือนที่สารทต้นเดือน 节 (ค่าตั้งต้น)</option><option value="zhongqi">เปลี่ยนเดือนที่สารทกลางเดือน 中气</option></select></div>
         <div class="f"><label class="label" for="solar">เวลาที่ใช้คำนวณ</label>
           <select id="solar"><option value="0">เวลามาตรฐาน (ค่าตั้งต้น)</option><option value="1">เวลาเทียบกับพระอาทิตย์</option></select></div>
         <div class="f"><label class="label" for="preg">จำนวนเดือนตั้งครรภ์ (หลักปฏิสนธิ)</label><input id="preg" type="number" min="7" max="11" value="9"></div>
       </div>
+      <p class="note">สารทต้นเดือน (节 เจี๋ย) เช่น ลิบชุน 立春 ~4 ก.พ. ใช้เป็นจุดเริ่มเดือนตามตำรามาตรฐาน · สารทกลางเดือน (中气 จงชี่) เช่น อู๋จุ้ย 雨水 ~19 ก.พ. ใช้ในบางสำนัก</p>
       <p class="note">สถานที่เกิดมีผลเฉพาะเมื่อเลือก "เวลาเทียบกับพระอาทิตย์" ทุกจังหวัดใช้เวลามาตรฐานไทย UTC+7</p>
     </details>
   </form>
