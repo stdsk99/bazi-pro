@@ -1,0 +1,887 @@
+<title>ผังดวงสี่เสา</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+SC:wght@500;700&display=swap">
+<style>
+/* Layout: แถบกรอกข้อมูลด้านบน → ผังเสาเรียงแบบตำราจีน (ปีอยู่ขวาสุด) → ธาตุ → วัยจรเป็นแถบเวลา */
+:root {
+  --paper: #f2f3ee;      /* กระดาษสีหยกอ่อน */
+  --sheet: #fbfcf8;
+  --ink: #1c2420;
+  --ink-soft: #55615b;
+  --rule: #d4d9d0;
+  --jade: #1f5e57;       /* สีหลัก */
+  --jade-wash: #e1ece8;
+  --warn: #8a5a00; --warn-wash: #fbf0d9;
+  --wood: #2f7d3b; --fire: #b8352a; --earth: #9a6b12; --metal: #6b7378; --water: #1f5f9e;
+  --f-han: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  --f-body: "IBM Plex Sans Thai", "Sarabun", "Leelawadee UI", system-ui, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #121715; --sheet: #19201d; --ink: #e6ebe7; --ink-soft: #9aa7a0; --rule: #2c3631;
+  --jade: #6fc0b2; --jade-wash: #1d3330; --warn: #f0c060; --warn-wash: #33290f;
+  --wood: #6cc27a; --fire: #ef7a6d; --earth: #d9a94a; --metal: #a9b2b7; --water: #6aa8e6; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #121715; --sheet: #19201d; --ink: #e6ebe7; --ink-soft: #9aa7a0; --rule: #2c3631;
+  --jade: #6fc0b2; --jade-wash: #1d3330; --warn: #f0c060; --warn-wash: #33290f;
+  --wood: #6cc27a; --fire: #ef7a6d; --earth: #d9a94a; --metal: #a9b2b7; --water: #6aa8e6; color-scheme: dark }
+
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.55; }
+.wrap > * { min-width: 0; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 22px; }
+h1 { font-size: 1.5rem; margin: 0; font-weight: 600; text-wrap: balance; }
+h1 .han { font-family: var(--f-han); color: var(--jade); margin-right: .35em; }
+h2 { font-size: 1.05rem; margin: 0 0 10px; font-weight: 600; text-wrap: balance; }
+.sub { color: var(--ink-soft); margin: 4px 0 0; font-size: .92rem; }
+.label { font-size: .75rem; letter-spacing: .04em; color: var(--ink-soft); }
+.mono { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+
+/* ฟอร์ม */
+form { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; display: grid; gap: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+.f { display: grid; gap: 4px; min-width: 0; }
+input, select { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 7px 9px; }
+input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--jade); outline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.seg label { padding: 7px 14px; cursor: pointer; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label:has(input:checked) { background: var(--jade); color: var(--sheet); }
+.seg label:has(input:focus-visible) { outline: 2px solid var(--jade); outline-offset: -2px; }
+button { font: inherit; font-weight: 600; background: var(--jade); color: var(--sheet); border: 0; border-radius: 6px; padding: 8px 18px; cursor: pointer; }
+details summary { cursor: pointer; color: var(--jade); font-weight: 500; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 12px; }
+.note { font-size: .82rem; color: var(--ink-soft); }
+
+/* ผังเสา */
+.chart { overflow-x: auto; }
+.pillars { display: grid; grid-template-columns: repeat(6, minmax(92px, 1fr)); min-width: 600px; border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); }
+.col { display: grid; grid-template-rows: auto auto auto auto 1fr; justify-items: center; padding: 12px 6px 14px; gap: 6px; text-align: center; border-left: 1px solid var(--rule); }
+.col:first-child { border-left: 0; }
+.col.extra { background: var(--paper); }
+.col.dm .stem .han { text-decoration: underline 2px var(--jade); text-underline-offset: 6px; }
+.col h3 { margin: 0; font-size: .8rem; font-weight: 500; color: var(--ink-soft); }
+.god { font-size: .72rem; color: var(--jade); min-height: 1.2em; }
+.glyph { display: grid; justify-items: center; line-height: 1.15; }
+.glyph .han { font-family: var(--f-han); font-size: 2.3rem; font-weight: 700; }
+.glyph .th { font-size: .78rem; color: var(--ink-soft); }
+.hidden-stems { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; align-content: start; }
+.chip { font-size: .72rem; border: 1px solid var(--rule); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+.chip .han { font-family: var(--f-han); font-weight: 700; }
+.e0 { color: var(--wood) } .e1 { color: var(--fire) } .e2 { color: var(--earth) } .e3 { color: var(--metal) } .e4 { color: var(--water) }
+
+/* สรุป */
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.panel { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 0; }
+dt { color: var(--ink-soft); font-size: .88rem; } dd { margin: 0; }
+.bars { display: grid; gap: 7px; }
+.bar { display: grid; grid-template-columns: 3em 1fr 1.5em; gap: 8px; align-items: center; font-size: .88rem; }
+.track { height: 10px; background: var(--paper); border-radius: 5px; overflow: hidden; border: 1px solid var(--rule); }
+.fill { height: 100%; background: currentColor; }
+.warns { display: grid; gap: 8px; }
+.warn { background: var(--warn-wash); color: var(--warn); border-radius: 8px; padding: 8px 12px; font-size: .88rem; }
+
+/* วัยจร */
+.luck { overflow-x: auto; padding-bottom: 4px; }
+.luck ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(10, minmax(96px, 1fr)); min-width: 960px; border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); }
+.luck li { padding: 10px 6px 12px; text-align: center; border-left: 1px solid var(--rule); display: grid; gap: 3px; justify-items: center; }
+.luck li:first-child { border-left: 0; }
+.luck li.now { background: var(--jade-wash); }
+.luck .han { font-family: var(--f-han); font-size: 1.45rem; font-weight: 700; line-height: 1.2; }
+.luck .age { font-size: .82rem; font-weight: 600; }
+.luck .date { font-size: .72rem; color: var(--ink-soft); }
+.tag { font-size: .7rem; background: var(--jade); color: var(--sheet); border-radius: 999px; padding: 0 7px; }
+.example { font-size: .75rem; color: var(--jade); border: 1px solid var(--jade); border-radius: 999px; padding: 1px 8px; margin-left: 8px; vertical-align: middle; }
+footer { color: var(--ink-soft); font-size: .8rem; }
+@media (prefers-reduced-motion: no-preference) { .fill { transition: width .3s ease; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><span class="han">四柱八字</span>ผังดวงสี่เสา</h1>
+    <p class="sub">ชั้นคำนวณรุ่นแรก ใช้ค่าตั้งต้นตามระบบที่ตกลงกันไว้</p>
+  </header>
+
+  <form id="f" autocomplete="off">
+    <div class="row">
+      <div class="f"><label class="label" for="name">ชื่อ</label><input id="name" value="ตัวอย่าง" size="12"></div>
+      <div class="f"><label class="label" for="date">วันเกิด (ค.ศ.)</label><input id="date" type="date" value="1990-01-15" min="1601-01-01" max="2099-12-31"></div>
+      <div class="f"><label class="label" for="time">เวลาเกิด</label><input id="time" type="time" value="10:30"></div>
+      <div class="f"><span class="label">เพศ</span>
+        <div class="seg" role="radiogroup" aria-label="เพศ">
+          <label><input type="radio" name="g" id="gM" value="M" checked>ชาย</label>
+          <label><input type="radio" name="g" id="gF" value="F">หญิง</label>
+        </div></div>
+      <div class="f"><label class="label" for="place">สถานที่เกิด</label><select id="place"></select></div>
+      <button type="submit">ผูกดวง</button>
+    </div>
+    <details id="more">
+      <summary>ตัวเลือกการคำนวณ</summary>
+      <div class="opts">
+        <div class="f"><label class="label" for="yearChange">เปลี่ยนปีที่</label>
+          <select id="yearChange"><option value="winterSolstice">ตังจี่ 冬至 ~22 ธ.ค. (ค่าตั้งต้น)</option><option value="lichun">ลิบชุน 立春 ~4 ก.พ.</option><option value="summerSolstice">แฮ่จี่ 夏至 ~21 มิ.ย.</option></select></div>
+        <div class="f"><label class="label" for="ziHour">ยามจื้อ (23.00–24.00 น.)</label>
+          <select id="ziHour"><option value="midnight">วันเปลี่ยน 24.00 น. (ค่าตั้งต้น)</option><option value="at23">วันเปลี่ยน 23.00 น.</option></select></div>
+        <div class="f"><label class="label" for="luckMethod">วิธีคิดอายุเริ่มวัยจร</label>
+          <select id="luckMethod"><option value="standard">มาตรฐาน (ค่าตั้งต้น)</option><option value="academic">วิชาการ</option><option value="proportional">สัดส่วนช่วงเดือน (นับเป็นวัน)</option></select></div>
+        <div class="f"><label class="label" for="monthSystem">ระบบเดือนและยาม</label>
+          <select id="monthSystem"><option value="standard">มาตรฐาน (เปลี่ยนเดือนที่ 节)</option><option value="zhongqi">เปลี่ยนเดือนที่ 中气</option></select></div>
+        <div class="f"><label class="label" for="solar">เวลาที่ใช้คำนวณ</label>
+          <select id="solar"><option value="0">เวลามาตรฐาน (ค่าตั้งต้น)</option><option value="1">เวลาเทียบกับพระอาทิตย์</option></select></div>
+        <div class="f"><label class="label" for="preg">จำนวนเดือนตั้งครรภ์ (หลักปฏิสนธิ)</label><input id="preg" type="number" min="7" max="11" value="9"></div>
+      </div>
+      <p class="note">สถานที่เกิดมีผลเฉพาะเมื่อเลือก "เวลาเทียบกับพระอาทิตย์" ทุกจังหวัดใช้เวลามาตรฐานไทย UTC+7</p>
+    </details>
+  </form>
+
+  <section aria-labelledby="h-chart">
+    <h2 id="h-chart">ผังดวง <span id="who"></span></h2>
+    <div class="chart"><div class="pillars" id="pillars"></div></div>
+  </section>
+
+  <section class="summary">
+    <div class="panel">
+      <h2>ข้อมูลการคำนวณ</h2>
+      <dl id="facts"></dl>
+    </div>
+    <div class="panel">
+      <h2>ธาตุใน 8 อักษร</h2>
+      <div class="bars" id="bars"></div>
+      <p class="note">นับก้านและกิ่งของ 4 เสาหลักแบบหนึ่งตัวต่อหนึ่งคะแนน ยังไม่ถ่วงน้ำหนักตามฤดูและราศีแฝง</p>
+    </div>
+    <div class="panel">
+      <h2>วิเคราะห์โครงสร้างดวง</h2>
+      <dl id="ana"></dl>
+      <p class="note">ยังไม่รวมการแปรธาตุจากการรวม/ชง</p>
+    </div>
+    <div class="panel" id="warnPanel">
+      <h2>ข้อควรระวัง</h2>
+      <div class="warns" id="warns"></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-luck">
+    <h2 id="h-luck">วัยจร 大运</h2>
+    <p class="sub" id="luckInfo"></p>
+    <div class="luck"><ol id="luck"></ol></div>
+  </section>
+
+  <footer>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
+</div>
+
+<script>
+// astro.js — ดาราศาสตร์ที่จำเป็นสำหรับการผูกดวง
+// - Julian Day / ปฏิทินเกรกอเรียน
+// - ΔT (TT − UT) สูตร Espenak–Meeus
+// - ลองจิจูดปรากฏของดวงอาทิตย์ (VSOP87 แบบย่อของ Meeus + nutation + aberration)
+// - เวลาเกิดสารท 24 (节气) และสมการเวลา (Equation of Time)
+// ใช้ได้ทั้งในเบราว์เซอร์ (window.BaziAstro) และ Node (require)
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory();
+    else root.BaziAstro = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+    'use strict';
+    const D2R = Math.PI / 180;
+    const norm360 = (x) => ((x % 360) + 360) % 360;
+
+    // ---------- ปฏิทิน ----------
+    // JD จากวันเวลา (ปฏิทินเกรกอเรียนตั้งแต่ 15 ต.ค. 1582, ก่อนนั้นจูเลียน)
+    function toJD(y, m, d, h = 0, mi = 0, s = 0) {
+        let Y = y, M = m;
+        if (M <= 2) { Y -= 1; M += 12; }
+        const greg = (y > 1582) || (y === 1582 && (m > 10 || (m === 10 && d >= 15)));
+        const A = Math.floor(Y / 100);
+        const B = greg ? 2 - A + Math.floor(A / 4) : 0;
+        return Math.floor(365.25 * (Y + 4716)) + Math.floor(30.6001 * (M + 1)) + d + B - 1524.5
+            + (h + mi / 60 + s / 3600) / 24;
+    }
+    // วันเวลาจาก JD (คืนค่าเป็นนาทีเต็ม ปัดเศษวินาที)
+    function fromJD(jd) {
+        const z0 = jd + 0.5 + 0.5 / 1440;            // ปัดเป็นนาทีที่ใกล้ที่สุด
+        const Z = Math.floor(z0), F = z0 - Z;
+        let A = Z;
+        if (Z >= 2299161) { const al = Math.floor((Z - 1867216.25) / 36524.25); A = Z + 1 + al - Math.floor(al / 4); }
+        const B = A + 1524, C = Math.floor((B - 122.1) / 365.25), D = Math.floor(365.25 * C), E = Math.floor((B - D) / 30.6001);
+        const day = B - D - Math.floor(30.6001 * E);
+        const month = E < 14 ? E - 1 : E - 13;
+        const year = month > 2 ? C - 4716 : C - 4715;
+        const mins = Math.floor(F * 1440);
+        return { year, month, day, hour: Math.floor(mins / 60), minute: mins % 60 };
+    }
+    const roundMinute = (jd) => Math.round((jd + 0.5) * 1440) / 1440 - 0.5;
+
+    // ---------- ΔT (วินาที) ----------
+    function deltaT(year) {
+        const y = year;
+        let t, u;
+        if (y < 500) { u = y / 100; return 10583.6 - 1014.41 * u + 33.78311 * u ** 2 - 5.952053 * u ** 3 - 0.1798452 * u ** 4 + 0.022174192 * u ** 5 + 0.0090316521 * u ** 6; }
+        if (y < 1600) { u = (y - 1000) / 100; return 1574.2 - 556.01 * u + 71.23472 * u ** 2 + 0.319781 * u ** 3 - 0.8503463 * u ** 4 - 0.005050998 * u ** 5 + 0.0083572073 * u ** 6; }
+        if (y < 1700) { t = y - 1600; return 120 - 0.9808 * t - 0.01532 * t ** 2 + t ** 3 / 7129; }
+        if (y < 1800) { t = y - 1700; return 8.83 + 0.1603 * t - 0.0059285 * t ** 2 + 0.00013336 * t ** 3 - t ** 4 / 1174000; }
+        if (y < 1860) { t = y - 1800; return 13.72 - 0.332447 * t + 0.0068612 * t ** 2 + 0.0041116 * t ** 3 - 0.00037436 * t ** 4 + 0.0000121272 * t ** 5 - 0.0000001699 * t ** 6 + 0.000000000875 * t ** 7; }
+        if (y < 1900) { t = y - 1860; return 7.62 + 0.5737 * t - 0.251754 * t ** 2 + 0.01680668 * t ** 3 - 0.0004473624 * t ** 4 + t ** 5 / 233174; }
+        if (y < 1920) { t = y - 1900; return -2.79 + 1.494119 * t - 0.0598939 * t ** 2 + 0.0061966 * t ** 3 - 0.000197 * t ** 4; }
+        if (y < 1941) { t = y - 1920; return 21.20 + 0.84493 * t - 0.076100 * t ** 2 + 0.0020936 * t ** 3; }
+        if (y < 1961) { t = y - 1950; return 29.07 + 0.407 * t - t ** 2 / 233 + t ** 3 / 2547; }
+        if (y < 1986) { t = y - 1975; return 45.45 + 1.067 * t - t ** 2 / 260 - t ** 3 / 718; }
+        if (y < 2005) { t = y - 2000; return 63.86 + 0.3345 * t - 0.060374 * t ** 2 + 0.0017275 * t ** 3 + 0.000651814 * t ** 4 + 0.00002373599 * t ** 5; }
+        if (y < 2050) { t = y - 2000; return 62.92 + 0.32217 * t + 0.005589 * t ** 2; }
+        if (y < 2150) { u = (y - 1820) / 100; return -20 + 32 * u * u - 0.5628 * (2150 - y); }
+        u = (y - 1820) / 100; return -20 + 32 * u * u;
+    }
+
+    // ---------- VSOP87 (โลก) แบบย่อ ตาม Meeus, Astronomical Algorithms ภาคผนวก III ----------
+    const L0 = [[175347046, 0, 0], [3341656, 4.6692568, 6283.07585], [34894, 4.6261, 12566.1517], [3497, 2.7441, 5753.3849], [3418, 2.8289, 3.5231], [3136, 3.6277, 77713.7715], [2676, 4.4181, 7860.4194], [2343, 6.1352, 3930.2097], [1324, 0.7425, 11506.7698], [1273, 2.0371, 529.691], [1199, 1.1096, 1577.3435], [990, 5.233, 5884.927], [902, 2.045, 26.298], [857, 3.508, 398.149], [780, 1.179, 5223.694], [753, 2.533, 5507.553], [505, 4.583, 18849.228], [492, 4.205, 775.523], [357, 2.92, 0.067], [317, 5.849, 11790.629], [284, 1.899, 796.298], [271, 0.315, 10977.079], [243, 0.345, 5486.778], [206, 4.806, 2544.314], [205, 1.869, 5573.143], [202, 2.458, 6069.777], [156, 0.833, 213.299], [132, 3.411, 2942.463], [126, 1.083, 20.775], [115, 0.645, 0.98], [103, 0.636, 4694.003], [102, 0.976, 15720.839], [102, 4.267, 7.114], [99, 6.21, 2146.17], [98, 0.68, 155.42], [86, 5.98, 161000.69], [85, 1.3, 6275.96], [85, 3.67, 71430.7], [80, 1.81, 17260.15], [79, 3.04, 12036.46], [75, 1.76, 5088.63], [74, 3.5, 3154.69], [74, 4.68, 801.82], [70, 0.83, 9437.76], [62, 3.98, 8827.39], [61, 1.82, 7084.9], [57, 2.78, 6286.6], [56, 4.39, 14143.5], [56, 3.47, 6279.55], [52, 0.19, 12139.55], [52, 1.33, 1748.02], [51, 0.28, 5856.48], [49, 0.49, 1194.45], [41, 5.37, 8429.24], [41, 2.4, 19651.05], [39, 6.17, 10447.39], [37, 6.04, 10213.29], [37, 2.57, 1059.38], [36, 1.71, 2352.87], [36, 1.78, 6812.77], [33, 0.59, 17789.85], [30, 0.44, 83996.85], [30, 2.74, 1349.87], [25, 3.16, 4690.48]];
+    const L1 = [[628331966747, 0, 0], [206059, 2.678235, 6283.07585], [4303, 2.6351, 12566.1517], [425, 1.59, 3.523], [119, 5.796, 26.298], [109, 2.966, 1577.344], [93, 2.59, 18849.23], [72, 1.14, 529.69], [68, 1.87, 398.15], [67, 4.41, 5507.55], [59, 2.89, 5223.69], [56, 2.17, 155.42], [45, 0.4, 796.3], [36, 0.47, 775.52], [29, 2.65, 7.11], [21, 5.34, 0.98], [19, 1.85, 5486.78], [19, 4.97, 213.3], [17, 2.99, 6275.96], [16, 0.03, 2544.31], [16, 1.43, 2146.17], [15, 1.21, 10977.08], [12, 2.83, 1748.02], [12, 3.26, 5088.63], [12, 5.27, 1194.45], [12, 2.08, 4694], [11, 0.77, 553.57], [10, 1.3, 6286.6], [10, 4.24, 1349.87], [9, 2.7, 242.73], [9, 5.64, 951.72], [8, 5.3, 2352.87], [6, 2.65, 9437.76], [6, 4.67, 4690.48]];
+    const L2 = [[52919, 0, 0], [8720, 1.0721, 6283.0758], [309, 0.867, 12566.152], [27, 0.05, 3.52], [16, 5.19, 26.3], [16, 3.68, 155.42], [10, 0.76, 18849.23], [9, 2.06, 77713.77], [7, 0.83, 775.52], [5, 4.66, 1577.34], [4, 1.03, 7.11], [4, 3.44, 5573.14], [3, 5.14, 796.3], [3, 6.05, 5507.55], [3, 1.19, 242.73], [3, 6.12, 529.69], [3, 0.31, 398.15], [3, 2.28, 553.57], [2, 4.38, 5223.69], [2, 3.75, 0.98]];
+    const L3 = [[289, 5.844, 6283.076], [35, 0, 0], [17, 5.49, 12566.15], [3, 5.2, 155.42], [1, 4.72, 3.52], [1, 5.3, 18849.23], [1, 5.97, 242.73]];
+    const L4 = [[114, 3.142, 0], [8, 4.13, 6283.08], [1, 3.84, 12566.15]];
+    const L5 = [[1, 3.14, 0]];
+    const B0 = [[280, 3.199, 84334.662], [102, 5.422, 5507.553], [80, 3.88, 5223.69], [44, 3.7, 2352.87], [32, 4, 1577.34]];
+    const B1 = [[9, 3.9, 5507.55], [6, 1.73, 5223.69]];
+    const R0 = [[100013989, 0, 0], [1670700, 3.0984635, 6283.07585], [13956, 3.05525, 12566.1517], [3084, 5.1985, 77713.7715], [1628, 1.1739, 5753.3849], [1576, 2.8469, 7860.4194], [925, 5.453, 11506.77], [542, 4.564, 3930.21], [472, 3.661, 5884.927]];
+    const R1 = [[103019, 1.10749, 6283.07585], [1721, 1.0644, 12566.1517], [702, 3.142, 0]];
+    const R2 = [[4359, 5.7846, 6283.0758], [124, 5.579, 12566.152]];
+    const sum = (tab, tau) => tab.reduce((s, [a, b, c]) => s + a * Math.cos(b + c * tau), 0);
+
+    // ลองจิจูดปรากฏของดวงอาทิตย์ (องศา) ที่ JDE (เวลา TT)
+    function sunApparentLongitude(jde) {
+        const tau = (jde - 2451545) / 365250, T = tau * 10;
+        const L = (sum(L0, tau) + sum(L1, tau) * tau + sum(L2, tau) * tau ** 2 + sum(L3, tau) * tau ** 3 + sum(L4, tau) * tau ** 4 + sum(L5, tau) * tau ** 5) / 1e8;
+        const R = (sum(R0, tau) + sum(R1, tau) * tau + sum(R2, tau) * tau ** 2) / 1e8;
+        let lon = norm360(L / D2R + 180);
+        lon -= 0.09033 / 3600;                                  // แปลงเข้า FK5
+        const om = (125.04452 - 1934.136261 * T) * D2R;
+        const Ls = (280.4665 + 36000.7698 * T) * D2R, Lm = (218.3165 + 481267.8813 * T) * D2R;
+        const dpsi = -17.20 * Math.sin(om) - 1.32 * Math.sin(2 * Ls) - 0.23 * Math.sin(2 * Lm) + 0.21 * Math.sin(2 * om);
+        lon += dpsi / 3600 - 20.4898 / 3600 / R;                // nutation + aberration
+        return { lon: norm360(lon), dpsi, T };
+    }
+
+    // ---------- สารท ----------
+    // ลองจิจูดของสารทในเดือนเกรกอเรียน m: type 0 = 节 (ต้นเดือน), 1 = 中气 (กลางเดือน)
+    const termLongitude = (m, type) => norm360(285 + (m - 1) * 30 + type * 15);
+
+    const cache = new Map();
+    // เวลาเกิดสารท (JD ตามเวลา UT)
+    function solarTermUT(year, month, type) {
+        const key = year * 100 + month * 2 + type;
+        if (cache.has(key)) return cache.get(key);
+        const target = termLongitude(month, type);
+        let jde = toJD(year, month, 6 + 15 * type, 0) + deltaT(year) / 86400;
+        for (let i = 0; i < 20; i++) {
+            const d = ((target - sunApparentLongitude(jde).lon + 540) % 360) - 180;
+            jde += d * 365.2422 / 360;
+            if (Math.abs(d) < 1e-7) break;
+        }
+        const ut = jde - deltaT(year + (month - 0.5) / 12) / 86400;
+        cache.set(key, ut);
+        return ut;
+    }
+
+    // สมการเวลา (นาที) = เวลาสุริยะปรากฏ − เวลาสุริยะเฉลี่ย ณ JD (UT)
+    function equationOfTime(jdUT) {
+        const jde = jdUT + deltaT(fromJD(jdUT).year) / 86400;
+        const { lon, dpsi, T } = sunApparentLongitude(jde);
+        const eps0 = 23.439291111 - 0.0130041667 * T - 1.6667e-7 * T * T + 5.02778e-7 * T ** 3;
+        const om = (125.04452 - 1934.136261 * T) * D2R;
+        const eps = (eps0 + 0.00256 * Math.cos(om)) * D2R;
+        const alpha = norm360(Math.atan2(Math.cos(eps) * Math.sin(lon * D2R), Math.cos(lon * D2R)) / D2R);
+        const L0m = norm360(280.4664567 + 360007.6982779 * (T / 10) + 0.03032028 * (T / 10) ** 2);
+        let E = L0m - 0.0057183 - alpha + (dpsi / 3600) * Math.cos(eps);
+        E = ((E + 540) % 360) - 180;
+        return E * 4;
+    }
+
+    return { toJD, fromJD, roundMinute, deltaT, sunApparentLongitude, termLongitude, solarTermUT, equationOfTime };
+});
+
+</script>
+<script>
+// bazi-core.js — ชั้นคำนวณดวงจีน (八字) : 6 เสา + วัยจร (大运)
+// ค่าตั้งต้นตามระบบที่ตกลงกันไว้
+// ต้องโหลด astro.js ก่อน (เบราว์เซอร์) หรือ require ใน Node
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./astro.js'));
+    else root.BaziCore = factory(root.BaziAstro);
+})(typeof self !== 'undefined' ? self : this, function (A) {
+    'use strict';
+
+    // ---------- ข้อมูลพื้นฐาน ----------
+    const STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+    const STEMS_TH = ['กะ', 'อิก', 'เปี้ย', 'เตง', 'โบ่ว', 'กี้', 'แก', 'ซิง', 'ยิ้ม', 'กุ่ย'];
+    const BRANCHES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+    const BRANCHES_TH = ['จื้อ', 'ทิ่ว', 'อี๊ง', 'เบ้า', 'ซิ้ง', 'จี๋', 'โง่ว', 'บี่', 'ซิน', 'อิ้ว', 'สุก', 'ไห'];
+    const ANIMALS_TH = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน'];
+    const ELEMENTS = ['ไม้', 'ไฟ', 'ดิน', 'ทอง', 'น้ำ'];
+    const STEM_ELEMENT = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4];
+    const BRANCH_ELEMENT = [4, 2, 0, 0, 2, 1, 1, 2, 3, 3, 2, 4];
+    // ราศีแฝง 藏干 (ตัวแรก = ปราณหลัก)
+    const HIDDEN_STEMS = [[9], [5, 9, 7], [0, 2, 4], [1], [4, 1, 9], [2, 4, 6], [3, 5], [5, 3, 1], [6, 8, 4], [7], [4, 7, 3], [8, 0]];
+    // ชื่อสารท ลำดับตามเดือนเกรกอเรียน: [节, 中气]
+    const TERMS = [
+        ['小寒', 'เสี่ยวฮั้ง'], ['大寒', 'ไต่ฮั้ง'], ['立春', 'ลิบชุง'], ['雨水', 'อู๋จุ้ย'], ['惊蛰', 'เก๋งเต็ก'], ['春分', 'ชุงฮุง'],
+        ['清明', 'เช็งเม้ง'], ['谷雨', 'ก๊อกฮู้'], ['立夏', 'ลิบแฮ่'], ['小满', 'เสียวมั่ว'], ['芒种', 'หมั่งเจ้ง'], ['夏至', 'แฮ่จี่'],
+        ['小暑', 'เสียวสู้'], ['大暑', 'ไต่สู้'], ['立秋', 'ลิบชิว'], ['处暑', 'ชู้สู้'], ['白露', 'แปะโหล่ว'], ['秋分', 'ชิวฮุง'],
+        ['寒露', 'ฮั่งโหล่ว'], ['霜降', 'ซึงกั่ง'], ['立冬', 'ลิบตัง'], ['小雪', 'เสียวเสาะ'], ['大雪', 'ไต่เสาะ'], ['冬至', 'ตังจี่']
+    ];
+    const termName = (m, type) => { const t = TERMS[(m - 1) * 2 + type]; return { zh: t[0], th: t[1] }; };
+
+    // สิบเทพ 十神 เทียบกับธาตุประจำตัว (ก้านวัน)
+    const TEN_GODS = {
+        '比肩': 'เพื่อนร่วมธาตุ', '劫财': 'คู่แข่งร่วมธาตุ', '食神': 'ผลงาน ความสุข', '伤官': 'ความคิด การแสดงออก',
+        '偏财': 'ลาภ ทรัพย์จร', '正财': 'ทรัพย์ประจำ', '七杀': 'แรงกดดัน อำนาจ', '正官': 'ตำแหน่ง ระเบียบ',
+        '偏印': 'ความรู้เฉพาะทาง', '正印': 'ผู้อุปถัมภ์ การเรียน'
+    };
+    function tenGod(dayStem, stem) {
+        const a = STEM_ELEMENT[dayStem], b = STEM_ELEMENT[stem], same = (dayStem % 2) === (stem % 2);
+        const rel = (b - a + 5) % 5; // 0 เดียวกัน, 1 เราให้กำเนิด, 2 เราข่ม, 3 ข่มเรา, 4 ให้กำเนิดเรา
+        const code = [['比肩', '劫财'], ['食神', '伤官'], ['偏财', '正财'], ['七杀', '正官'], ['偏印', '正印']][rel][same ? 0 : 1];
+        return { code, th: TEN_GODS[code] };
+    }
+
+    // ---------- ตัวเลือก (ค่าตั้งต้นตามระบบที่ตกลงกันไว้) ----------
+    const DEFAULT_OPTIONS = {
+        yearChange: 'winterSolstice', // 'lichun' 立春 ~4 ก.พ. | 'winterSolstice' 冬至 ~22 ธ.ค. (ค่าตั้งต้น) | 'summerSolstice' 夏至
+        monthSystem: 'standard',      // 'standard' เปลี่ยนเดือนที่ 节 | 'zhongqi' เปลี่ยนเดือนที่ 中气 และยามเริ่มชั่วโมงคู่
+        ziHour: 'midnight',           // 'midnight' วันเปลี่ยน 24.00 น. (ค่าตั้งต้น) | 'at23' วันเปลี่ยน 23.00 น.
+        trueSolarTime: false,         // true = ใช้เวลาสุริยะปรากฏ (ลองจิจูด + สมการเวลา)
+        luckMethod: 'standard',       // 'academic' วิชาการ | 'standard' มาตรฐาน (ค่าตั้งต้น) | 'proportional' เทียบสัดส่วนในช่วงเดือน นับละเอียดเป็นวัน
+        southern: false,              // ซีกโลกใต้: กิ่งเดือนเลื่อน 6
+        pregnancyMonths: 9            // ใช้คำนวณหลักปฏิสนธิ
+    };
+    const YC_INDEX = { lichun: 0, winterSolstice: 1, summerSolstice: 2 };
+    const YC_MONTH = [2, 12, 6];
+    const ADofY = 365.242191;
+
+    const mod = (n, m) => ((n % m) + m) % m;
+    const adjInt = (d) => { const i = Math.trunc(d); return d > i + 0.5 ? i + 1 : i; }; // ปัดเกินครึ่งขึ้น
+    const modX = (d, m) => mod(d, m);
+
+    function makePillar(stem, branch) {
+        return {
+            stem, branch,
+            zh: STEMS[stem] + BRANCHES[branch],
+            th: STEMS_TH[stem] + BRANCHES_TH[branch],
+            stemElement: ELEMENTS[STEM_ELEMENT[stem]], stemYang: stem % 2 === 0,
+            branchElement: ELEMENTS[BRANCH_ELEMENT[branch]], branchYang: branch % 2 === 0,
+            animal: ANIMALS_TH[branch],
+            hidden: HIDDEN_STEMS[branch].map((s) => ({ stem: s, zh: STEMS[s], th: STEMS_TH[s], element: ELEMENTS[STEM_ELEMENT[s]] }))
+        };
+    }
+
+    // ---------- คำนวณ ----------
+    // input: { year, month, day, hour, minute, gender: 'M'|'F', tz: 7, longitude: 100.5, options }
+    function calculate(input) {
+        const o = Object.assign({}, DEFAULT_OPTIONS, input.options || {});
+        // ระบบเปลี่ยนเดือนที่ 中气 บังคับเปลี่ยนปีที่ตังจี่และวันเปลี่ยน 24.00 น.
+        if (o.monthSystem === 'zhongqi') {
+            o.ziHour = 'midnight';
+            if (!o.southern || o.yearChange === 'lichun') o.yearChange = 'winterSolstice';
+        }
+        const tz = input.tz != null ? input.tz : 7;
+        const lng = input.longitude != null ? input.longitude : 100.5;
+        const yct = YC_INDEX[o.yearChange];
+        const monthType = o.monthSystem === 'zhongqi' ? 1 : 0;
+        const warnings = [];
+
+        // กรอบเวลาที่ใช้คำนวณ: เวลามาตรฐานท้องถิ่น หรือเวลาสุริยะ
+        // ทุกเวลาภายในเก็บเป็น "นาทีเต็ม" (จำนวนเต็ม) เพื่อให้เทียบเวลาที่ตรงนาทีเดียวกันได้แม่นยำ
+        const toMin = (jd) => Math.round((jd + 0.5) * 1440);
+        const fromMin = (mn) => A.fromJD(mn / 1440 - 0.5);
+        const local = A.toJD(input.year, input.month, input.day, input.hour, input.minute || 0);
+        let t = toMin(local), solarShiftMin = 0;
+        if (o.trueSolarTime) {
+            const lngSec = Math.trunc((lng - tz * 15) * 240);
+            const p = A.fromJD(local + lngSec / 86400);
+            const eotSec = Math.trunc(A.equationOfTime(A.toJD(p.year, p.month, p.day, 12)) * 60);
+            solarShiftMin = Math.floor((lngSec + eotSec) / 60);
+            t += solarShiftMin;
+        }
+        // เวลาสารทในกรอบเดียวกัน (ปัดเป็นนาที)
+        const term = (y, m, type) => {
+            const bj = toMin(A.solarTermUT(y, m, type) + 8 / 24);
+            return o.trueSolarTime ? bj + adjInt((lng - 120) * 4) : bj + Math.round((tz - 8) * 60);
+        };
+        const sd = fromMin(t); // วันเวลาในกรอบคำนวณ
+
+        // --- เสาปี ---
+        const yearStart = (Y) => yct === 0 ? term(Y, 2, 0) : yct === 1 ? term(Y - 1, 12, 1) : term(Y, 6, 1);
+        let Y = sd.year + 1;
+        while (t < yearStart(Y)) Y--;
+        const yIdx = mod(Y - 4, 60);
+        const yearP = makePillar(yIdx % 10, yIdx % 12);
+
+        // --- เสาเดือน ---
+        let my = sd.year, mm = sd.month;
+        if (t < term(my, mm, monthType)) { mm--; if (mm === 0) { mm = 12; my--; } }
+        const mSerial = my * 12 + mm - (1984 * 12 + 2);
+        let mBranch = mod(2 + mSerial, 12);
+        if (o.southern) mBranch = mod(mBranch + 6, 12);
+        const monthP = makePillar(mod(2 + mSerial, 10), mBranch);
+        const monthTermStart = term(my, mm, monthType);
+        const nm = mm === 12 ? [my + 1, 1] : [my, mm + 1];
+        const monthTermNext = term(nm[0], nm[1], monthType);
+
+        // --- เสาวัน ---
+        let dayJD = A.toJD(sd.year, sd.month, sd.day);
+        if (o.monthSystem === 'standard' && o.ziHour === 'at23' && sd.hour === 23) dayJD += 1;
+        const dIdx = mod(Math.floor(dayJD + 0.5) - 11, 60);
+        const dayP = makePillar(dIdx % 10, dIdx % 12);
+
+        // --- เสายาม ---
+        let hBranch, hStem;
+        if (o.monthSystem === 'standard') {
+            hBranch = Math.floor((sd.hour + 1) / 2) % 12;
+            hStem = mod(dayP.stem * 2 + hBranch + (sd.hour === 23 && o.ziHour === 'midnight' ? 2 : 0), 10);
+        } else {
+            hBranch = Math.min(Math.floor(sd.hour / 2), 11);
+            hStem = mod(dayP.stem * 2 + hBranch, 10);
+        }
+        const hourP = makePillar(hStem, hBranch);
+
+        // --- หลักปฏิสนธิ 胎元 และหลักลัคนา 命宫 ---
+        const pm = 9 - o.pregnancyMonths;
+        const conceptionP = makePillar(mod(monthP.stem + 1 + pm, 10), mod(monthP.branch + 3 + pm, 12));
+        const beforeMid = t < term(sd.year, sd.month, 1);
+        const lpBranch1 = mod((beforeMid ? 7 : 6) - sd.month - (hBranch + 1) - 1, 12) + 1; // 1..12
+        const lpStem1 = mod((yearP.stem + 1) * 2 + lpBranch1 - 2 - 1, 10) + 1;
+        const lifePalaceP = makePillar(lpStem1 - 1, lpBranch1 - 1);
+
+        // --- วัยจร 大运 ---
+        const male = (input.gender || 'M') === 'M';
+        const forward = ((male ? 0 : 1) + ((yearP.stem + 1) % 2)) === 1;
+        const prevM = sd.month === 1 ? [sd.year - 1, 12] : [sd.year, sd.month - 1];
+        const nextM = sd.month === 12 ? [sd.year + 1, 1] : [sd.year, sd.month + 1];
+        const T1 = term(prevM[0], prevM[1], monthType), T2 = term(sd.year, sd.month, monthType), T3 = term(nextM[0], nextM[1], monthType);
+        let d2, d3;
+        if (forward) { if (t < T2) { d2 = T2 - t; d3 = T2 - T1; } else { d2 = T3 - t; d3 = T3 - T2; } }
+        else { if (T2 < t) { d2 = t - T2; d3 = T3 - T2; } else { d2 = t - T1; d3 = T2 - T1; } }
+        d2 /= 1440; d3 /= 1440; // เป็นวัน
+        const ycOfBirthYear = yct === 0 ? term(sd.year, 2, 0) : yct === 1 ? term(sd.year - 1, 12, 1) : term(sd.year, 6, 1);
+        let takeAge, takeMonth = -1, takeDay = -1;
+        if (o.luckMethod !== 'proportional') {
+            let yrs = Math.trunc(d2 / 3), mos = Math.trunc((d2 - yrs * 3) * 4);
+            if (o.luckMethod === 'academic') {
+                mos += Math.trunc(modX((t - ycOfBirthYear) / 1440, ADofY) / (ADofY / 12));
+                if (mos > 12) { yrs++; mos = mod(mos - 1, 12) + 1; }
+            }
+            takeAge = yrs + 1; takeMonth = mos;
+        } else {
+            const d4 = d2 * 10 / d3;
+            let yrs = Math.trunc(d4);
+            let d6 = (t - ycOfBirthYear) / 1440 + (d4 - yrs) * ADofY;
+            if (d6 > ADofY) { yrs++; d6 -= ADofY; }
+            takeAge = yrs + 1; takeDay = Math.trunc(d6);
+        }
+        const ycType = yct === 0 ? 0 : 1, ycMonth = YC_MONTH[yct];
+        const luckStart = (k) => {
+            let Yk = sd.year + takeAge + 10 * k - 1 - (yct % 2);
+            if (o.luckMethod !== 'proportional') {
+                let M = ycMonth + takeMonth;
+                if (M > 12) { M -= 12; Yk++; }
+                return term(Yk, M, ycType);
+            }
+            return term(Yk, ycMonth, ycType) + takeDay * 1440;
+        };
+        const dir = forward ? 1 : -1;
+        const luck = [];
+        for (let k = 0; k < 10; k++) {
+            const s = luckStart(k), e = luckStart(k + 1), st = fromMin(s);
+            const p = makePillar(mod(monthP.stem + dir * (k + 1), 10), mod(monthP.branch + dir * (k + 1), 12));
+            p.tenGod = tenGod(dayP.stem, p.stem);
+            luck.push({ index: k + 1, pillar: p, start: st, end: fromMin(e), ageAtStart: ageBetween(sd, st) });
+        }
+
+        // --- คำเตือนเวลาใกล้รอยต่อ ---
+        const near = (a, b, mins) => Math.abs(a - b) < mins;
+        if (near(t, monthTermStart, 120) || near(t, monthTermNext, 120)) warnings.push('เกิดใกล้เวลาเปลี่ยนเดือน (ภายใน 2 ชั่วโมงของสารท) เสาเดือนอาจเปลี่ยนถ้าเวลาเกิดคลาดเคลื่อน');
+        if (near(t, yearStart(Y), 120) || near(t, yearStart(Y + 1), 120)) warnings.push('เกิดใกล้เวลาเปลี่ยนปี เสาปีอาจเปลี่ยนถ้าเวลาเกิดคลาดเคลื่อน');
+        const minOfDay = sd.hour * 60 + sd.minute;
+        const hourEdge = o.monthSystem === 'standard' ? (minOfDay + 60) % 120 : minOfDay % 120;
+        if (hourEdge < 10 || hourEdge > 110) warnings.push('เกิดใกล้เวลาเปลี่ยนยาม (ภายใน 10 นาที) เสายามอาจเปลี่ยนถ้าเวลาเกิดคลาดเคลื่อน');
+        if (o.monthSystem === 'standard' && sd.hour === 23) warnings.push('เกิดยามจื้อช่วง 23.00–24.00 น. ผลเสาวันขึ้นกับตัวเลือก "วันเปลี่ยน 23.00/24.00 น."');
+        if (input.year < 1920 && tz === 7) warnings.push('ก่อน 1 เม.ย. 2463 (ค.ศ. 1920) ประเทศไทยใช้เวลามาตรฐานกรุงเทพฯ UTC+6:42 ไม่ใช่ UTC+7');
+
+        const pillars = { conception: conceptionP, lifePalace: lifePalaceP, hour: hourP, day: dayP, month: monthP, year: yearP };
+        for (const k of Object.keys(pillars)) if (k !== 'day') pillars[k].tenGod = tenGod(dayP.stem, pillars[k].stem);
+        pillars.day.tenGod = { code: '日主', th: 'ตัวเจ้าชะตา' };
+        const counts = [0, 0, 0, 0, 0];
+        for (const k of ['year', 'month', 'day', 'hour']) { counts[STEM_ELEMENT[pillars[k].stem]]++; counts[BRANCH_ELEMENT[pillars[k].branch]]++; }
+
+        return {
+            input: Object.assign({}, input, { tz, longitude: lng }),
+            options: o,
+            calcTime: sd, solarShiftMinutes: solarShiftMin,
+            pillars,
+            dayMaster: { stem: dayP.stem, zh: STEMS[dayP.stem], th: STEMS_TH[dayP.stem], element: ELEMENTS[STEM_ELEMENT[dayP.stem]], yang: dayP.stem % 2 === 0 },
+            elementCount: ELEMENTS.map((e, i) => ({ element: e, count: counts[i] })),
+            monthTerm: { start: Object.assign(termName(mm, monthType), fromMin(monthTermStart)), next: Object.assign(termName(nm[1], monthType), fromMin(monthTermNext)) },
+            luck: { forward, takeAge, takeMonth, takeDay, periods: luck },
+            warnings
+        };
+    }
+
+    function ageBetween(x, y) {
+        let yrs = y.year - x.year, mos = y.month - x.month;
+        if (y.day < x.day) mos--;
+        if (mos < 0) { yrs--; mos += 12; }
+        return { years: yrs, months: mos };
+    }
+
+    return { calculate, tenGod, DEFAULT_OPTIONS, STEMS, STEMS_TH, BRANCHES, BRANCHES_TH, ANIMALS_TH, ELEMENTS, STEM_ELEMENT, BRANCH_ELEMENT, HIDDEN_STEMS, TERMS };
+});
+
+</script>
+<script>
+// analysis-tables.js — ตารางตัดสิน (สร้างอัตโนมัติ ห้ามแก้ด้วยมือ)
+// special: กุญแจลักษณะดวง -> รหัสประเภทดวงพิเศษ (0 = ดวงปกติ)
+// fav: กุญแจลักษณะดวงปกติ -> [ธาตุดี, ธาตุร้าย] รหัสตามความสัมพันธ์กับเจ้าชะตา 同食財官印
+// specialFav: (ประเภท, มีธาตุถ่ายเท, มีธาตุทรัพย์) -> [ธาตุดี, ธาตุร้าย]
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory();
+    else root.BaziAnalysisTables = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+    return {"special":{"(4, 7, False, False, False, False, False, False)":0,"(1, 4, False, False, False, False, False, True)":0,"(1, 3, False, False, False, False, False, True)":0,"(4, 1, False, True, False, False, False, True)":0,"(4, 10, False, True, False, False, False, False)":0,"(4, 12, False, False, False, False, False, True)":0,"(1, 8, False, False, False, False, False, True)":0,"(2, 10, False, False, False, False, False, True)":0,"(1, 1, False, False, False, False, False, True)":0,"(3, 5, False, False, False, False, False, False)":0,"(0, 10, False, True, False, False, False, False)":0,"(3, 7, False, False, False, False, False, False)":0,"(4, 1, False, False, False, False, False, True)":0,"(0, 7, False, False, False, False, False, True)":0,"(3, 6, False, False, True, False, False, False)":0,"(2, 9, False, False, False, False, False, True)":0,"(4, 9, False, False, False, False, False, False)":0,"(3, 11, False, False, False, False, False, False)":0,"(2, 3, False, True, True, False, False, False)":0,"(0, 3, False, False, False, False, False, False)":0,"(1, 10, False, False, False, False, False, False)":0,"(1, 5, False, False, False, False, False, True)":0,"(2, 11, False, True, False, False, False, False)":0,"(0, 10, False, True, True, False, False, False)":0,"(2, 8, False, False, False, False, False, False)":0,"(3, 1, False, True, False, False, False, True)":0,"(0, 9, False, False, False, False, False, False)":0,"(3, 4, False, False, False, False, False, False)":0,"(3, 9, False, False, False, False, False, True)":0,"(2, 2, False, False, False, False, False, True)":0,"(1, 12, False, False, True, False, False, False)":0,"(2, 1, True, True, True, True, False, False)":16,"(3, 4, False, False, False, False, False, True)":0,"(3, 10, False, False, False, False, False, True)":0,"(3, 6, False, False, False, False, False, False)":0,"(2, 6, False, False, False, False, False, True)":0,"(2, 3, True, False, True, False, False, False)":4,"(3, 5, False, False, False, False, False, True)":0,"(1, 8, False, False, False, False, False, False)":0,"(4, 11, False, False, False, False, False, True)":0,"(4, 5, False, False, False, False, False, False)":0,"(0, 7, False, False, False, False, False, False)":0,"(4, 6, False, False, False, False, False, False)":0,"(3, 8, False, False, False, False, False, False)":0,"(2, 3, False, False, False, False, False, False)":0,"(0, 12, False, False, False, False, False, True)":0,"(2, 7, False, False, False, False, False, True)":0,"(4, 12, False, True, False, False, False, False)":0,"(3, 1, False, False, False, False, False, True)":0,"(4, 11, True, False, True, False, False, False)":1,"(4, 10, False, False, False, False, False, True)":0,"(0, 4, False, False, False, False, False, True)":0,"(2, 11, False, False, False, False, False, True)":0,"(2, 4, False, False, False, False, False, False)":0,"(2, 5, False, True, False, False, False, False)":0,"(3, 7, False, False, False, False, False, True)":0,"(0, 11, False, False, False, False, False, False)":0,"(2, 1, False, True, False, False, False, False)":0,"(4, 2, True, False, True, False, False, False)":1,"(0, 10, False, False, False, False, False, True)":0,"(4, 7, False, False, False, False, False, True)":0,"(3, 3, False, False, True, False, False, False)":0,"(1, 9, False, False, False, False, False, False)":0,"(0, 12, False, True, False, False, False, False)":0,"(4, 3, False, False, False, False, False, True)":0,"(1, 6, False, False, False, False, False, True)":0,"(3, 8, False, False, False, False, False, True)":0,"(0, 1, False, False, False, False, False, True)":0,"(2, 11, False, True, False, False, False, True)":0,"(0, 8, False, False, False, False, False, False)":0,"(0, 5, False, False, False, False, False, False)":0,"(4, 6, False, False, True, False, False, False)":0,"(3, 2, False, False, False, False, False, True)":0,"(3, 3, False, True, False, False, False, False)":0,"(1, 7, False, False, False, False, False, True)":0,"(1, 2, False, False, False, False, False, False)":0,"(1, 12, False, False, False, False, False, True)":0,"(4, 4, False, False, False, False, False, False)":0,"(1, 1, False, False, False, False, False, False)":0,"(1, 2, False, False, False, False, False, True)":0,"(3, 10, False, False, False, False, False, False)":0,"(3, 12, False, False, False, False, False, False)":0,"(4, 10, False, False, False, False, False, False)":0,"(0, 6, False, False, False, False, False, True)":0,"(0, 2, False, False, False, False, False, False)":0,"(1, 11, False, False, False, False, False, True)":0,"(3, 6, False, False, False, False, False, True)":0,"(2, 4, False, False, False, False, False, True)":0,"(4, 11, False, True, False, False, False, False)":0,"(2, 12, False, True, False, False, False, False)":0,"(4, 2, False, False, False, False, False, True)":0,"(2, 5, False, False, False, False, False, True)":0,"(3, 3, False, False, False, False, False, True)":0,"(0, 11, False, False, False, False, False, True)":0,"(3, 12, False, False, False, False, False, True)":0,"(3, 4, True, True, True, True, False, False)":16,"(4, 12, False, False, False, False, False, False)":0,"(2, 5, False, False, False, False, False, False)":0,"(4, 8, False, True, False, False, False, False)":0,"(3, 11, False, True, False, False, False, False)":0,"(2, 5, False, True, False, False, False, True)":0,"(2, 8, False, False, False, False, False, True)":0,"(0, 4, False, False, False, False, False, False)":0,"(2, 2, False, False, False, False, False, False)":0,"(4, 2, False, True, True, False, False, False)":0,"(2, 12, False, False, False, False, False, False)":0,"(1, 9, False, True, True, False, False, False)":0,"(4, 9, False, False, False, False, False, True)":0,"(2, 9, False, False, False, False, False, False)":0,"(2, 1, False, True, True, False, False, False)":0,"(2, 2, False, True, False, False, False, False)":0,"(4, 8, True, True, True, False, False, False)":1,"(4, 4, False, False, False, False, False, True)":0,"(1, 10, False, False, False, False, False, True)":0,"(3, 9, False, True, False, False, False, False)":0,"(2, 1, False, False, False, False, False, True)":0,"(1, 5, False, False, False, False, False, False)":0,"(4, 8, False, False, False, False, False, False)":0,"(0, 2, False, True, True, False, False, False)":0,"(4, 2, False, False, False, False, False, False)":0,"(3, 7, False, False, True, False, False, False)":0,"(2, 12, False, False, False, False, False, True)":0,"(4, 3, False, False, False, False, False, False)":0,"(3, 1, False, False, False, False, False, False)":0,"(1, 7, False, True, False, False, False, False)":0,"(4, 7, True, False, True, False, False, False)":1,"(3, 7, False, True, True, False, False, False)":0,"(3, 3, False, False, False, False, False, False)":0,"(4, 11, False, False, False, False, False, False)":0,"(1, 12, False, False, False, False, False, False)":0,"(4, 6, False, False, False, False, False, True)":0,"(0, 9, False, True, False, False, False, False)":0,"(1, 9, False, False, False, False, False, True)":0,"(2, 4, True, True, True, False, False, False)":4,"(0, 6, False, True, False, False, False, False)":0,"(0, 12, False, False, False, False, False, False)":0,"(4, 10, False, False, False, False, True, False)":0,"(1, 9, False, False, True, False, False, False)":0,"(4, 5, False, True, True, False, False, False)":0,"(4, 6, True, True, True, False, False, False)":1,"(3, 4, True, False, True, False, False, False)":5,"(3, 7, False, True, False, False, False, False)":0,"(4, 7, True, True, True, True, False, False)":16,"(2, 1, False, False, False, False, False, False)":0,"(0, 8, True, False, True, False, False, False)":3,"(0, 8, False, True, True, False, False, False)":0,"(1, 11, False, True, False, False, False, True)":0,"(1, 10, False, False, True, False, False, False)":0,"(0, 3, False, False, False, False, False, True)":0,"(0, 4, False, True, False, False, False, False)":0,"(3, 9, False, True, False, False, False, True)":0,"(3, 11, False, False, False, False, False, True)":0,"(0, 8, False, True, False, False, False, False)":0,"(0, 2, False, True, False, False, False, False)":0,"(1, 7, False, False, False, False, False, False)":0,"(0, 3, False, True, False, False, False, False)":0,"(0, 8, True, True, True, True, False, False)":16,"(2, 8, False, True, False, False, False, False)":0,"(1, 10, False, True, True, False, False, False)":0,"(2, 2, False, True, False, False, False, True)":0,"(4, 4, False, True, False, False, False, True)":0,"(2, 3, False, False, False, False, False, True)":0,"(4, 5, True, True, True, False, False, False)":1,"(0, 3, False, True, False, False, False, True)":0,"(2, 8, False, True, True, False, False, False)":0,"(2, 10, False, True, False, False, False, False)":0,"(3, 6, False, True, False, False, False, False)":0,"(2, 4, False, True, False, False, False, False)":0,"(2, 11, False, False, False, False, False, False)":0,"(0, 10, False, False, False, False, False, False)":0,"(0, 4, False, True, False, False, False, True)":0,"(3, 4, False, False, True, False, False, False)":0,"(0, 5, False, True, True, False, False, False)":0,"(4, 1, False, True, False, False, False, False)":0,"(2, 6, False, True, False, False, False, True)":0,"(0, 2, False, False, False, False, False, True)":0,"(3, 6, True, False, True, False, False, False)":5,"(1, 3, True, True, True, False, False, False)":0,"(3, 9, False, False, False, False, False, False)":0,"(2, 4, False, True, True, False, False, False)":0,"(4, 8, False, False, False, False, False, True)":0,"(0, 8, True, True, True, False, False, False)":3,"(2, 8, False, True, False, False, False, True)":0,"(4, 6, True, False, True, False, False, False)":1,"(0, 9, False, False, False, False, False, True)":0,"(1, 6, False, False, False, False, False, False)":0,"(0, 6, False, False, False, False, False, False)":0,"(3, 2, False, False, False, False, False, False)":0,"(0, 8, False, False, False, False, False, True)":0,"(1, 1, False, True, True, False, False, False)":0,"(0, 9, False, True, True, False, False, False)":0,"(1, 4, False, False, False, False, False, False)":0,"(2, 7, False, False, False, False, False, False)":0,"(0, 11, False, True, True, False, False, False)":0,"(4, 7, False, True, False, False, False, False)":0,"(1, 1, False, True, False, False, False, False)":0,"(4, 11, False, True, True, False, False, False)":0,"(2, 3, False, True, False, False, False, False)":0,"(0, 1, False, False, False, False, False, False)":0,"(1, 10, False, True, False, False, False, False)":0,"(4, 6, False, True, False, False, False, False)":0,"(1, 11, False, False, False, False, False, False)":0,"(4, 6, False, True, True, False, False, False)":0,"(3, 5, False, False, False, False, True, False)":0,"(0, 10, False, True, False, False, False, True)":0,"(1, 9, False, True, False, False, False, False)":0,"(1, 9, False, True, False, False, False, True)":0,"(1, 3, False, False, False, False, False, False)":0,"(3, 6, False, True, True, False, False, False)":0,"(4, 2, False, True, False, False, False, False)":0,"(0, 12, False, True, False, False, False, True)":0,"(0, 1, False, True, False, False, False, False)":0,"(0, 9, False, False, True, False, False, False)":0,"(0, 7, False, True, False, False, False, False)":0,"(1, 9, True, True, True, False, False, False)":2,"(0, 9, False, True, False, False, False, True)":0,"(1, 6, False, True, False, False, False, True)":0,"(0, 1, False, True, False, False, False, True)":0,"(2, 12, False, True, True, False, False, False)":0,"(4, 12, False, True, False, False, False, True)":0,"(0, 5, False, False, False, False, False, True)":0,"(4, 11, True, True, True, False, False, False)":1,"(0, 11, False, True, False, False, False, True)":0,"(4, 5, False, True, False, False, False, False)":0,"(4, 7, False, True, True, False, False, False)":0,"(3, 11, False, False, False, False, True, False)":0,"(3, 2, False, False, False, False, True, False)":0,"(1, 1, False, True, False, False, False, True)":0,"(2, 5, False, True, True, False, False, False)":0,"(0, 5, True, False, True, False, False, False)":3,"(4, 9, False, True, False, False, False, False)":0,"(3, 11, True, True, True, False, False, False)":5,"(2, 4, False, False, True, False, False, False)":0,"(2, 12, True, True, True, True, False, False)":16,"(2, 10, False, False, False, False, False, False)":0,"(1, 12, True, True, True, False, False, False)":2,"(1, 3, False, True, False, False, False, False)":0,"(4, 11, False, False, True, False, False, False)":0,"(0, 9, True, True, True, False, False, False)":3,"(0, 2, True, False, True, False, False, False)":3,"(1, 6, False, True, False, False, False, False)":0,"(4, 3, False, True, False, False, False, False)":0,"(4, 8, True, False, True, False, False, False)":1,"(4, 11, False, True, False, False, False, True)":0,"(0, 9, True, False, True, False, False, False)":3,"(2, 9, False, True, False, False, False, True)":0,"(4, 7, True, True, True, False, False, False)":1,"(2, 12, True, True, True, False, False, False)":4,"(2, 12, False, False, True, False, False, False)":0,"(4, 6, True, True, True, True, False, False)":16,"(0, 2, True, True, True, False, False, False)":3,"(0, 11, False, False, True, False, False, False)":0,"(3, 11, False, False, True, False, False, False)":0,"(2, 7, False, True, False, False, False, True)":0,"(4, 7, False, True, False, False, False, True)":0,"(0, 5, False, True, False, False, False, False)":0,"(1, 5, False, False, True, False, False, False)":0,"(2, 6, False, True, False, False, False, False)":0,"(3, 10, False, True, False, False, False, False)":0,"(4, 6, False, True, False, False, False, True)":0,"(3, 8, False, False, True, False, False, False)":0,"(0, 11, False, True, False, False, False, False)":0,"(2, 6, False, False, False, False, False, False)":0,"(1, 8, False, True, False, False, False, False)":0,"(4, 2, True, True, True, False, False, False)":1,"(1, 7, False, True, False, False, False, True)":0,"(1, 2, False, False, True, False, False, False)":0,"(3, 3, False, True, True, False, False, False)":0,"(3, 10, False, True, False, False, False, True)":0,"(0, 10, True, True, True, False, False, False)":3,"(3, 2, False, True, False, False, False, False)":0,"(0, 2, False, False, True, False, False, False)":0,"(0, 5, False, False, True, False, False, False)":0,"(1, 11, False, True, False, False, False, False)":0,"(3, 5, False, True, True, False, False, False)":0,"(1, 2, False, True, False, False, False, False)":0,"(4, 3, True, True, True, False, False, False)":1,"(4, 5, False, False, False, False, False, True)":0,"(2, 1, False, True, False, False, False, True)":0,"(1, 11, True, True, True, False, False, False)":0,"(2, 9, False, True, False, False, False, False)":0,"(1, 12, False, True, False, False, False, False)":0,"(3, 5, False, True, False, False, False, True)":0,"(0, 5, True, True, True, False, False, False)":3,"(4, 2, False, False, True, False, False, False)":0,"(3, 7, True, False, True, False, False, False)":5,"(2, 3, False, False, True, False, False, False)":0,"(1, 1, False, False, True, False, False, False)":0,"(3, 11, True, False, True, False, False, False)":5,"(1, 3, False, True, False, False, False, True)":0,"(0, 10, False, False, True, False, False, False)":0,"(0, 2, False, True, False, False, False, True)":0,"(3, 4, False, True, True, False, False, False)":0,"(1, 1, True, True, True, False, False, False)":2,"(2, 1, False, False, True, False, False, False)":0,"(0, 1, True, True, True, False, False, False)":0,"(0, 11, True, True, True, False, False, False)":3,"(2, 10, False, True, False, False, False, True)":0,"(1, 10, True, True, True, True, False, False)":16,"(3, 6, True, True, True, False, False, False)":5,"(0, 11, True, False, True, False, False, False)":3,"(4, 7, False, False, True, False, False, False)":0,"(3, 4, False, True, False, False, False, False)":0,"(4, 8, False, True, True, False, False, False)":0,"(0, 12, False, False, False, False, True, True)":0,"(2, 3, True, True, True, False, False, False)":4,"(1, 12, True, False, True, False, False, False)":2,"(1, 1, True, False, True, False, False, False)":2,"(4, 5, False, False, True, False, False, False)":0,"(4, 8, False, False, True, False, False, False)":0,"(3, 3, False, True, False, False, False, True)":0,"(1, 5, True, False, True, False, False, False)":0,"(1, 12, False, True, True, False, False, False)":0,"(4, 2, False, True, False, False, False, True)":0,"(0, 10, True, False, True, False, False, False)":3,"(1, 2, True, False, True, False, False, False)":0,"(0, 5, True, True, True, True, False, False)":16,"(2, 1, True, True, True, False, False, False)":4,"(1, 2, True, True, True, False, False, False)":2,"(3, 4, True, True, True, False, False, False)":5,"(1, 4, False, True, False, False, False, True)":0,"(1, 10, False, True, False, False, False, True)":0,"(2, 2, False, True, True, False, False, False)":0,"(2, 1, True, False, True, False, False, False)":4,"(2, 12, True, False, True, False, False, False)":4,"(4, 8, False, True, False, False, False, True)":0,"(1, 4, False, True, False, False, False, False)":0,"(4, 5, False, True, False, False, False, True)":0,"(2, 8, True, True, True, False, False, False)":4,"(1, 2, False, True, False, False, False, True)":0,"(4, 5, True, False, True, False, False, False)":1,"(3, 7, True, True, True, False, False, False)":5,"(1, 3, False, False, False, False, True, False)":0,"(1, 9, True, False, True, False, False, False)":2,"(4, 9, False, False, False, False, True, True)":0,"(2, 6, False, False, False, False, True, False)":0,"(0, 11, True, True, True, True, False, False)":16,"(3, 12, False, True, False, False, False, False)":0,"(1, 8, True, True, True, False, False, False)":0,"(4, 9, True, True, True, False, False, False)":1,"(4, 1, False, False, False, False, False, False)":0,"(0, 8, False, False, True, False, False, False)":0,"(3, 6, False, True, False, False, False, True)":0,"(1, 12, False, True, False, False, False, True)":0,"(1, 10, True, True, True, False, False, False)":2,"(0, 7, True, True, True, False, False, False)":0,"(4, 9, False, False, False, False, True, False)":0,"(3, 4, False, True, False, False, False, True)":0,"(0, 4, True, True, True, False, False, False)":0,"(2, 3, False, True, False, False, False, True)":0,"(2, 4, True, False, True, False, False, False)":4,"(4, 10, False, True, False, False, False, True)":0,"(1, 2, False, True, True, False, False, False)":0,"(3, 8, False, False, False, False, True, False)":0,"(1, 5, False, True, True, False, False, False)":0,"(2, 10, True, True, True, False, False, False)":0,"(3, 7, False, True, False, False, False, True)":0,"(1, 10, True, False, True, False, False, False)":2,"(4, 10, True, True, True, False, False, False)":1,"(4, 1, True, True, True, False, False, False)":1,"(0, 7, False, True, False, False, False, True)":0,"(3, 3, True, True, True, False, False, False)":5,"(2, 7, False, True, False, False, False, False)":0,"(3, 3, True, False, True, False, False, False)":5,"(1, 9, True, True, True, True, False, False)":16,"(3, 2, True, True, True, False, False, False)":0,"(3, 8, True, False, True, False, False, False)":5,"(3, 12, False, True, False, False, False, True)":0,"(0, 6, True, True, True, False, False, False)":0,"(4, 3, False, True, False, False, False, True)":0,"(2, 4, False, True, False, False, False, True)":0,"(3, 1, False, True, False, False, False, False)":0,"(0, 1, False, False, False, False, True, False)":0,"(0, 2, True, True, True, True, False, False)":16,"(3, 11, False, True, True, False, False, False)":0,"(4, 9, False, True, False, False, False, True)":0,"(0, 6, False, True, False, False, False, True)":0,"(0, 12, True, True, True, False, False, False)":0,"(3, 8, False, True, False, False, False, False)":0,"(3, 2, False, False, True, False, False, False)":0,"(1, 3, True, False, True, False, False, False)":0,"(4, 4, True, True, True, False, False, False)":1,"(1, 3, False, False, False, False, True, True)":0,"(1, 4, False, False, False, False, True, False)":0,"(0, 12, False, False, False, False, True, False)":0,"(1, 8, False, True, False, False, False, True)":0,"(4, 10, False, False, False, False, True, True)":0,"(3, 3, True, True, True, True, False, False)":16,"(1, 5, False, True, False, False, False, True)":0,"(1, 5, True, True, True, False, False, False)":2,"(3, 2, False, False, False, False, True, True)":0,"(0, 3, True, True, True, False, False, False)":0,"(3, 5, False, False, False, False, True, True)":0,"(3, 12, True, True, True, False, False, False)":0,"(3, 5, True, False, True, False, False, False)":0,"(2, 6, True, True, True, False, False, False)":0,"(3, 9, False, True, True, False, False, False)":0,"(2, 11, False, True, True, False, False, False)":0,"(0, 5, False, True, False, False, False, True)":0,"(3, 11, False, False, True, False, True, False)":0,"(4, 12, True, True, True, False, False, False)":1,"(2, 7, False, False, False, False, True, False)":0,"(3, 8, False, False, False, False, True, True)":0,"(3, 8, False, True, False, False, False, True)":0,"(3, 5, False, False, True, False, False, False)":0,"(3, 8, True, True, True, False, False, False)":5,"(4, 4, False, True, False, False, False, False)":0,"(1, 5, False, True, False, False, False, False)":0,"(2, 5, True, True, True, False, False, False)":4,"(3, 2, False, True, False, False, False, True)":0,"(1, 11, False, False, True, False, False, False)":0,"(3, 8, False, True, True, False, False, False)":0,"(0, 3, True, True, False, False, False, False)":0,"(3, 5, False, True, False, False, False, False)":0,"(2, 2, True, True, True, False, False, False)":4,"(3, 10, False, True, True, False, False, False)":0,"(0, 1, False, False, False, False, True, True)":17,"(3, 1, True, True, True, False, False, False)":0,"(3, 11, False, False, False, False, True, True)":17,"(3, 11, False, True, False, False, False, True)":0,"(2, 11, True, True, True, False, False, False)":0,"(3, 8, False, False, True, False, True, False)":0,"(2, 12, False, True, False, False, False, True)":0,"(2, 7, False, False, False, False, True, True)":0,"(1, 4, True, False, True, False, False, False)":0,"(2, 6, False, False, False, False, True, True)":0,"(2, 6, False, True, True, False, False, False)":0,"(0, 8, False, True, False, False, False, True)":0,"(1, 6, False, True, True, False, False, False)":0,"(2, 9, False, True, True, False, False, False)":0,"(1, 8, False, False, True, False, False, False)":0,"(3, 12, True, False, True, False, False, False)":0,"(3, 1, True, False, True, False, False, False)":0,"(2, 7, True, True, True, False, False, False)":0,"(3, 5, False, False, True, False, True, False)":0,"(1, 4, True, True, True, False, False, False)":0,"(1, 7, False, True, True, False, False, False)":0,"(1, 4, False, False, False, False, True, True)":17},"fav":{"('S', 1, False, '印', False, False, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '官', False, True, False, True, False, False, False, True, True)":["官+財+食","同"],"('W', 2, True, False, 0, False, True, 1)":["9+印+官","10+財+食"],"('W', 3, True, False, 9, False, False, 4)":["印+同+官","財+食"],"('S', 1, False, '財', False, False, True, True, False, True, True, False, True)":["官+財+食","同"],"('W', 2, True, True, 0, False, True, 1)":["9+印+官","10+財+食"],"('S', 6, True, '官', True, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('W', 2, True, True, 0, False, False, 2)":["9+印+官","10+財+食"],"('W', 3, False, False, 10, True, False, 2)":["印+同","官+財+食"],"('W', 2, True, False, 0, True, True, 1)":["9+印+官","10+財+食"],"('S', 1, False, '財', True, False, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '印', False, True, True, False, True, False, True, False, False)":["財+食","印+同+官"],"('S', 1, False, '官', True, True, False, False, False, False, True, False, True)":["官+財","同+食"],"('W', 3, False, False, 9, False, False, 4)":["印+同","官+財+食"],"('W', 3, True, False, 10, False, False, 0)":["印+同+官","財"],"('S', 1, True, '印', False, False, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('W', 3, False, True, 9, False, False, 4)":["14+印+同+官","15+官+財+食"],"('W', 3, False, False, 10, True, True, 1)":["印+同","官+財+食"],"('U', True, False, True)":["14+印+同+食","15+印+官+財"],"('S', 1, True, '財', True, False, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, False, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '財', False, False, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '官', False, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, True, False, True, True, False, True)":["印+官+財","同"],"('W', 3, False, True, 10, True, True, 1)":["14+印+同+官","15+官+財+食"],"('S', 1, True, '財', False, True, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '財', False, False, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', False, False, True, True, True, True, True, False, True)":["官+財+食","同"],"('S', 6, False, '財', False, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '官', True, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, True, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('W', 2, False, True, 0, False, False, 3)":["14+9+印+官","10+15+官+財+食"],"('S', 6, True, '印', True, False, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, True, False, False, False, False, True, False, True)":["官+財+食","同"],"('W', 2, True, True, 0, False, False, 3)":["9+印+官","10+財+食"],"('W', 3, False, False, 9, False, False, 3)":["印+同","官+財+食"],"('S', 1, True, '官', True, True, False, True, False, True, True, False, True)":["官+財+食","同"],"('W', 2, True, False, 0, False, False, 2)":["9+印+官","10+財+食"],"('W', 2, True, False, 0, False, False, 3)":["9+印+官","10+財+食"],"('S', 1, True, '官', False, True, False, True, False, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('W', 2, True, False, 0, False, False, 4)":["9+印+官","10+財+食"],"('S', 1, False, '財', True, False, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, False, True, True, False, True, True, False, False)":["財+食","印+同+官"],"('S', 1, True, '官', False, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, True, False, False, False, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, False, True, False, True, False, True, True)":["印+財+食","同+官"],"('W', 2, False, True, 0, False, False, 0)":["14+9+印+官","10+15+官+財+食"],"('S', 6, True, '財', False, False, True, True, True, True, False, False, True)":["印+財+食","同+官"],"('W', 3, False, False, 10, True, False, 4)":["印+同","官+財+食"],"('W', 2, False, True, 0, False, False, 2)":["14+9+印+官","10+15+官+財+食"],"('W', 3, False, False, 10, True, False, 3)":["印+同","官+財+食"],"('S', 1, True, '印', False, True, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '財', False, False, True, True, True, True, False, False, True)":["印+財+食","同+官"],"('U', True, True, True)":["同+食","印+官+財"],"('W', 2, False, True, 0, False, False, 4)":["14+9+印+官","10+15+官+財+食"],"('S', 6, False, '官', False, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('W', 2, True, False, 0, False, False, 0)":["9+印+官","10+財+食"],"('W', 3, False, False, 0, False, True, 1)":["印+同","官+財+食"],"('W', 2, False, False, 0, True, False, 2)":["9+印","10+官+財+食"],"('W', 3, True, False, 0, True, False, 0)":["印+同","財+食"],"('S', 1, True, '財', False, True, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '官', True, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('U', False, True, False)":["15+印+同+食","14+印+官+財"],"('S', 6, False, '財', True, False, True, True, True, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, True, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '官', True, True, True, True, False, True, True, False, True)":["印+官+財","同"],"('S', 1, False, '印', False, False, True, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 1, False, '財', True, False, True, True, False, True, False, False, True)":["官+財+食","同"],"('S', 6, False, '官', True, True, True, True, False, True, False, True, True)":["印+官+財","同"],"('W', 2, True, False, 0, True, False, 0)":["9+印+官","10+財+食"],"('S', 1, True, '印', True, False, False, False, False, False, True, False, False)":["財+食","印+同+官"],"('S', 1, False, '官', True, True, True, False, True, False, True, False, True)":["印+官+財","同"],"('S', 1, True, '印', False, False, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('W', 2, False, False, 0, True, False, 4)":["9+印","10+官+財+食"],"('S', 6, False, '官', True, True, True, True, False, False, False, True, True)":["印+官+財","同"],"('S', 1, False, '官', True, True, False, True, False, True, True, False, True)":["官+財","同+食"],"('W', 2, True, False, 0, True, False, 2)":["9+印+官","10+財+食"],"('S', 1, True, '印', True, False, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, False, False, True, False, True, True, False, True)":["印+財+食","同+官"],"('W', 3, False, False, 8, True, False, 3)":["印+同","官+財+食"],"('S', 1, False, '官', True, True, False, True, False, False, False, True, False)":["官+財","同+食"],"('W', 3, False, False, 8, False, False, 3)":["印+同","官+財+食"],"('S', 6, True, '財', False, True, True, True, True, True, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '印', False, True, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '官', True, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '官', False, True, False, True, False, True, True, False, True)":["官+財+食","同"],"('U', True, True, False)":["同+食","印+官+財"],"('S', 6, False, '財', False, True, True, True, True, False, True, False, True)":["官+財+食","同"],"('S', 6, False, '官', True, True, False, True, False, False, True, False, True)":["官+財","同+食"],"('S', 1, True, '財', False, False, True, True, True, True, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, False, True, True, False, True, True, False, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, True, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, False, True, False, True, False, True, False)":["財+食","印+同+官"],"('W', 3, True, True, 10, False, False, 0)":["印+同+官","財"],"('S', 1, False, '印', False, True, True, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 1, True, '印', False, True, False, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, True, False, True, False, True, True, False, True)":["印+財+食","同+官"],"('U', False, True, True)":["15+印+同+食","14+印+官+財"],"('W', 2, False, False, 0, False, False, 4)":["9+印","10+官+財+食"],"('S', 1, True, '印', False, False, True, False, True, False, False, False, False)":["財+食","印+同+官"],"('W', 2, True, True, 0, False, False, 4)":["9+印+官","10+財+食"],"('S', 6, True, '官', True, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('W', 3, False, False, 10, True, False, 0)":["印+同","官+財+食"],"('S', 6, True, '印', True, True, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('W', 2, True, True, 0, False, False, 0)":["9+印+官","10+財+食"],"('W', 2, False, False, 0, False, True, 1)":["9+印","10+官+財+食"],"('W', 3, False, True, 9, False, False, 0)":["14+印+同+官","15+官+財+食"],"('S', 6, True, '印', True, False, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('W', 2, False, False, 0, False, False, 2)":["9+印","10+官+財+食"],"('W', 3, False, True, 10, True, False, 3)":["14+印+同+官","15+官+財+食"],"('S', 6, True, '財', False, False, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('W', 3, True, False, 10, True, False, 3)":["印+同","財+食"],"('S', 1, True, '財', True, False, True, True, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, True, False, True, False, True, True, False, True)":["印+財+食","同+官"],"('W', 3, True, False, 9, False, False, 2)":["印+同+官","財+食"],"('W', 3, True, True, 10, False, False, 3)":["印+同+官","財+食"],"('S', 6, False, '財', False, False, True, True, True, True, True, False, True)":["官+財+食","同"],"('S', 6, False, '財', False, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('W', 3, False, True, 10, True, False, 0)":["14+印+同+官","15+官+財+食"],"('S', 1, False, '印', True, False, True, True, True, False, False, True, False)":["38+官+財+食","印+同"],"('W', 3, True, False, 9, False, False, 3)":["印+同+官","財+食"],"('W', 2, False, False, 0, False, False, 3)":["9+印","10+官+財+食"],"('W', 3, True, False, 10, True, False, 4)":["印+同","財+食"],"('S', 1, True, '財', True, False, True, True, True, False, False, False, True)":["印+財+食","同+官"],"('W', 3, True, False, 10, False, False, 3)":["印+同+官","財+食"],"('S', 1, True, '印', True, True, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, True, False, True, False, True, False, False)":["財+食","印+同+官"],"('S', 1, False, '印', True, False, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', False, True, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '印', True, False, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '官', True, True, False, True, False, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, True, True, True, False, True, True, False, False)":["財+食","印+同+官"],"('W', 2, True, True, 0, True, True, 1)":["9+印+官","10+財+食"],"('W', 2, False, True, 0, True, False, 4)":["14+9+印+官","10+15+官+財+食"],"('S', 6, True, '印', False, False, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', True, False, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '印', False, False, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, True, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('W', 2, True, False, 0, True, False, 4)":["9+印+官","10+財+食"],"('S', 1, False, '財', False, False, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, False, True, True, False, True, False, False, False)":["財+食","印+同+官"],"('S', 6, True, '財', True, False, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, False, True, False, True, True, False, False)":["財+食","印+同+官"],"('W', 2, False, True, 0, True, False, 2)":["14+9+印+官","10+15+官+財+食"],"('S', 1, True, '印', False, False, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '官', False, True, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, True, True, False, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, True, True, True, False, False, True, False, True)":["印+官+財","同"],"('S', 1, False, '印', False, False, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('W', 3, True, True, 9, False, False, 4)":["印+同+官","財+食"],"('W', 3, True, False, 10, False, True, 1)":["印+同+官","財+食"],"('S', 1, False, '財', True, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '印', True, False, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('W', 2, False, True, 0, False, True, 1)":["14+9+印+官","10+15+官+財+食"],"('S', 1, True, '印', True, False, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, True, False, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '官', True, True, False, True, False, False, False, True, True)":["官+財","同+食"],"('S', 6, True, '印', False, True, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, False, False, True, False, True, True, False, False)":["財+食","印+同+官"],"('W', 3, True, False, 10, True, False, 0)":["印+同","財+食"],"('S', 1, False, '財', True, False, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', False, False, True, True, False, True, False, False, False)":["財+食","印+同+官"],"('S', 6, False, '財', True, False, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '印', True, False, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('W', 3, False, False, 0, False, False, 4)":["印+同","官+財+食"],"('S', 1, True, '印', True, True, False, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, False, False, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '財', False, False, True, True, False, True, True, False, True)":["官+財+食","同"],"('W', 3, True, True, 8, False, False, 0)":["印+同+官","財+食"],"('S', 1, True, '財', False, False, True, False, True, False, True, False, False)":["財+食","印+同+官"],"('W', 2, False, True, 0, True, False, 3)":["14+9+印+官","10+15+官+財+食"],"('W', 3, True, True, 10, True, False, 2)":["印+同","財+食"],"('S', 6, True, '財', False, True, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '財', False, False, True, True, True, True, False, True, True)":["官+財+食","同"],"('S', 1, False, '印', False, False, True, True, False, True, False, False, False)":["官+財+食","印+同"],"('S', 1, True, '印', False, True, True, True, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, True, False, True, False, False, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, False, True, True, True, True, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, False, True, True, True, True, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, True, True, True, False, True, False, True)":["印+財+食","同+官"],"('W', 2, False, True, 0, True, True, 1)":["14+9+印+官","10+15+官+財+食"],"('S', 6, True, '財', True, False, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('W', 2, False, False, 0, True, False, 0)":["9+印","10+官+財+食"],"('W', 3, False, False, 9, False, False, 2)":["印+同","官+財+食"],"('S', 1, True, '印', True, True, True, False, True, False, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, True, True, True, False, True, False, False, False)":["財+食","印+同+官"],"('S', 6, False, '財', True, False, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '財', False, False, True, True, True, True, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, True, False, True, False, True, True, False, True)":["官+財","同+食"],"('W', 3, False, True, 10, False, False, 0)":["14+印+同+官","15+官+財+食"],"('W', 3, False, False, 0, True, False, 3)":["印+同","官+財+食"],"('S', 1, False, '印', False, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, False, True, False, True, False, True, False, False)":["財+食","印+同+官"],"('W', 2, False, False, 0, True, False, 3)":["9+印","10+官+財+食"],"('W', 3, False, True, 10, True, False, 2)":["14+印+同+官","15+官+財+食"],"('S', 1, True, '財', True, False, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '官', True, False, False, False, False, False, True, False, True)":["官+財","同+食"],"('W', 2, False, True, 0, True, False, 0)":["14+9+印+官","10+15+官+財+食"],"('S', 1, False, '財', True, False, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, False, '財', False, True, True, True, True, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, False, False, True, False, True, False, False, False)":["財+食","印+同+官"],"('S', 6, False, '財', True, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, False, True, False, False, True, True)":["印+官+財","同"],"('W', 3, True, False, 10, False, False, 4)":["印+同+官","財+食"],"('S', 6, True, '印', True, False, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('U', True, False, False)":["14+印+同+食","15+印+官+財"],"('W', 3, True, False, 8, False, False, 2)":["印+同+官","財+食"],"('S', 1, False, '印', False, False, True, True, False, True, True, False, False)":["官+財+食","印+同"],"('W', 3, True, False, 10, True, True, 1)":["印+同","財+食"],"('W', 2, False, False, 0, False, False, 0)":["9+印","10+官+財+食"],"('S', 1, True, '財', False, True, True, True, True, False, False, False, True)":["印+財+食","同+官"],"('W', 3, False, True, 10, False, False, 2)":["14+印+同+官","15+官+財+食"],"('S', 1, False, '官', True, True, True, False, True, False, False, True, False)":["印+官+財","同"],"('W', 3, False, True, 8, False, False, 0)":["14+印+同+官","15+官+財+食"],"('S', 1, False, '官', True, True, False, True, False, False, False, False, True)":["官+財","同+食"],"('S', 1, False, '印', False, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('W', 3, True, False, 10, True, False, 2)":["印+同","財+食"],"('W', 3, False, True, 10, False, False, 4)":["14+印+同+官","15+官+財+食"],"('S', 1, True, '印', True, False, False, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, True, False, True, False, False, False, True, True)":["官+財","同+食"],"('S', 1, True, '財', False, True, True, True, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, True, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('W', 3, False, True, 9, False, False, 2)":["14+印+同+官","15+官+財+食"],"('W', 2, True, True, 0, True, False, 2)":["9+印+官","10+財+食"],"('S', 1, True, '財', False, False, True, True, False, True, True, False, False)":["財+食","印+同+官"],"('W', 3, True, True, 9, False, False, 0)":["印+同+官","財+食"],"('S', 1, False, '印', True, False, True, True, False, True, False, False, False)":["官+財+食","印+同"],"('W', 3, False, False, 10, False, True, 1)":["印+同","官+財+食"],"('S', 6, True, '印', False, True, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '財', True, True, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('W', 3, False, True, 8, False, False, 2)":["14+印+同+官","15+官+財+食"],"('S', 6, True, '印', False, False, True, True, True, True, False, False, True)":["印+財+食","同"],"('S', 6, True, '財', False, False, True, True, True, True, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, True, False, False, False, False, False, True, True)":["官+財","同+食"],"('W', 3, True, False, 8, False, False, 4)":["印+同+官","財+食"],"('S', 1, False, '官', True, False, False, True, False, True, False, False, True)":["官+財","同+食"],"('W', 3, False, False, 10, False, False, 2)":["印+同","官+財+食"],"('S', 6, True, '印', True, False, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, True, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, True, False, False, False, False, False, True, True)":["印+財+食","同+官"],"('W', 3, False, True, 0, True, True, 1)":["17+20+印+同+官","官+財+食"],"('S', 6, True, '印', True, True, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, True, False, True, False, False, False, True, True)":["印+財+食","同+官"],"('W', 3, False, False, 0, True, True, 1)":["印+同","官+財+食"],"('S', 6, True, '官', False, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('W', 3, False, True, 0, True, False, 4)":["14+印+同+官","15+官+財+食"],"('S', 6, True, '官', True, True, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, False, True, False, False, False, True)":["印+官+財","同"],"('S', 1, True, '印', True, False, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '財', False, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, True, True, True, True, False, True, False, True)":["官+財+食","同"],"('W', 3, True, False, 10, False, False, 2)":["印+同+官","財+食"],"('S', 1, False, '印', False, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('W', 3, False, False, 8, False, False, 4)":["印+同","官+財+食"],"('S', 1, False, '官', True, True, False, True, False, False, True, False, True)":["官+財","同+食"],"('S', 6, False, '印', True, False, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, False, False, True, False, True, True, False, True)":["官+財","同+食"],"('S', 6, False, '財', True, False, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '財', False, True, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 1, False, '印', True, False, False, True, False, True, False, False, False)":["官+財+食","印+同"],"('S', 1, False, '官', True, True, False, False, False, False, False, True, False)":["官+財","同+食"],"('S', 1, True, '印', True, False, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '官', True, True, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', False, True, False, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('W', 3, False, True, 9, False, False, 3)":["14+印+同+官","15+官+財+食"],"('S', 1, True, '印', False, True, False, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 6, True, '印', True, True, False, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, True, False, True, False, True, True, False, False)":["財+食","印+同+官"],"('S', 1, True, '印', True, False, True, False, True, False, False, False, False)":["財+食","印+同+官"],"('S', 6, True, '印', True, False, True, True, True, False, True, False, True)":["印+財+食","同+官"],"('W', 3, True, False, 9, False, True, 1)":["印+同+官","財+食"],"('S', 6, True, '印', True, False, True, True, False, True, False, False, True)":["印+財+食","同"],"('W', 3, False, False, 9, False, True, 1)":["印+同","官+財+食"],"('S', 1, True, '印', True, False, False, False, False, False, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '印', False, True, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, True, False, True, False, True, False, True, True)":["官+財","同+食"],"('S', 1, True, '印', False, True, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '官', True, True, False, True, False, False, False, True, False)":["官+財","同"],"('W', 3, True, True, 9, False, False, 2)":["印+同+官","財+食"],"('W', 3, True, True, 10, True, False, 3)":["印+同","財+食"],"('S', 1, True, '官', False, True, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, False, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('W', 2, True, False, 0, True, False, 3)":["9+印+官","10+財+食"],"('W', 3, False, True, 9, False, True, 1)":["17+20+印+同+官","官+財+食"],"('S', 1, True, '印', False, False, False, True, False, True, False, False, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, True, True, True, False, False, False, True, False)":["財+食","印+同+官"],"('W', 3, False, True, 8, True, True, 1)":["17+20+印+同+官","官+財+食"],"('W', 3, True, False, 8, False, False, 3)":["印+同+官","財+食"],"('W', 3, False, True, 8, True, False, 3)":["14+印+同+官","15+官+財+食"],"('S', 1, True, '官', True, True, False, True, False, False, True, False, True)":["官+財+食","同"],"('W', 3, True, False, 8, True, True, 1)":["印+同","財+食"],"('S', 6, True, '財', False, False, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, True, False, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, True, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 6, False, '財', True, False, True, True, True, False, False, True, False)":["官+財+食","印+同"],"('W', 3, False, True, 10, False, False, 3)":["14+印+同+官","15+官+財+食"],"('W', 3, True, False, 8, True, False, 3)":["印+同","財+食"],"('S', 6, False, '財', True, False, True, False, True, False, False, True, False)":["官+財+食","印+同"],"('W', 2, False, False, 0, True, True, 1)":["9+印","10+官+財+食"],"('S', 1, True, '印', False, False, True, True, True, True, True, False, False)":["財+食","印+同+官"],"('W', 3, False, True, 8, False, False, 4)":["14+印+同+官","15+官+財+食"],"('S', 1, True, '印', False, True, False, False, False, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', True, False, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, True, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('W', 3, True, False, 0, False, False, 4)":["印+同+官","財+食"],"('S', 6, False, '財', True, False, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, False, '官', False, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('W', 3, True, False, 9, False, False, 0)":["印+同+官","財+食"],"('S', 1, False, '財', False, True, True, True, True, True, False, True, True)":["官+財+食","同"],"('W', 3, False, False, 9, False, False, 0)":["印+同","官+財+食"],"('S', 6, False, '印', True, False, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, False, '印', False, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '財', True, False, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('W', 3, False, True, 10, True, False, 4)":["14+印+同+官","15+官+財+食"],"('S', 6, True, '印', True, True, False, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '印', True, False, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '官', True, True, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '官', True, True, False, False, False, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '財', True, False, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 6, False, '印', False, True, False, True, False, True, True, False, True)":["官+財+食","同"],"('W', 3, False, True, 0, True, False, 0)":["14+印+同+官","15+官+財+食"],"('S', 1, False, '官', True, True, False, True, False, True, False, False, True)":["官+財","同+食"],"('S', 1, True, '官', True, True, False, False, False, False, False, True, True)":["官+財+食","同"],"('W', 3, False, False, 8, True, False, 2)":["印+同","官+財+食"],"('S', 1, True, '官', True, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, True, '印', False, False, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '官', True, False, True, False, True, False, True, False, True)":["印+官+財","同"],"('S', 6, True, '印', False, True, True, True, False, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '官', True, True, False, True, False, True, False, True, False)":["官+財","同+食"],"('W', 3, True, True, 8, False, False, 3)":["印+同+官","財+食"],"('S', 1, False, '財', False, False, True, True, True, True, False, True, False)":["官+財+食","印+同"],"('S', 1, False, '印', False, True, False, False, False, False, True, False, True)":["官+財+食","同"],"('W', 3, False, False, 8, True, True, 1)":["印+同","官+財+食"],"('W', 3, False, True, 8, False, True, 1)":["17+20+印+同+官","官+財+食"],"('W', 3, True, False, 8, True, False, 2)":["印+同","財+食"],"('W', 3, False, True, 0, False, True, 1)":["17+20+印+同+官","官+財+食"],"('S', 6, True, '印', False, True, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '印', True, False, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, True, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '官', True, True, False, True, False, True, False, True, True)":["官+財","同+食"],"('S', 6, False, '官', True, True, True, False, True, False, False, True, True)":["印+官+財","同"],"('S', 1, True, '印', True, True, False, False, False, False, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, False, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 6, True, '官', True, False, True, False, True, False, False, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, False, True, True, True, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '印', False, True, False, True, False, False, False, True, False)":["財+食","印+同+官"],"('W', 3, True, True, 8, False, True, 1)":["印+同+官","財+食"],"('S', 6, True, '印', False, True, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '印', False, False, False, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 1, True, '印', True, False, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '財', False, True, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 6, True, '官', True, True, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '印', False, True, False, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '官', False, True, False, True, False, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '官', True, False, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 6, False, '官', True, True, False, False, False, False, True, False, True)":["官+財","同+食"],"('S', 1, False, '官', True, False, False, True, False, True, False, True, True)":["官+財","同+食"],"('S', 6, False, '官', False, True, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, False, True, True, True, True, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, True, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, True, False, True, False, True, True, False, False)":["財+食","印+同+官"],"('S', 6, False, '財', False, False, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '官', True, True, False, True, False, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, False, False, True, False, True, False, False, True)":["印+財+食","同+官"],"('W', 3, False, False, 0, True, False, 2)":["印+同","官+財+食"],"('S', 1, True, '印', False, True, False, False, False, False, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, True, True, True, False, False, False, False, True)":["印+財+食","同+官"],"('S', 6, True, '官', False, True, False, True, False, False, False, False, True)":["官+財+食","同"],"('S', 1, False, '官', False, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('W', 3, False, True, 10, False, True, 1)":["14+印+同+官","15+官+財+食"],"('S', 6, True, '印', True, False, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', True, False, True, True, False, True, False, True, False)":["官+財+食","印+同"],"('W', 3, True, False, 0, False, True, 1)":["印+同+官","財+食"],"('S', 6, True, '印', False, True, False, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '官', False, True, False, False, False, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, True, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, False, False, True, False, True, True, False, True)":["官+財","同+食"],"('W', 3, True, True, 10, False, False, 4)":["印+同+官","財+食"],"('S', 1, False, '印', True, False, False, True, False, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '官', True, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 6, False, '官', True, False, True, True, False, False, False, True, True)":["印+官+財","同"],"('S', 1, False, '印', True, False, True, True, True, False, True, False, True)":["官+財+食","同"],"('W', 3, False, False, 0, False, False, 3)":["印+同","官+財+食"],"('S', 6, False, '官', False, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', True, False, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '印', False, True, True, True, False, True, False, False, False)":["官+財+食","印+同"],"('W', 2, True, True, 0, True, False, 0)":["9+印+官","10+財+食"],"('S', 6, False, '財', True, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('W', 3, True, True, 8, False, False, 4)":["印+同+官","財+食"],"('W', 3, False, True, 0, False, False, 0)":["14+印+同+官","15+官+財"],"('W', 3, False, False, 8, False, True, 1)":["印+同","官+財+食"],"('S', 6, True, '財', True, False, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '印', False, True, True, True, True, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '印', True, False, False, False, False, False, True, False, False)":["官+財+食","印+同"],"('S', 1, False, '印', False, False, False, True, False, True, True, False, False)":["官+財+食","印+同"],"('S', 1, True, '印', False, False, True, True, True, True, False, False, True)":["印+財+食","同+官"],"('W', 2, True, True, 0, True, False, 3)":["9+印+官","10+財+食"],"('S', 1, True, '財', False, False, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '印', True, False, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '官', True, True, False, True, False, False, True, False, True)":["官+財+食","同"],"('W', 3, False, False, 8, False, False, 2)":["印+同","官+財+食"],"('S', 6, False, '官', True, True, True, False, True, False, True, False, True)":["印+官+財","同"],"('S', 1, True, '印', False, True, False, True, False, True, False, True, True)":["印+財+食","同+官"],"('W', 3, False, False, 0, True, False, 4)":["印+同","官+財+食"],"('W', 3, True, False, 8, False, True, 1)":["印+同+官","財+食"],"('W', 3, True, True, 10, False, False, 2)":["印+同+官","財+食"],"('S', 1, True, '印', True, False, False, True, False, True, False, False, True)":["印+財+食","同+官"],"('W', 3, True, True, 10, True, False, 0)":["印+同","財+食"],"('S', 6, True, '財', False, False, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 6, True, '官', False, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, False, True, False, True, False, False)":["財+食","印+同+官"],"('S', 1, True, '印', True, False, False, False, False, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', False, True, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '印', True, False, True, False, True, False, False, True, False)":["官+財+食","印+同"],"('S', 1, False, '印', True, False, False, False, False, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, False, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, False, True, False, True, False, True, False, True)":["印+官+財","同"],"('S', 1, True, '印', False, True, False, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, True, False, True, False, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, True, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('W', 3, True, True, 10, True, True, 1)":["印+同","財+食"],"('S', 1, True, '官', False, True, False, True, False, False, False, False, True)":["官+財+食","同"],"('W', 3, False, True, 8, False, False, 3)":["14+印+同+官","15+官+財+食"],"('W', 3, True, True, 8, False, False, 2)":["印+同+官","財+食"],"('S', 6, True, '財', False, True, True, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, False, True, True, True, False, True, False, True)":["印+官+財","同"],"('S', 1, True, '印', False, True, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '財', False, False, True, False, True, False, True, False, False)":["官+財+食","印+同"],"('S', 1, False, '官', True, True, False, False, False, False, False, True, True)":["官+財","同+食"],"('S', 1, False, '官', False, True, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 6, False, '財', True, False, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, False, True, True, False, True, False, False, False)":["官+財+食","印+同"],"('S', 1, False, '財', True, False, True, True, True, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '印', True, False, True, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 6, False, '印', False, True, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '印', False, True, False, True, False, False, False, False, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, True, True, True, False, False, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '財', True, False, True, True, True, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '財', True, False, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '印', True, False, True, False, True, False, True, False, False)":["官+財+食","印+同"],"('S', 1, True, '印', True, True, False, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', True, True, False, False, False, False, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '財', True, False, True, True, True, True, False, False, True)":["官+財+食","同"],"('S', 1, False, '印', True, False, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, True, '印', True, True, False, True, False, False, False, False, True)":["印+財+食","同+官"],"('W', 3, True, False, 9, True, False, 2)":["印+同","財+食"],"('S', 1, True, '印', False, True, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 6, False, '印', True, False, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, True, False, True, False, True, True)":["印+官+財","同"],"('S', 1, False, '印', False, False, True, True, True, True, True, False, False)":["官+財+食","印+同"],"('S', 6, False, '印', False, True, True, True, True, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '印', True, False, False, True, False, False, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', True, True, False, False, False, False, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '財', False, False, True, True, True, True, False, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, True, False, False, False, False, True, False, False)":["財+食","印+同+官"],"('S', 1, True, '財', True, False, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, True, True, False, True, False, False, False, True)":["印+財+食","同+官"],"('S', 6, True, '印', True, False, False, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '財', False, False, True, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 1, True, '印', False, True, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '印', False, True, True, False, True, False, True, False, False)":["官+財+食","印+同"],"('S', 1, False, '印', True, False, False, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 1, False, '印', True, False, False, False, False, False, False, True, False)":["官+財+食","印+同"],"('S', 1, False, '印', False, False, True, False, True, False, False, True, False)":["官+財+食","印+同"],"('W', 3, False, False, 8, True, False, 4)":["印+同","官+財+食"],"('S', 6, True, '印', True, True, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '財', False, True, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '印', False, False, True, True, True, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '印', True, False, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '財', True, False, True, False, True, False, False, False, True)":["印+財+食","同+官"],"('S', 6, False, '印', True, False, True, True, True, False, False, True, False)":["38+官+財+食","印+同"],"('S', 6, False, '印', False, False, False, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 6, False, '印', False, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('W', 3, True, True, 9, False, True, 1)":["印+同+官","財+食"],"('S', 6, True, '印', False, False, False, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 6, True, '印', True, True, False, False, False, False, False, True, False)":["財+食","印+同+官"],"('W', 3, False, True, 8, True, False, 0)":["14+印+同+官","15+財+食"],"('S', 1, True, '印', True, True, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '財', True, False, True, True, True, False, False, False, True)":["印+財+食","同+官"],"('S', 1, False, '官', False, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, True, True, False, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, False, True, False, False, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '財', False, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('W', 3, True, True, 10, True, False, 4)":["印+同","財+食"],"('S', 1, False, '財', False, False, True, True, False, True, True, False, False)":["官+財+食","印+同"],"('S', 1, True, '印', True, False, False, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '財', False, False, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '財', False, False, True, True, False, True, False, False, True)":["官+財+食","同"],"('W', 3, False, False, 8, False, False, 0)":["印+同+官","財+食"],"('S', 1, True, '財', True, False, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '印', False, False, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, True, False, True, False, False, False, False)":["官+財+食","印+同"],"('W', 3, False, True, 0, False, False, 3)":["14+印+同+官","15+官+財+食"],"('S', 6, True, '官', False, True, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '官', False, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '財', False, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, True, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '印', False, True, True, True, False, False, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, True, True, False, True, False, False, False, False)":["財+食","印+同+官"],"('W', 3, False, False, 0, False, False, 0)":["印+同","官+財+食"],"('W', 3, False, False, 0, False, False, 2)":["印+同","官+財+食"],"('S', 1, False, '財', True, False, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '印', False, True, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, True, True, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '財', True, False, True, False, True, False, False, False, False)":["官+財+食","印+同"],"('S', 6, True, '印', True, True, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '印', True, False, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '印', True, False, False, True, False, False, False, True, False)":["官+財+食","印+同"],"('W', 3, False, True, 8, True, False, 4)":["14+印+同+官","15+官+財+食"],"('S', 1, True, '印', True, True, True, False, True, False, True, False, False)":["財+食","印+同+官"],"('S', 1, True, '財', True, False, True, False, True, False, False, False, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, True, True, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, True, '官', False, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '財', False, False, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '官', True, False, True, True, False, False, True, False, True)":["印+官+財","同"],"('S', 6, True, '官', True, True, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '官', False, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('W', 3, False, False, 9, True, False, 3)":["印+同","官+財+食"],"('S', 1, False, '官', True, False, True, True, True, False, True, False, True)":["印+官+財","同"],"('S', 1, True, '印', False, True, False, False, False, False, True, False, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, True, False, True, False, True, False, False, False)":["財+食","印+同+官"],"('W', 3, True, False, 0, False, False, 0)":["印+同+官","財"],"('S', 1, False, '財', True, False, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, True, '財', True, False, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, False, True, True, True, True, True, False, True)":["印+財+食","同+官"],"('W', 3, False, False, 8, True, False, 0)":["印+同","財+食"],"('S', 1, True, '印', True, True, True, True, False, False, False, True, True)":["印+財+食","同+官"],"('W', 3, True, False, 9, True, True, 1)":["印+同","財+食"],"('S', 6, True, '財', False, False, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, True, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '印', False, True, True, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '印', True, False, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '官', True, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '財', True, False, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, False, True, True, False, False, False, True, True)":["印+官+財","同"],"('S', 6, True, '財', True, False, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, True, True, True, False, False, False, False, True)":["官+財+食","同"],"('W', 3, True, False, 0, True, False, 4)":["印+同","財+食"],"('S', 6, False, '印', False, False, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, False, '官', True, False, True, True, False, False, True, False, True)":["印+官+財","同"],"('W', 3, True, True, 10, False, True, 1)":["印+同+官","財+食"],"('S', 1, False, '印', False, True, False, True, False, False, False, False, True)":["官+財+食","同"],"('W', 3, False, False, 9, True, False, 4)":["印+同","官+財+食"],"('S', 6, False, '財', False, True, True, True, True, True, False, False, True)":["官+財+食","同"],"('S', 6, False, '財', True, True, True, True, False, True, False, True, True)":["官+財+食","同"],"('W', 2, True, True, 0, True, False, 4)":["9+印+官","10+財+食"],"('S', 1, True, '官', True, True, False, True, False, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '官', True, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, False, '官', False, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, True, False, False, False, True, True)":["印+官+財","同"],"('S', 6, False, '官', True, True, True, False, True, False, False, True, False)":["印+官+財","同"],"('S', 6, True, '印', False, True, True, True, True, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, False, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, True, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('W', 3, True, False, 8, True, False, 4)":["印+同","財+食"],"('S', 1, False, '印', False, False, True, True, True, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, True, True, False, True, False, False, False, True)":["印+財+食","同+官"],"('S', 6, True, '官', True, True, False, True, False, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, True, False, True, False, True, False)":["印+官+財","同"],"('S', 6, True, '官', True, False, True, True, False, False, True, False, True)":["官+財+食","同"],"('W', 3, True, False, 0, False, False, 2)":["印+同+官","財+食"],"('S', 6, False, '印', True, False, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, False, '財', True, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', True, False, False, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', True, False, True, False, True, False, False, True, False)":["官+財+食","印+同"],"('S', 1, True, '印', False, False, False, True, False, True, False, False, True)":["印+財+食","同+官"],"('W', 3, False, False, 10, False, False, 4)":["印+同","官+財+食"],"('S', 1, True, '官', True, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, True, True, False, False, False, True)":["印+官+財","同"],"('S', 6, False, '官', True, False, True, True, True, False, False, True, True)":["印+官+財","同"],"('S', 6, True, '印', True, False, False, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', True, False, True, False, True, False, False, False, True)":["官+財+食","同"],"('S', 6, False, '財', True, False, True, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '印', False, True, True, True, True, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '財', False, False, True, True, True, True, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '印', True, False, True, False, True, False, False, True, False)":["官+財+食","印+同"],"('S', 6, True, '財', True, False, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '財', False, False, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, False, '印', False, False, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, False, '官', True, True, True, True, True, False, False, True, True)":["印+官+財","同"],"('W', 3, False, True, 0, True, False, 2)":["14+印+同+官","15+官+財+食"],"('S', 6, True, '官', False, True, False, False, False, False, False, True, True)":["官+財+食","同"],"('W', 3, True, True, 0, True, False, 4)":["印+同","財+食"],"('W', 3, True, False, 0, True, False, 2)":["印+同","財+食"],"('S', 1, False, '印', True, False, True, False, True, False, False, False, False)":["官+財+食","印+同"],"('S', 1, True, '財', True, False, True, False, True, False, True, False, False)":["財+食","印+同+官"],"('S', 6, True, '印', False, False, False, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '財', False, True, True, True, True, True, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '財', True, False, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('W', 3, False, True, 9, True, False, 2)":["14+印+同+官","15+官+財+食"],"('S', 6, False, '財', False, False, True, True, True, True, False, False, True)":["官+財+食","同"],"('S', 6, False, '印', False, False, True, True, True, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '官', True, True, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '官', False, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '官', True, True, True, True, True, False, True, False, True)":["印+官+財","同"],"('S', 1, True, '印', False, True, True, True, False, False, True, False, True)":["印+財+食","同+官"],"('W', 3, False, False, 10, False, False, 0)":["印+同","官+財+食"],"('S', 6, False, '官', True, False, False, True, False, True, False, True, True)":["官+財","同+食"],"('W', 3, True, True, 9, False, False, 3)":["印+同+官","財+食"],"('S', 6, False, '官', True, True, True, False, True, False, False, False, True)":["印+官+財","同"],"('S', 6, True, '官', False, True, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 6, False, '官', True, True, True, True, True, False, False, False, True)":["印+官+財","同"],"('S', 6, False, '財', False, True, True, True, True, False, False, True, True)":["官+財+食","同"],"('W', 3, True, True, 9, True, False, 0)":["印+同","財+食"],"('W', 3, True, False, 9, True, False, 4)":["印+同","財+食"],"('S', 6, False, '財', True, False, True, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 6, True, '財', False, True, True, True, True, False, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '財', True, False, True, True, True, False, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '印', True, False, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '官', False, True, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '印', False, True, False, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', False, True, True, True, True, True, True, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, False, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, False, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, True, False, False, True, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', True, False, True, True, True, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, False, True, False, False, False, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, True, True, True, False, False, False, True, False)":["官+財+食","印+同"],"('S', 1, True, '官', False, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 1, True, '官', True, False, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, False, '財', False, False, True, True, True, True, False, True, False)":["官+財+食","印+同"],"('S', 6, True, '印', True, False, False, True, False, True, False, True, True)":["印+財+食","同+官"],"('W', 3, False, True, 8, True, False, 2)":["14+印+同+官","15+官+財+食"],"('S', 1, True, '印', True, True, True, True, False, False, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '官', False, True, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, True, True, False, False, False, True, False)":["財+食","印+同+官"],"('W', 3, False, True, 0, False, False, 4)":["14+印+同+官","15+官+財+食"],"('W', 3, False, False, 0, True, False, 0)":["印+同","財+食"],"('W', 3, True, False, 8, False, False, 0)":["印+同+官","財+食"],"('W', 3, True, True, 0, True, False, 0)":["印+同","財+食"],"('S', 6, True, '印', True, False, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '印', False, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '財', True, False, True, False, True, False, False, False, True)":["官+財+食","同"],"('W', 3, False, False, 10, False, False, 3)":["印+同","官+財+食"],"('S', 1, False, '財', False, True, True, True, True, True, False, False, True)":["官+財+食","同"],"('S', 1, True, '官', False, True, False, False, False, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, False, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 1, False, '財', True, False, True, False, True, False, True, False, False)":["官+財+食","印+同"],"('S', 1, False, '財', True, False, True, True, False, True, True, False, False)":["官+財+食","印+同"],"('S', 1, False, '財', False, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 1, True, '財', True, False, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '財', False, True, True, True, False, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', True, False, True, True, False, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, False, False, False, False, False, True, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '官', False, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, False, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '財', False, False, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, False, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, True, False, True, False, False, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '印', False, True, True, False, True, False, False, True, False)":["官+財+食","印+同"],"('S', 1, False, '官', False, True, False, False, False, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '官', False, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '官', False, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('S', 6, True, '財', False, False, True, True, False, True, True, False, False)":["財+食","印+同+官"],"('S', 6, True, '官', False, True, False, True, False, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, False, False, False, False, True, False, False)":["官+財","同+食"],"('S', 1, False, '印', True, False, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, False, '官', False, True, True, True, True, False, False, False, True)":["官+財+食","同"],"('W', 3, False, True, 0, False, False, 2)":["14+印+同+官","15+官+財+食"],"('S', 1, False, '印', False, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, False, '官', True, True, False, True, False, False, False, False, True)":["官+財","同+食"],"('S', 6, True, '印', False, True, False, False, False, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', True, True, False, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 1, False, '印', False, False, True, False, True, False, True, False, False)":["官+財+食","印+同"],"('W', 3, True, False, 0, False, False, 3)":["印+同+官","財+食"],"('W', 3, False, False, 9, True, False, 0)":["印+同","財+食"],"('S', 1, True, '財', False, False, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '印', False, True, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, True, True, True, False, False, False, True, False)":["印+官+財","同"],"('W', 3, True, False, 8, True, False, 0)":["印+同","財+食"],"('S', 6, False, '印', True, False, True, True, True, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, False, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '印', False, False, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', True, True, False, False, False, False, True, False, True)":["印+財+食","同+官"],"('S', 1, True, '官', False, True, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, False, '財', False, True, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, True, False, False, False, True, False)":["印+官+財","同"],"('S', 1, False, '官', True, False, True, True, True, False, False, False, True)":["印+官+財","同"],"('S', 6, False, '財', True, False, True, True, True, True, False, True, True)":["官+財+食","同"],"('W', 3, False, True, 9, True, False, 4)":["14+印+同+官","15+官+食"],"('S', 1, False, '官', True, False, True, False, True, False, False, True, True)":["印+官+財","同"],"('S', 6, False, '印', False, True, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '財', True, False, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '財', False, True, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, True, '官', True, False, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '財', True, False, True, True, True, True, False, False, True)":["官+財+食","同"],"('S', 6, True, '官', True, False, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 1, True, '財', False, True, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('S', 1, True, '官', False, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '財', True, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', True, False, True, True, False, False, False, True, True)":["印+財+食","同+官"],"('W', 3, False, True, 0, True, False, 3)":["14+印+同+官","15+官+財+食"],"('S', 1, False, '財', False, True, True, True, False, False, False, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('S', 1, False, '印', True, False, False, True, False, True, True, False, False)":["官+財+食","印+同"],"('S', 1, True, '印', True, True, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, True, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '財', False, True, True, True, True, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, True, False, True, False, False, False, True)":["印+財+食","同+官"],"('W', 3, False, True, 9, True, False, 0)":["14+印+同+官","15+財+食"],"('S', 6, False, '官', True, False, True, True, True, False, False, False, True)":["印+官+財","同"],"('W', 3, False, True, 9, True, False, 3)":["14+印+同+官","15+官+財+食"],"('S', 6, False, '印', True, False, False, True, False, True, False, True, False)":["38+官+財+食","印+同"],"('S', 6, True, '印', True, True, True, True, False, True, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, True, False, True, False, True, False, False, True)":["官+財","同+食"],"('S', 1, False, '官', False, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '官', False, True, True, True, True, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, True, False, False, True, False, True)":["印+官+財","同"],"('S', 1, True, '財', True, False, True, True, True, True, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, True, True, False, True, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '財', True, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, False, True, False, True, False, False, False)":["官+財+食","印+同"],"('W', 3, True, True, 9, True, False, 4)":["印+同","財+食"],"('S', 1, True, '財', False, True, True, True, False, True, True, False, False)":["財+食","印+同+官"],"('S', 6, False, '財', False, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('W', 3, False, False, 9, True, False, 2)":["印+同","官+財+食"],"('S', 1, True, '官', True, True, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 6, False, '印', True, False, True, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 6, False, '財', False, True, True, True, False, True, False, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, False, True, False, True, False, False, True, False)":["財+食","印+同+官"],"('W', 3, True, False, 9, True, False, 0)":["印+同","財+食"],"('W', 3, True, True, 0, False, False, 2)":["印+同+官","財+食"],"('S', 6, True, '財', True, False, True, True, True, True, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, False, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, True, '官', True, False, True, True, True, False, False, False, True)":["官+財+食","同"],"('W', 3, True, True, 9, True, True, 1)":["印+同","財+食"],"('S', 1, True, '財', False, False, True, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, False, True, True, True, True, True, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, False, True, True, False, True, False, False, True)":["官+財+食","同"],"('S', 6, True, '財', True, False, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, False, False, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '官', False, True, False, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, False, True, False, False, False, True)":["印+財+食","同+官"],"('S', 1, False, '財', False, True, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 6, False, '官', False, True, False, True, False, True, False, True, True)":["官+財+食","同"],"('W', 3, True, False, 0, True, True, 1)":["印+同","財+食"],"('S', 6, False, '財', False, True, True, True, False, False, False, False, True)":["官+財+食","同"],"('S', 1, True, '官', False, True, False, True, False, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '官', True, False, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, True, False, True, False, True, False)":["財+食","印+同+官"],"('S', 6, False, '印', False, True, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, True, '官', False, True, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 6, False, '官', False, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '財', True, True, True, True, True, False, True, False, True)":["官+財+食","同"],"('S', 6, True, '財', True, False, True, True, True, False, False, True, False)":["官+財+食","印+同"],"('S', 6, True, '財', False, False, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, False, True, False, True, False, False, False, True)":["官+財+食","同"],"('W', 3, True, True, 0, True, True, 1)":["印+同","財+食"],"('S', 6, False, '官', True, True, False, False, False, False, False, True, False)":["官+財","同+食"],"('S', 6, True, '官', True, True, False, False, False, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '財', False, False, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, False, '印', False, False, False, True, False, True, False, False, False)":["官+財+食","印+同"],"('S', 6, False, '財', False, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', True, False, True, True, True, False, False, True, True)":["印+官+財","同"],"('S', 1, False, '印', False, False, True, True, True, True, False, True, False)":["官+財+食","印+同"],"('S', 6, True, '財', True, True, True, True, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, True, '印', False, True, False, True, False, False, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '財', False, True, True, True, True, True, True, False, True)":["印+財+食","同+官"],"('S', 6, True, '官', True, False, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, False, '印', False, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 6, False, '印', True, False, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '官', True, False, True, False, True, False, False, True, True)":["印+官+財","同"],"('S', 1, False, '財', False, False, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '財', True, False, True, True, True, True, True, False, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '財', False, False, True, False, True, False, False, True, False)":["官+財+食","印+同"],"('S', 1, False, '官', True, False, True, False, True, False, False, False, True)":["印+官+財","同"],"('S', 1, True, '印', False, False, False, True, False, True, False, True, True)":["印+財+食","同+官"],"('S', 1, True, '官', True, True, True, True, False, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 1, False, '官', False, True, True, True, True, False, False, False, True)":["官+財+食","同"],"('S', 6, False, '財', True, True, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, True, False, True, False, False, True)":["印+財+食","同+官"],"('S', 6, True, '財', False, True, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '官', True, False, True, True, False, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '印', False, False, True, True, True, True, False, True, False)":["官+財+食","印+同"],"('S', 6, False, '官', True, False, True, False, True, False, False, False, True)":["印+官+財","同"],"('S', 1, False, '印', False, True, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '財', False, True, True, True, False, False, False, False, True)":["印+財+食","同+官"],"('S', 1, False, '印', False, True, True, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, True, True, False, False, False, True, False)":["官+財+食","印+同"],"('S', 6, False, '官', True, False, False, True, False, False, False, True, True)":["官+財","同+食"],"('S', 6, True, '財', True, False, True, True, True, True, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, False, True, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '印', True, True, False, True, False, False, False, False, True)":["印+財+食","同+官"],"('S', 1, True, '印', False, False, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('S', 6, False, '印', False, True, True, False, True, False, False, False, True)":["官+財+食","同"],"('W', 3, False, True, 9, True, True, 1)":["17+20+印+同+官","官+財+食"],"('S', 6, False, '財', False, False, True, False, True, False, False, True, True)":["官+財+食","同"],"('W', 3, True, True, 0, False, True, 1)":["印+同+官","財+食"],"('W', 3, True, True, 9, True, False, 2)":["印+同","財+食"],"('S', 6, False, '印', False, False, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 1, False, '官', False, True, True, False, True, False, False, True, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, False, True, False, False, False, True, True)":["官+財+食","同"],"('S', 1, True, '官', True, False, True, True, True, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '官', True, False, True, True, False, True, True, False, True)":["印+官+財","同"],"('S', 1, False, '印', False, True, True, True, False, False, False, True, True)":["官+財+食","同"],"('W', 3, True, False, 0, True, False, 3)":["印+同","財+食"],"('S', 6, True, '印', False, True, False, False, False, False, False, True, False)":["財+食","印+同+官"],"('S', 6, True, '印', True, False, True, True, True, True, False, True, True)":["印+財+食","同+官"],"('S', 1, False, '官', True, True, True, True, True, False, False, True, True)":["印+官+財","同"],"('S', 6, False, '財', False, False, True, True, False, True, False, True, False)":["官+財+食","印+同"],"('S', 6, False, '官', True, True, False, True, False, True, False, True, False)":["官+財","同+食"],"('S', 1, False, '財', False, True, True, True, False, True, False, False, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, False, True, False, True, True, False, False)":["官+財+食","印+同"],"('W', 3, True, False, 9, True, False, 3)":["印+同","財+食"],"('S', 1, False, '財', False, False, True, False, True, False, False, False, False)":["官+財+食","印+同"],"('S', 6, True, '財', True, True, True, False, True, False, False, True, True)":["印+財+食","同+官"],"('W', 3, True, True, 9, True, False, 3)":["印+同","財+食"],"('S', 1, True, '官', False, True, True, True, False, True, True, False, True)":["官+財+食","同"],"('S', 6, True, '印', False, False, True, True, False, True, False, False, False)":["財+食","印+同+官"],"('S', 1, False, '官', True, False, True, True, False, True, True, False, True)":["印+官+財","同"],"('S', 1, True, '財', True, False, True, True, True, False, False, True, False)":["財+食","印+同+官"],"('W', 3, True, True, 0, True, False, 2)":["印+同","財+食"],"('S', 1, False, '印', False, True, False, True, False, True, False, False, True)":["官+財+食","同"],"('S', 6, False, '官', False, True, False, True, False, False, False, False, True)":["官+財+食","同"],"('S', 1, False, '印', False, True, False, False, False, False, True, False, False)":["官+財+食","印+同"],"('S', 6, True, '官', False, True, False, False, False, False, True, False, True)":["官+財+食","同"],"('S', 1, False, '官', True, True, True, True, True, False, True, False, True)":["印+官+財","同"],"('S', 1, False, '印', False, False, True, False, True, False, False, False, False)":["官+財+食","印+同"],"('S', 1, True, '官', True, False, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, False, '印', False, False, False, True, False, True, False, True, True)":["官+財+食","同"],"('S', 6, True, '財', True, True, True, False, True, False, True, False, True)":["印+財+食","同+官"],"('S', 6, False, '官', True, False, False, True, False, True, False, False, True)":["官+財","同+食"],"('S', 6, True, '印', False, False, True, False, True, False, False, False, False)":["財+食","印+同+官"],"('S', 6, False, '官', False, True, False, True, False, False, False, True, True)":["官+財+食","同"],"('S', 6, False, '官', True, False, False, True, False, False, True, False, True)":["官+財","同+食"],"('S', 6, False, '印', False, True, True, True, True, False, True, False, True)":["官+財+食","同"]},"specialFav":{"(13, True, True)":["官+財+食","印+同"],"(14, True, True)":["官+財+食","印+同"],"(16, False, False)":["印+同","官+財+食"],"(4, True, False)":["印+同+食","官"],"(1, True, False)":["印+同+食","11+官"],"(16, True, False)":["印+同+食","官+財"],"(1, False, False)":["印+同+食","官+財"],"(4, False, True)":["印+同+食","官"],"(1, False, True)":["印+同+食","11+官"],"(5, True, False)":["印+同+食","8+官"],"(13, True, False)":["官+財+食","印+同"],"(3, True, False)":["印+同+食","7+官"],"(13, False, True)":["官+財","印+同+食"],"(3, False, True)":["印+同+食","7+官"],"(14, False, True)":["官+財+食","印+同"],"(2, False, False)":["印+同+食","5"],"(3, False, False)":["印+同+食","7+官"],"(11, True, False)":["同+財+食","印+官"],"(12, False, False)":["同+財+食","印+官"],"(4, False, False)":["印+同+食","官"],"(2, False, True)":["印+同+食","5"],"(4, True, True)":["印+同+食","官"],"(13, False, False)":["官+財","印+同+食"],"(12, False, True)":["同+財+食","印+官"],"(2, True, False)":["印+同+食","5"],"(5, True, True)":["印+同+食","8+官"],"(18, False, True)":["財+食","印+同"],"(5, False, False)":["印+同+食","8+官"],"(17, True, False)":["同+食","印+官+財"],"(12, True, False)":["同+財+食","印+官"],"(5, False, True)":["印+同+食","8+官"],"(18, False, False)":["印+同","官+財"]}};
+});
+
+</script>
+<script>
+// analysis.js — ชั้นวิเคราะห์ดวง (ตามระบบที่ตกลงกันไว้)
+// ขั้นตอน: คะแนนฝ่ายช่วย (ราศีบน + ราศีล่าง) → ตรวจดวงพิเศษ → ประเภทดวงปกติ → ธาตุดี/ร้าย
+// ตรวจเทียบกับระบบอ้างอิง: คะแนนตรง 100%, ประเภทดวง ~98%, ชุดธาตุดี/ร้าย ~94%
+// ตัวแปรภายในใช้รหัสธาตุภายใน (0 ทอง 1 น้ำ 2 ไม้ 3 ไฟ 4 ดิน) แล้วแปลงเป็นรหัสของ BaziCore ตอนส่งออก
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'), require('./analysis-tables.js'));
+    else root.BaziAnalysis = factory(root.BaziCore, root.BaziAnalysisTables);
+})(typeof self !== 'undefined' ? self : this, function (B, TABLES) {
+    'use strict';
+
+    const ET = [2, 2, 3, 3, 4, 4, 0, 0, 1, 1];             // ธาตุของก้าน (รหัสภายใน)
+    const EL = [1, 4, 2, 2, 4, 3, 3, 4, 0, 0, 4, 1];       // ธาตุของกิ่ง (รหัสภายใน)
+    const TO_CORE = [3, 4, 0, 1, 2];                        // รหัสภายใน -> รหัส BaziCore (0 ไม้ 1 ไฟ 2 ดิน 3 ทอง 4 น้ำ)
+    const HID = [[10], [6, 10, 8], [1, 3, 5], [2], [5, 2, 10], [3, 5, 7], [4, 6], [6, 4, 2], [7, 9, 5], [8], [5, 8, 4], [9, 1]]; // 1-based
+    const HID_W = [[5, 0, 0], [5, 3, 2], [5, 3, 1], [5, 0, 0], [5, 2, 2], [5, 1, 2], [5, 3, 0], [5, 2, 2], [5, 3, 1], [5, 0, 0], [5, 3, 2], [5, 3, 0]];
+    const REL = '同食財官印';
+    const REL_TH = { '同': 'ธาตุเดียวกัน', '食': 'ธาตุถ่ายเท', '財': 'ธาตุทรัพย์', '官': 'ธาตุอำนาจ', '印': 'ธาตุให้กำเนิด' };
+    const mod = (n, m) => ((n % m) + m) % m;
+    const adj0 = (x) => mod(x - 1, 10) + 1, adj1 = (x) => mod(x - 1, 12) + 1;
+
+    const PATTERN_TH = {
+        1: 'ดวงกระแสดินแข็งแรง', 2: 'ดวงกระแสน้ำแข็งแรง', 3: 'ดวงกระแสทองแข็งแรง', 4: 'ดวงกระแสไม้แข็งแรง', 5: 'ดวงกระแสไฟแข็งแรง',
+        6: 'ดวงภาคีดิถีดิน', 7: 'ดวงภาคีดิถีไฟ', 8: 'ดวงภาคีดิถีน้ำ', 9: 'ดวงภาคีดิถีทอง', 10: 'ดวงภาคีดิถีไม้',
+        11: 'ดวงสละดิถีตามธาตุถ่ายเท', 12: 'ดวงธาตุส่งเสริมมากเกิน', 13: 'ดวงสละดิถีตามอำนาจ', 14: 'ดวงสละดิถีตามโชค',
+        15: 'ดวงสละดิถีตามธาตุแข็งแรง', 16: 'ดวง 2 ธาตุเกื้อหนุน (คู่ธาตุ+ส่งเสริม)', 17: 'ดวง 2 ธาตุเกื้อหนุน (คู่ธาตุ+ถ่ายเท)',
+        18: 'ดวง 2 ธาตุขัดแย้ง', 20: 'ดวงกระแสแข็งแรงพิเศษ'
+    };
+    const PATTERN_ZH = { 1: '專旺', 2: '專旺', 3: '專旺', 4: '專旺', 5: '專旺', 6: '化氣', 7: '化氣', 8: '化氣', 9: '化氣', 10: '化氣', 11: '從兒', 12: '印旺', 13: '從殺', 14: '從財', 15: '從強', 16: '兩神成象', 17: '兩神成象', 18: '兩神相戰', 20: '專旺' };
+    const STRENGTH_TH = { 1: 'ดิถีแข็งแรง', 6: 'ดิถีสมดุล', 2: 'ดิถีอ่อน ปานกลาง', 3: 'ดิถีอ่อน', 4: 'ดิถีอ่อน มีโรค (ใช้ยารักษา)' };
+
+    // แปลงผลผูกดวงเป็นโครงสร้างภายใน: fn[k] = [ก้าน, กิ่ง] แบบ 1-based, k: 2 ยาม 3 วัน 4 เดือน 5 ปี
+    function toFn(chart) {
+        const p = chart.pillars, fn = [];
+        [['hour', 2], ['day', 3], ['month', 4], ['year', 5]].forEach(([k, i]) => { fn[i] = [p[k].stem + 1, p[k].branch + 1]; });
+        return fn;
+    }
+
+    // ---------- คะแนนฝ่ายช่วย: ราศีบน + ราศีล่าง ----------
+    // ราศีบน: ก้านทั้ง 4 (รวมก้านวัน) ที่เป็นธาตุเดียวกัน/ให้กำเนิด ตัวละ 1
+    //   หัก 0.5 เมื่อถูกก้านข้างเคียงขั้วเดียวกันข่ม: ก้านเดือน↔ก้านปี, ก้านวันเมื่อถูกข่มทั้งก้านยามและก้านเดือน
+    // ราศีล่าง: กิ่งฝ่ายช่วย ยาม 1 · วัน 1.5 · เดือน 2 · ปี 1
+    //   กิ่งดินคลัง (丑辰未戌) ที่แฝงธาตุฝ่ายช่วย (ยกเว้นทอง) ได้ 0.5 (กิ่งเดือน 1)
+    //   กิ่งข้างเคียงที่ชงกันหักตามตำแหน่ง ยาม 0.5 · วัน 0.5 · เดือน 0.25 · ปี 0.5
+    function supportScoreFn(fn) {
+        const ek = ET[fn[3][0] - 1], km1 = mod(ek - 1, 5);
+        const help = (e) => e === ek || e === km1;
+        let upper = 0;
+        for (let k = 2; k < 6; k++) {
+            if (!help(ET[fn[k][0] - 1])) continue;
+            let v = 1;
+            const st = fn[k][0];
+            if (k === 3 && st === adj0(fn[4][0] + 4) && st === adj0(fn[2][0] + 4)) v -= 0.5;
+            if (k === 4 && st === adj0(fn[5][0] + 4)) v -= 0.5;
+            if (k === 5 && st === adj0(fn[4][0] + 4)) v -= 0.5;
+            upper += v;
+        }
+        const W = { 2: 1, 3: 1.5, 4: 2, 5: 1 }, D = { 2: 0.5, 3: 0.5, 4: 0.25, 5: 0.5 };
+        const E = {}; for (let k = 2; k < 6; k++) E[k] = EL[fn[k][1] - 1];
+        const sc = [0, 0, 0, 0, 0];
+        const woodStem = [2, 3, 4, 5].some((k) => ET[fn[k][0] - 1] === 2), woodBr = [2, 3, 4, 5].some((k) => E[k] === 2);
+        for (let k = 2; k < 6; k++) {
+            const b = fn[k][1];
+            sc[E[k]] += W[k];
+            if (help(E[k]) || ![2, 5, 8, 11].includes(b)) continue;
+            if (ek === 3 && b === 5) {
+                if (woodStem || woodBr) sc[ek] += (woodBr ? [0.5, 0.75, 1, 0.5] : [0.25, 0.25, 0.5, 0.25])[k - 2];
+            } else {
+                const h = HID[b - 1].slice(1).find((x) => help(ET[x - 1]) && ET[x - 1] !== 0);
+                if (h !== undefined) sc[ET[h - 1]] += k === 4 ? 1 : 0.5;
+            }
+        }
+        const flags = new Set();
+        const clash = (a, c) => fn[a][1] === adj1(fn[c][1] + 6);
+        for (let k = 2; k < 6; k++) {
+            const e = E[k];
+            if (e === 4 && (ek === 4 || ek === 0)) continue;
+            for (const nb of [k + 1, k - 1]) {
+                if (nb < 2 || nb > 5 || !clash(k, nb) || (flags.has(k) && flags.has(nb))) continue;
+                flags.add(k); flags.add(nb);
+                sc[e] -= D[k]; sc[E[nb]] -= D[nb];
+                if (e === 4) sc[ek] -= D[nb];
+            }
+        }
+        const lower = sc[ek] + sc[km1];
+        return { upper, lower, total: upper + lower };
+    }
+
+    // จำนวนธาตุบนก้าน [0] และในกิ่ง [1]
+    function counts(fn) {
+        const c = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
+        for (let k = 2; k < 6; k++) { c[ET[fn[k][0] - 1]][0]++; c[EL[fn[k][1] - 1]][1]++; }
+        return c;
+    }
+    // กำลังธาตุตามฤดู: จำนวนตัว × น้ำหนักฤดู (ธาตุเดือน 5, ธาตุที่เดือนให้กำเนิด 4, ...) + ครึ่งหนึ่งของธาตุแม่
+    function seasonalStrength(fn) {
+        const cnt = [0, 0, 0, 0, 0];
+        for (let k = 2; k < 6; k++) { cnt[ET[fn[k][0] - 1]]++; cnt[EL[fn[k][1] - 1]]++; }
+        const m = EL[fn[4][1] - 1], w = [0, 0, 0, 0, 0];
+        for (let i = 0; i < 5; i++) w[(m + i) % 5] = 5 - i;
+        const a = cnt.map((c, e) => c * w[e]);
+        const half = a.map((x) => Math.trunc(x / 2));
+        return a.map((x, e) => x + (x > 0 ? half[mod(e - 1, 5)] : 0));
+    }
+    // ธาตุหลักที่ใช้ (อำนาจ / ทรัพย์ / ให้กำเนิด) ที่มีทั้งบนก้านและในกิ่ง และมีกำลังมากที่สุด
+    function keyElement(fn, ek, c, A) {
+        const km2 = mod(ek - 2, 5), kp2 = mod(ek + 2, 5), km1 = mod(ek - 1, 5);
+        const v = [km2, kp2, km1].map((e) => (c[e][0] > 0 && c[e][1] > 0 ? A[e] : 0));
+        let r = -1;
+        if (v[0] + v[1] + v[2] === 0) {
+            if (A[km2] >= A[kp2] && A[km2] >= A[km1]) r = km2;
+            if (A[kp2] >= A[km2] && A[kp2] >= A[km1]) r = kp2;
+            return (A[km1] < A[km2] || A[km1] < A[kp2]) ? r : km1;
+        }
+        if (v[0] > 0 && v[0] >= v[1] && v[0] >= v[2]) r = km2;
+        if (v[1] > 0 && v[1] >= v[0] && v[1] >= v[2]) r = kp2;
+        return (v[2] <= 0 || v[2] < v[1] || v[2] < v[0]) ? r : km1;
+    }
+    // ตรวจดวงสละดิถี (從格): คะแนนต่ำ ไม่มีฝ่ายช่วยในกิ่ง ไม่มีธาตุให้กำเนิดบนก้าน แล้วตามธาตุที่มีกำลังสูงสุด
+    function followPattern(fn, ek, c, score) {
+        const km1 = mod(ek - 1, 5), kp2 = mod(ek + 2, 5);
+        if (!(score.total < 4 && score.lower < 1)) return null;
+        if (c[ek][1] + c[km1][1] !== 0 || c[km1][0] !== 0) return null;
+        const b = new Array(10).fill(0);
+        for (let k = 2; k < 6; k++) {
+            b[fn[k][0] - 1] += 5;
+            HID[fn[k][1] - 1].forEach((h, j) => {
+                let w = HID_W[fn[k][1] - 1][j]; const e = ET[h - 1];
+                if (k === 3 && (e === ek || e === km1)) w = w === 5 ? 8 : w * 2;
+                if (k === 4 && j === 0) b[h - 1] += w * 2;
+                b[h - 1] += w;
+            });
+        }
+        const P0 = [0, 0, 0, 0, 0];
+        for (let s = 0; s < 10; s++) P0[mod(ET[s] - ek, 5)] += b[s];
+        const P1 = P0.map((v, r) => v + P0[mod(r - 1, 5)] / 2);
+        let hi = 0, mx = 0;
+        P1.forEach((v, r) => { if (v > mx) { mx = v; hi = r; } });
+        const wealthAny = c[kp2][0] + c[kp2][1] > 0;
+        if (!wealthAny && hi === 1) return 11;
+        if (hi === 3) return 13;
+        if (hi === 2 || (wealthAny && hi === 1)) return 14;
+        return null;
+    }
+    const waterSupport = (fn) => (ET[fn[3][0] - 1] === 1 && EL[fn[3][1] - 1] === 4 && (fn[3][1] === 2 || fn[3][1] === 5)) ? 1 : 0;
+
+    function normalType(fn, ek, c, A, score) {
+        const tot = (e) => c[e][0] + c[e][1];
+        const km1 = mod(ek - 1, 5), km2 = mod(ek - 2, 5), kp1 = mod(ek + 1, 5), kp2 = mod(ek + 2, 5);
+        if (score.total < 4.5) {
+            const pw = tot(km2) - waterSupport(fn);
+            if ((pw >= 3 && tot(km1) === 0 && tot(kp1) >= 1) || (pw === 2 && tot(kp2) >= 2 && tot(kp1) >= 1 && tot(km1) === 0 && A[km2] > A[kp1])) return 4;
+            return score.total <= 3 ? 3 : 2;
+        }
+        return score.total >= 5 ? 1 : 6;
+    }
+
+    // กุญแจแบบเดียวกับที่ใช้สร้างตาราง (รูปแบบ tuple ของ Python)
+    const pyKey = (arr) => '(' + arr.map((x) => typeof x === 'boolean' ? (x ? 'True' : 'False') : typeof x === 'string' ? `'${x}'` : String(x)).join(', ') + ')';
+    function specialKey(fn, ek, c, score) {
+        const tot = (e) => c[e][0] + c[e][1];
+        const km1 = mod(ek - 1, 5), km2 = mod(ek - 2, 5), kp1 = mod(ek + 1, 5), kp2 = mod(ek + 2, 5);
+        const T = score.total, h = tot(ek) + tot(km1), out = tot(kp1), pw = tot(km2);
+        const f6 = T >= 8 || h >= 7 || (T >= 7 && h === 6 && out === 1 && pw === 1);
+        const p1 = EL[fn[4][1] - 1] === km1 && tot(ek) >= 3 && tot(km1) >= 3 && tot(kp2) === 0 && pw === 0 && out <= 1;
+        const p2 = EL[fn[4][1] - 1] === kp1 && tot(ek) >= 3 && out >= 3 && T >= 4.5 && tot(kp2) === 0 && pw === 0;
+        return pyKey([ek, fn[4][1], f6, pw + out <= 1, T >= 7, p1, p2, T < 5]);
+    }
+    function favKey(fn, ek, c, A, type) {
+        const km1 = mod(ek - 1, 5), km2 = mod(ek - 2, 5), kp1 = mod(ek + 1, 5), kp2 = mod(ek + 2, 5);
+        const tot = (e) => c[e][0] + c[e][1];
+        const hi = keyElement(fn, ek, c, A);
+        const hirel = hi >= 0 ? REL[mod(hi - ek, 5)] : '-';
+        if (type === 4) return pyKey(['U', c[kp1][0] > 0, c[kp1][1] > 0, c[ek][1] > 0]);
+        if (type === 2 || type === 3) {
+            const z2 = c[km1][0] >= 1, z3 = c[km1][1] >= 1;
+            let dt = 0;
+            if (A[kp1] > A[km2] && A[kp1] > A[kp2] && tot(kp1) >= 3) dt = 8;
+            else if (A[kp2] >= A[kp1] - 1 && A[kp2] > A[km2]) dt = 9;
+            else if (A[km2] >= A[kp2] - 1 && A[km2] > A[kp1]) dt = 10;
+            return pyKey(['W', type, z2, z3, type === 3 ? dt : 0, hirel === '官', km2 === 4, ek]);
+        }
+        return pyKey(['S', type, c[km1][0] > 0, hirel, c[km2][0] > 0, c[km2][1] > 0, tot(kp2) > 0, tot(kp1) > 0,
+            A[kp2] > A[kp1], A[kp1] > A[km2], A[ek] > A[km1], A[km1] > A[ek], tot(km1) <= 2]);
+    }
+
+    // แปลงป้าย [ธาตุดี, ธาตุร้าย] เป็นรายการธาตุของ BaziCore
+    function decode(label, ek) {
+        const [favS, unfavS] = label.map((s) => (s ? s.split('+') : []));
+        const elOf = (r) => mod(ek + REL.indexOf(r), 5);
+        const build = (tokens, side) => {
+            const out = [];
+            for (const t of tokens) {
+                if (REL.includes(t)) out.push({ code: elOf(t), relation: REL_TH[t], zh: t });
+                else if (t === '9') out.push({ code: ek, relation: REL_TH['同'], zh: '比肩', polarity: 'same' });
+                else if (t === '10') out.push({ code: ek, relation: REL_TH['同'], zh: '劫財', polarity: 'opposite' });
+            }
+            // 14/15: ธาตุที่อยู่ทั้งสองฝั่ง ดี/ร้ายต่างกันระหว่างก้านกับกิ่ง
+            const split = tokens.includes('14') ? 'branch' : tokens.includes('15') ? 'stem' : null;
+            return { out, split };
+        };
+        const F = build(favS, 'fav'), U = build(unfavS, 'unfav');
+        const both = F.out.filter((x) => !x.polarity && U.out.some((y) => !y.polarity && y.code === x.code)).map((x) => x.code);
+        const fin = (list, isFav) => list.map((x) => {
+            const e = TO_CORE[x.code];
+            const o = { element: e, th: B.ELEMENTS[e], relation: x.relation };
+            if (x.polarity) o.polarity = x.polarity;
+            if (both.includes(x.code) && !x.polarity && F.split) {
+                const favPos = F.split; // ตำแหน่งที่เป็นคุณ
+                o.position = isFav ? favPos : (favPos === 'branch' ? 'stem' : 'branch');
+            }
+            return o;
+        });
+        return { favorable: fin(F.out, true), unfavorable: fin(U.out, false) };
+    }
+
+    function analyze(chart) {
+        const fn = toFn(chart);
+        const ek = ET[fn[3][0] - 1];
+        const score = supportScoreFn(fn);
+        const c = counts(fn), A = seasonalStrength(fn);
+        const reasons = [`คะแนนฝ่ายช่วย ราศีบน ${score.upper} + ราศีล่าง ${score.lower} = ${score.total}`];
+        let pattern = 0, strength = null, label = null;
+        const fp = followPattern(fn, ek, c, score);
+        if (fp) {
+            pattern = fp;
+            reasons.push('คะแนนต่ำ ไม่มีฝ่ายช่วยในกิ่งและไม่มีธาตุให้กำเนิดบนก้าน เจ้าชะตาจึงยอมตามธาตุที่มีกำลังสูงสุด');
+        } else {
+            pattern = TABLES.special[specialKey(fn, ek, c, score)] || 0;
+        }
+        if (pattern) {
+            const tot = (e) => c[e][0] + c[e][1];
+            label = TABLES.specialFav[pyKey([pattern, tot(mod(ek + 1, 5)) > 0, tot(mod(ek + 2, 5)) > 0])];
+        } else {
+            strength = normalType(fn, ek, c, A, score);
+            label = TABLES.fav[favKey(fn, ek, c, A, strength)];
+            if (strength === 4) reasons.push('ธาตุอำนาจกดเจ้าชะตาหนักโดยไม่มีธาตุให้กำเนิดช่วย เปรียบเหมือนดวงมีโรค ต้องใช้ธาตุถ่ายเทเป็นยา (病藥)');
+        }
+        const fu = label ? decode(label, ek) : { favorable: [], unfavorable: [] };
+        return {
+            pattern, patternTh: pattern ? PATTERN_TH[pattern] : 'ดวงปกติ', patternZh: pattern ? PATTERN_ZH[pattern] : '正格',
+            strength, strengthTh: strength ? STRENGTH_TH[strength] : null,
+            score, seasonal: A.map((v, e) => ({ element: TO_CORE[e], th: B.ELEMENTS[TO_CORE[e]], value: v })),
+            keyElement: (() => { const h = keyElement(fn, ek, c, A); return h >= 0 ? { element: TO_CORE[h], th: B.ELEMENTS[TO_CORE[h]] } : null; })(),
+            favorable: fu.favorable, unfavorable: fu.unfavorable,
+            reasons, matched: !!label
+        };
+    }
+
+    function supportScore(chart) { return supportScoreFn(toFn(chart)); }
+    return { analyze, supportScore, PATTERN_TH, STRENGTH_TH };
+});
+
+</script>
+<script>
+(function () {
+  const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
+  const $ = (id) => document.getElementById(id);
+  $('place').innerHTML = PLACES.map(([n, l], i) => `<option value="${l}">${n}</option>`).join('');
+  const E = (name) => BaziCore.ELEMENTS.indexOf(name);
+  const pad = (n) => String(n).padStart(2, '0');
+  const fmt = (d) => `${d.day}/${d.month}/${d.year} ${pad(d.hour)}:${pad(d.minute)}`;
+  const OPT_TEXT = { winterSolstice: 'ตังจี่ 冬至', lichun: 'ลิบชุน 立春', summerSolstice: 'แฮ่จี่ 夏至' };
+
+  function glyph(ch, th, el, yang) {
+    return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
+  }
+
+  function render() {
+    const [y, m, d] = $('date').value.split('-').map(Number);
+    const [h, mi] = $('time').value.split(':').map(Number);
+    if (!y || isNaN(h)) return;
+    const g = document.querySelector('input[name="g"]:checked').value;
+    const r = BaziCore.calculate({ year: y, month: m, day: d, hour: h, minute: mi, gender: g, tz: 7, longitude: Number($('place').value),
+      options: { yearChange: $('yearChange').value, ziHour: $('ziHour').value, luckMethod: $('luckMethod').value, monthSystem: $('monthSystem').value, trueSolarTime: $('solar').value === '1', pregnancyMonths: Number($('preg').value) || 9 } });
+    const name = $('name').value.trim();
+    $('who').innerHTML = name ? `· ${name}${name === 'ตัวอย่าง' ? '<span class="example">ข้อมูลตัวอย่าง</span>' : ''}` : '';
+
+    const cols = [['conception', 'หลักปฏิสนธิ', 'extra'], ['lifePalace', 'หลักลัคนา', 'extra'], ['hour', 'หลักยาม', ''], ['day', 'หลักดิถี', 'dm'], ['month', 'หลักเดือน', ''], ['year', 'หลักปี', '']];
+    $('pillars').innerHTML = cols.map(([k, label, cls]) => {
+      const p = r.pillars[k];
+      const stemGod = p.tenGod.code === '日主' ? '日主 ตัวเจ้าชะตา' : `${p.tenGod.code} ${p.tenGod.th}`;
+      const hidden = k === 'conception' || k === 'lifePalace' ? '' : p.hidden.map((s) => {
+        const tg = BaziCore.tenGod(r.pillars.day.stem, s.stem);
+        return `<span class="chip" title="${tg.th}"><span class="han e${E(s.element)}">${s.zh}</span> ${tg.code}</span>`;
+      }).join('');
+      return `<div class="col ${cls}"><h3>${label}</h3><div class="god">${stemGod}</div>
+        <div class="stem">${glyph(BaziCore.STEMS[p.stem], BaziCore.STEMS_TH[p.stem], p.stemElement, p.stemYang)}</div>
+        ${glyph(BaziCore.BRANCHES[p.branch], `${BaziCore.BRANCHES_TH[p.branch]} ${p.animal}`, p.branchElement, p.branchYang)}
+        <div class="hidden-stems">${hidden}</div></div>`;
+    }).join('');
+
+    const dm = r.dayMaster, ct = r.calcTime, mt = r.monthTerm;
+    $('facts').innerHTML = `
+      <dt>ธาตุประจำตัว</dt><dd><span class="e${E(dm.element)}" style="font-family:var(--f-han);font-weight:700">${dm.zh}</span> ${dm.th} ${dm.element}${dm.yang ? 'หยาง' : 'หยิน'}</dd>
+      <dt>เวลาที่ใช้คำนวณ</dt><dd class="mono">${fmt(ct)}${r.options.trueSolarTime ? ` (ปรับ ${r.solarShiftMinutes} นาที)` : ''}</dd>
+      <dt>เดือนเริ่มที่</dt><dd>${mt.start.th} ${mt.start.zh} <span class="mono">${fmt(mt.start)}</span></dd>
+      <dt>สารทถัดไป</dt><dd>${mt.next.th} ${mt.next.zh} <span class="mono">${fmt(mt.next)}</span></dd>
+      <dt>เปลี่ยนปีที่</dt><dd>${OPT_TEXT[r.options.yearChange]}</dd>`;
+
+    const an = BaziAnalysis.analyze(r);
+    const posTh = { stem: ' (เฉพาะบนก้าน)', branch: ' (เฉพาะในกิ่ง)' };
+    const elList = (l) => l.length ? l.map((x) => `<span class="e${x.element}">${x.th}${x.polarity === 'same' ? ' ขั้วเดียวกับเจ้าชะตา' : x.polarity === 'opposite' ? ' ขั้วตรงข้ามเจ้าชะตา' : ''}${x.position ? posTh[x.position] : ''}</span>`).join(', ') : '—';
+    $('ana').innerHTML = `
+      <dt>ลักษณะดวง</dt><dd>${an.pattern ? `${an.patternTh} <span style="font-family:var(--f-han)">${an.patternZh}</span>` : an.strengthTh}</dd>
+      <dt>คะแนนฝ่ายช่วย</dt><dd class="mono">${an.score.upper} + ${an.score.lower} = ${an.score.total}</dd>
+      <dt>ธาตุให้คุณ</dt><dd>${elList(an.favorable)}</dd>
+      <dt>ธาตุให้โทษ</dt><dd>${elList(an.unfavorable)}</dd>`;
+
+    const max = Math.max(...r.elementCount.map((e) => e.count), 1);
+    $('bars').innerHTML = r.elementCount.map((e, i) => `<div class="bar e${i}"><span>${e.element}</span><span class="track"><span class="fill" style="display:block;width:${e.count / max * 100}%"></span></span><span class="mono" style="color:var(--ink)">${e.count}</span></div>`).join('');
+
+    $('warns').innerHTML = r.warnings.length ? r.warnings.map((w) => `<div class="warn">${w}</div>`).join('') : '<p class="note" style="margin:0">เวลาเกิดไม่อยู่ใกล้รอยต่อของปี เดือน หรือยาม ผลไม่อ่อนไหวต่อความคลาดเคลื่อนของเวลาเกิดเล็กน้อย</p>';
+
+    const L = r.luck;
+    const startTxt = L.takeDay >= 0 ? `${L.takeAge} ปี ${L.takeDay} วัน (นับจากวันเปลี่ยนปี)` : `${L.takeAge} ปี ${L.takeMonth} เดือน`;
+    const f = L.periods[0];
+    $('luckInfo').textContent = `เดิน${L.forward ? 'หน้า' : 'ถอยหลัง'}จากเสาเดือน · วัยจรแรกเริ่ม ${f.start.day}/${f.start.month}/${f.start.year} อายุ ${f.ageAtStart.years} ปี ${f.ageAtStart.months} เดือน · ค่าภายใน: ${startTxt}`;
+    const now = new Date(); const nowKey = now.getFullYear() * 1e4 + (now.getMonth() + 1) * 100 + now.getDate();
+    const key = (d) => d.year * 1e4 + d.month * 100 + d.day;
+    $('luck').innerHTML = L.periods.map((p) => {
+      const cur = key(p.start) <= nowKey && nowKey < key(p.end);
+      const q = p.pillar;
+      return `<li class="${cur ? 'now' : ''}">
+        <span class="age">อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} ด.` : ''}</span>
+        <span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>
+        <span class="date">${BaziCore.STEMS_TH[q.stem]}${BaziCore.BRANCHES_TH[q.branch]}</span>
+        <span class="date">${q.tenGod.code}</span>
+        <span class="date mono">${p.start.day}/${p.start.month}/${p.start.year}</span>
+        ${cur ? '<span class="tag">ตอนนี้</span>' : ''}</li>`;
+    }).join('');
+  }
+
+  $('f').addEventListener('submit', (e) => { e.preventDefault(); render(); });
+  ['date', 'time', 'place', 'yearChange', 'ziHour', 'luckMethod', 'monthSystem', 'solar', 'preg', 'gM', 'gF'].forEach((id) => $(id).addEventListener('change', render));
+  render();
+})();
+</script>
