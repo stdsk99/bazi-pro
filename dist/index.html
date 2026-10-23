@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ผังดวงสี่เสา</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -211,13 +213,57 @@ footer { font-size: .85rem; }
 @media (max-width: 360px) {
   .tg span { display: none; }
 }
+
+/* แถบข้อมูลเกิดแบบย่อ */
+form[hidden], .birthbar[hidden] { display: none; }
+.birthbar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; }
+.bsum { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.bsum b { font-size: 1.05rem; }
+.bsum span { color: var(--ink-soft); }
+button.ghost { background: none; color: var(--jade); border: 1px solid var(--jade); }
+/* เมนู */
+.tabs { position: sticky; top: 0; z-index: 5; display: flex; gap: 4px; background: var(--paper); padding: 6px 0; border-bottom: 1px solid var(--rule); overflow-x: auto; scrollbar-width: none; }
+.tabs button { background: none; color: var(--ink-soft); border-radius: 8px 8px 0 0; padding: 10px 18px; font-weight: 600; white-space: nowrap; border-bottom: 3px solid transparent; border-radius: 0; }
+.tabs button[aria-selected="true"] { color: var(--jade); border-bottom-color: var(--jade); }
+.tabs button:hover { color: var(--ink); }
+.page { display: grid; gap: 22px; }
+.page[hidden] { display: none; }
+/* วัยจร: การ์ดกดเลือกได้ + รายละเอียดช่วงที่เลือก */
+.luck li { padding: 0; }
+.luck li button { all: unset; box-sizing: border-box; width: 100%; height: 100%; display: grid; gap: 3px; justify-items: center; padding: 10px 6px 12px; cursor: pointer; border-radius: 9px; }
+.luck li button:focus-visible { outline: 2px solid var(--jade); outline-offset: 2px; }
+.luck li.sel { outline: 3px solid var(--jade); outline-offset: 1px; }
+.luck .rate { font-size: .78rem; font-weight: 600; }
+.r-good { color: var(--good); } .r-bad { color: var(--bad); } .r-mix { color: var(--ink-soft); }
+.ldetail h2 { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.ldetail h2 small { font-weight: 400; color: var(--ink-soft); font-size: .9rem; }
+.lgrid { display: grid; grid-template-columns: auto 1fr; gap: 16px 20px; align-items: start; }
+.lpill { display: grid; gap: 8px; justify-items: center; }
+.lpill .tile { width: 72px; }
+.lrows { display: grid; gap: 10px; }
+.lrow { display: grid; grid-template-columns: 7.5em 1fr; gap: 4px 12px; align-items: baseline; }
+.lrow .k { color: var(--ink-soft); font-size: .92rem; }
+.lsum { margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--paper); font-size: 1rem; }
+.lsum b { font-size: 1.05rem; }
+.soon { margin-top: 12px; border: 1px dashed var(--rule); border-radius: 10px; padding: 12px 14px; color: var(--ink-soft); font-size: .92rem; }
+@media (max-width: 600px) {
+  .tabs button { padding: 10px 14px; flex: 1; }
+  .lgrid { grid-template-columns: 1fr; }
+  .lpill { grid-auto-flow: column; justify-content: start; }
+  .lpill .tile { width: 60px; }
+}
 </style>
 
 <div class="wrap">
   <header>
     <h1><span class="han">四柱八字</span>ผังดวงสี่เสา</h1>
-    <p class="sub">หน้าทดสอบ · ผูกดวงและวิเคราะห์โครงสร้างดวง</p>
+    <p class="sub">หน้าทดสอบ</p>
   </header>
+
+  <div class="birthbar" id="bbar" hidden>
+    <div class="bsum" id="bsum"></div>
+    <button type="button" class="ghost" id="edit" aria-controls="f" aria-expanded="false">แก้ไขข้อมูลเกิด</button>
+  </div>
 
   <form id="f" autocomplete="off">
     <div class="row">
@@ -251,39 +297,51 @@ footer { font-size: .85rem; }
     </details>
   </form>
 
-  <section aria-labelledby="h-chart">
-    <h2 id="h-chart">ผังดวง <span id="who"></span></h2>
-    <div class="board">
-      <div class="main4" id="pillars"></div>
-      <aside class="extra2" id="extras" aria-label="หลักเสริม"></aside>
-    </div>
-  </section>
+  <nav class="tabs" role="tablist" aria-label="เมนู">
+    <button type="button" role="tab" id="t-chart" data-page="chart" aria-controls="p-chart">ผังดวง</button>
+    <button type="button" role="tab" id="t-analysis" data-page="analysis" aria-controls="p-analysis">วิเคราะห์ดวง</button>
+    <button type="button" role="tab" id="t-luck" data-page="luck" aria-controls="p-luck">วัยจร</button>
+  </nav>
 
-  <section class="insight">
-    <div class="panel verdict" id="verdict" aria-live="polite"></div>
-    <div class="panel wheel">
-      <h2>วงจรห้าธาตุของดวงนี้</h2>
-      <div id="wheel"></div>
-      <div class="legend"><span><i style="border-color:var(--ink-soft)"></i>ให้กำเนิด</span><span><i style="border-color:var(--rule);border-top-style:dashed"></i>ข่ม</span><span>ตัวเลข = จำนวนตัวใน 8 อักษร</span></div>
-    </div>
-  </section>
+  <div class="page" id="p-chart" role="tabpanel" aria-labelledby="t-chart">
+    <section aria-labelledby="h-chart">
+      <h2 id="h-chart">ผังดวง <span id="who"></span></h2>
+      <div class="board">
+        <div class="main4" id="pillars"></div>
+        <aside class="extra2" id="extras" aria-label="หลักเสริม"></aside>
+      </div>
+    </section>
+    <section class="summary">
+      <div class="panel">
+        <h2>ข้อมูลการคำนวณ</h2>
+        <dl id="facts"></dl>
+      </div>
+      <div class="panel" id="warnPanel">
+        <h2>ข้อควรระวัง</h2>
+        <div class="warns" id="warns"></div>
+      </div>
+    </section>
+  </div>
 
-  <section class="summary">
-    <div class="panel">
-      <h2>ข้อมูลการคำนวณ</h2>
-      <dl id="facts"></dl>
-    </div>
-    <div class="panel" id="warnPanel">
-      <h2>ข้อควรระวัง</h2>
-      <div class="warns" id="warns"></div>
-    </div>
-  </section>
+  <div class="page" id="p-analysis" role="tabpanel" aria-labelledby="t-analysis" hidden>
+    <section class="insight">
+      <div class="panel verdict" id="verdict" aria-live="polite"></div>
+      <div class="panel wheel">
+        <h2>วงจรห้าธาตุของดวงนี้</h2>
+        <div id="wheel"></div>
+        <div class="legend"><span><i style="border-color:var(--ink-soft)"></i>ให้กำเนิด</span><span><i style="border-color:var(--rule);border-top-style:dashed"></i>ข่ม</span><span>ตัวเลข = จำนวนตัวใน 8 อักษร</span></div>
+      </div>
+    </section>
+  </div>
 
-  <section aria-labelledby="h-luck">
-    <h2 id="h-luck">วัยจร 大运</h2>
-    <p class="sub" id="luckInfo"></p>
-    <div class="luck"><ol id="luck"></ol></div>
-  </section>
+  <div class="page" id="p-luck" role="tabpanel" aria-labelledby="t-luck" hidden>
+    <section aria-labelledby="h-luck">
+      <h2 id="h-luck">วัยจร 大运</h2>
+      <p class="sub" id="luckInfo"></p>
+      <div class="luck"><ol id="luck"></ol></div>
+    </section>
+    <section class="panel ldetail" id="luckDetail" aria-live="polite"></section>
+  </div>
 
   <footer>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
 </div>
@@ -933,6 +991,26 @@ footer { font-size: .85rem; }
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
   }
 
+  let luckSel = null;
+  const G_TH = { M: 'ชาย', F: 'หญิง' };
+  function setForm(open) {
+    $('f').hidden = !open; $('bbar').hidden = open;
+    $('edit').setAttribute('aria-expanded', String(open));
+  }
+  $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
+  const PAGES = ['chart', 'analysis', 'luck'];
+  function show(pg) {
+    if (!PAGES.includes(pg)) pg = 'chart';
+    PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
+    try { localStorage.setItem('bazi.page', pg); } catch (e) {}
+    try { history.replaceState(null, '', '#' + pg); } catch (e) {}
+  }
+  document.querySelector('.tabs').addEventListener('click', (ev) => { const b = ev.target.closest('[data-page]'); if (b) { show(b.dataset.page); } });
+  document.querySelector('.tabs').addEventListener('keydown', (ev) => {
+    if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+    const cur = PAGES.findIndex((k) => !$('p-' + k).hidden), nx = PAGES[(cur + (ev.key === 'ArrowRight' ? 1 : PAGES.length - 1)) % PAGES.length];
+    show(nx); $('t-' + nx).focus();
+  });
   function render() {
     const [y, m, d] = $('date').value.split('-').map(Number);
     const [h, mi] = $('time').value.split(':').map(Number);
@@ -941,6 +1019,7 @@ footer { font-size: .85rem; }
     const r = BaziCore.calculate({ year: y, month: m, day: d, hour: h, minute: mi, gender: g, tz: 7, longitude: Number($('place').value),
       options: { yearChange: $('yearChange').value, ziHour: $('ziHour').value, luckMethod: $('luckMethod').value, monthSystem: $('monthSystem').value, trueSolarTime: $('solar').value === '1', pregnancyMonths: Number($('preg').value) || 9 } });
     const name = $('name').value.trim();
+    $('bsum').innerHTML = `<b>${name || 'ไม่ระบุชื่อ'}</b><span>${d}/${m}/${y} · ${pad(h)}:${pad(mi)} น. · ${G_TH[g]} · ${$('place').selectedOptions[0].text}</span>`;
     $('who').innerHTML = name ? `· ${name}${name === 'ตัวอย่าง' ? '<span class="example">ข้อมูลตัวอย่าง</span>' : ''}` : '';
 
     const dmStem = r.pillars.day.stem;
@@ -1031,21 +1110,59 @@ footer { font-size: .85rem; }
     $('luckInfo').textContent = `เดิน${L.forward ? 'หน้า' : 'ถอยหลัง'}จากเสาเดือน · วัยจรแรกเริ่ม ${f.start.day}/${f.start.month}/${f.start.year} อายุ ${f.ageAtStart.years} ปี ${f.ageAtStart.months} เดือน · ค่าภายใน: ${startTxt}`;
     const now = new Date(); const nowKey = now.getFullYear() * 1e4 + (now.getMonth() + 1) * 100 + now.getDate();
     const key = (d) => d.year * 1e4 + d.month * 100 + d.day;
-    $('luck').innerHTML = L.periods.map((p) => {
-      const cur = key(p.start) <= nowKey && nowKey < key(p.end);
-      const q = p.pillar;
-      return `<li class="${cur ? 'now' : ''}">
-        <span class="age">อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} ด.` : ''}</span>
-        <span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>
-        <span class="date">${BaziCore.STEMS_TH[q.stem]}${BaziCore.BRANCHES_TH[q.branch]}</span>
-        <span class="god">${q.tenGod.code}<br>${q.tenGod.th}</span>
-        <span class="date mono">${p.start.day}/${p.start.month}/${p.start.year}</span>
-        ${cur ? '<span class="tag">ตอนนี้</span>' : ''}</li>`;
-    }).join('');
+    // ประเมินธาตุของวัยจรเทียบธาตุให้คุณ/ให้โทษ
+    const sameRule = (x, stemIdx, pos) => (!x.polarity || (x.polarity === 'same') === ((stemIdx % 2) === (dmStem % 2))) && (!x.position || x.position === pos);
+    const judge = (elName, stemIdx, pos) => {
+      const e = E(elName);
+      const f = an.favorable.some((x) => x.element === e && sameRule(x, stemIdx, pos));
+      const u = an.unfavorable.some((x) => x.element === e && sameRule(x, stemIdx, pos));
+      return f && !u ? 1 : u && !f ? -1 : 0;
+    };
+    const rateOf = (q) => {
+      const a = judge(q.stemElement, q.stem, 'stem'), b = judge(q.branchElement, q.hidden[0].stem, 'branch');
+      return { a, b, sum: a + b };
+    };
+    const RATE = (v) => v >= 2 ? ['r-good', 'ส่งเสริม'] : v === 1 ? ['r-good', 'ค่อนข้างดี'] : v === 0 ? ['r-mix', 'ผสม'] : v === -1 ? ['r-bad', 'ค่อนข้างติดขัด'] : ['r-bad', 'ต้องระวัง'];
+    const ST = (v) => v > 0 ? '<span class="r-good">ธาตุให้คุณ</span>' : v < 0 ? '<span class="r-bad">ธาตุให้โทษ</span>' : '<span class="r-mix">กลางๆ</span>';
+    const curIdx = L.periods.findIndex((p) => key(p.start) <= nowKey && nowKey < key(p.end));
+    if (luckSel == null || luckSel >= L.periods.length) luckSel = curIdx >= 0 ? curIdx : 0;
+    const drawLuck = () => {
+      $('luck').innerHTML = L.periods.map((p, i) => {
+        const q = p.pillar, rt = RATE(rateOf(q).sum);
+        return `<li class="${i === curIdx ? 'now' : ''}${i === luckSel ? ' sel' : ''}"><button type="button" data-i="${i}" aria-pressed="${i === luckSel}">
+          <span class="age">อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} ด.` : ''}</span>
+          <span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>
+          <span class="date">${BaziCore.STEMS_TH[q.stem]}${BaziCore.BRANCHES_TH[q.branch]}</span>
+          <span class="rate ${rt[0]}">${rt[1]}</span>
+          <span class="date mono">${p.start.day}/${p.start.month}/${p.start.year}</span>
+          ${i === curIdx ? '<span class="tag">ตอนนี้</span>' : ''}</button></li>`;
+      }).join('');
+      const p = L.periods[luckSel], q = p.pillar, rr = rateOf(q), rt = RATE(rr.sum), nx = L.periods[luckSel + 1];
+      const endAge = nx ? `${nx.ageAtStart.years} ปี${nx.ageAtStart.months ? ` ${nx.ageAtStart.months} เดือน` : ''}` : '';
+      const bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
+      $('luckDetail').innerHTML = `
+        <h2>วัยจรช่วงที่ ${luckSel + 1} <small>อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} เดือน` : ''}${endAge ? ` – ${endAge}` : ''} · ${p.start.day}/${p.start.month}/${p.start.year} – ${p.end.day}/${p.end.month}/${p.end.year}</small></h2>
+        <div class="lgrid">
+          <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
+          <div class="lrows">
+            <div class="lrow"><span class="k">ก้าน (5 ปีแรก)</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(rr.a)}</span></div>
+            <div class="lrow"><span class="k">กิ่ง (5 ปีหลัง)</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(rr.b)}</span></div>
+            <div class="lrow"><span class="k">ราศีแฝง</span><span>${q.hidden.map((h) => { const t = BaziCore.tenGod(dmStem, h.stem); return `<span class="e${E(h.element)}" style="font-family:var(--f-han);font-weight:700">${h.zh}</span> ${t.code} ${SHORT[t.code]}`; }).join(' · ')}</span></div>
+          </div>
+        </div>
+        <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b> — ก้าน${rr.a > 0 ? 'เป็นธาตุให้คุณ' : rr.a < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'} กิ่ง${rr.b > 0 ? 'เป็นธาตุให้คุณ' : rr.b < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'}</div>
+        <div class="soon">คำทำนายละเอียดของช่วงนี้ (การงาน การเงิน ความสัมพันธ์ สุขภาพ) จะแสดงที่นี่ · กำลังพัฒนา</div>`;
+    };
+    drawLuck();
+    $('luck').onclick = (ev) => { const b = ev.target.closest('button[data-i]'); if (!b) return; luckSel = Number(b.dataset.i); drawLuck(); if (window.matchMedia('(max-width: 600px)').matches) $('luckDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   }
 
-  $('f').addEventListener('submit', (e) => { e.preventDefault(); render(); });
+  $('f').addEventListener('submit', (e) => { e.preventDefault(); luckSel = null; render(); setForm(false); });
   ['date', 'time', 'place', 'yearChange', 'ziHour', 'luckMethod', 'monthSystem', 'solar', 'preg', 'gM', 'gF'].forEach((id) => $(id).addEventListener('change', render));
   render();
+  setForm(false);
+  let start = 'chart';
+  try { start = (location.hash || '').slice(1) || localStorage.getItem('bazi.page') || 'chart'; } catch (e) {}
+  show(start);
 })();
 </script>
