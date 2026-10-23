@@ -302,6 +302,19 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .bsl dd { font-size: 1.02rem; line-height: 1.65; }
 .bsl .src { display: block; font-size: .78rem; color: var(--ink-soft); }
 @media (max-width: 600px) { .bsl { grid-template-columns: 1fr; gap: 2px; } .bsl dd { margin-bottom: 10px; } }
+
+/* กรอบแต่ละหัวข้อในพื้นดวงและคำทำนาย */
+.bsl { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.bitem { display: grid; grid-template-columns: 9.5em 1fr; gap: 4px 14px; border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; background: var(--sheet); }
+.bitem dt { margin: 0; }
+.bitem dd { margin: 0; }
+.basis { border-left: 1px solid var(--rule); background: var(--paper); }
+.basis h2 { color: var(--jade); }
+.rblock { border: 1px solid var(--rule) !important; border-radius: 10px; padding: 12px 14px !important; margin-bottom: 10px !important; max-width: none; }
+.rblock:not(.el) { background: var(--sheet); }
+.rsec { background: var(--paper); }
+.rblock h3 { color: var(--jade); }
+@media (max-width: 600px) { .bitem { grid-template-columns: 1fr; gap: 2px; padding: 10px 12px; } .bsl dd { margin-bottom: 0; } }
 </style>
 
 <div class="wrap">
@@ -1735,7 +1748,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); };
 
     $('natalRels').innerHTML = relHTML(BaziInteractions.natal(r));
-    $('basis').innerHTML = BaziNarrative.summary(r, an, BaziInteractions.natal(r)).map((x) => `<dt>${x.label}</dt><dd>${x.text}${x.more && x.more.length ? `<details class="more"><summary>อ่านเพิ่ม</summary><dl>${x.more.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>` : ''}<span class="src">ที่มา: ${x.source}</span></dd>`).join('');
+    $('basis').innerHTML = BaziNarrative.summary(r, an, BaziInteractions.natal(r)).map((x) => `<div class="bitem"><dt>${x.label}</dt><dd>${x.text}${x.more && x.more.length ? `<details class="more"><summary>อ่านเพิ่ม</summary><dl>${x.more.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl></details>` : ''}<span class="src">ที่มา: ${x.source}</span></dd></div>`).join('');
 
     // ---------- คำทำนาย ----------
     const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
