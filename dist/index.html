@@ -271,6 +271,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .dc.sel { background: var(--jade); color: var(--sheet); border-color: var(--jade); }
 
 /* คำทำนาย */
+.rblock .sub2 { font-size: .88rem; color: var(--ink-soft); font-style: italic; margin: 0 0 8px; line-height: 1.55; }
+.ritems dt { font-weight: 600; }
 #readNav { flex-wrap: wrap; overflow: visible; padding-bottom: 0; }
 .ritems { grid-template-columns: max-content 1fr; gap: 4px 14px; }
 .ritems dt { color: var(--ink-soft); }
@@ -1276,6 +1278,19 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         { sys: 'ปอด ลำไส้ใหญ่ กระดูก และระบบทางเดินหายใจ', tip: 'ระวังฝุ่นควันและอากาศแห้ง ออกกำลังกายสม่ำเสมอ', boost: 'แขวนกระดิ่งลมหรือเล่นเครื่องดนตรีโลหะ และเลือกอาหารที่บำรุงปอดและกระดูก' },
         { sys: 'ไต กระเพาะปัสสาวะ ระบบสืบพันธุ์ และหู', tip: 'ดื่มน้ำให้พอ ไม่ทำงานจนอ่อนเพลียสะสม', boost: 'ว่ายน้ำ เลี้ยงปลาหรือมีตู้ปลา อยู่ใกล้แหล่งน้ำ และเลือกอาหารที่บำรุงไต' }
     ];
+    // ตำแหน่งในดวง: ญาติประจำตำแหน่ง และเรื่องที่หลักนั้นดูแล (ตามระบบอ้างอิง)
+    const KIN = {
+        year: ['ญาติผู้ใหญ่ฝ่ายชาย — ปู่ ตา ลุง', 'ญาติผู้ใหญ่ฝ่ายหญิง — ย่า ยาย แม่ ป้า'],
+        month: ['พ่อ พี่ชาย พี่สาว', 'แม่ น้องชาย น้องสาว'],
+        day: ['ตัวคุณ', 'คู่ครอง'],
+        hour: ['บุตรชาย หลาน และลูกน้องชาย', 'บุตรสาว หลาน และลูกน้องหญิง']
+    };
+    const PILLAR_TOPIC = {
+        year: { title: 'บรรพบุรุษและครอบครัวเดิม', topic: 'บรรพบุรุษ ชื่อเสียงของวงศ์ตระกูล วัยเด็ก บ้านเกิด ที่ดิน มรดก และเรื่องทางไกล' },
+        month: { title: 'พ่อแม่ พี่น้อง และการงาน', topic: 'พ่อแม่ พี่น้อง สังคม เพื่อน การงาน ตำแหน่ง เจ้านาย และผู้ร่วมงาน' },
+        day: { title: 'ตัวคุณและคู่ครอง', topic: 'ตัวคุณ คู่ครอง การได้รับความช่วยเหลือ การเก็บเงิน หุ้นส่วน และที่อยู่อาศัย' },
+        hour: { title: 'ลูกหลาน ลูกน้อง และบั้นปลาย', topic: 'บุตรหลาน บริวาร ฝีมือ การริเริ่ม ความสุข และชีวิตหลังอายุ 46 ปี' }
+    };
     const BODY_BY_PILLAR = { year: 'ศีรษะและใบหน้า', month: 'หน้าอกและหลัง', day: 'ท้องและระบบสืบพันธุ์', hour: 'ขาและเท้า' };
     const SEASON_OF = (b) => [5, 6, 7].includes(b) ? 'hot' : [11, 0, 1].includes(b) ? 'cold' : null;
     const REL_TH_REL = ['คู่ธาตุ', 'ธาตุถ่ายเท', 'ธาตุโชคลาภ', 'ธาตุอำนาจ', 'ธาตุส่งเสริม'];
@@ -1325,7 +1340,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
             hour: { good: 'สนิทกับลูกหลานแบบเพื่อน มีลูกน้องคอยช่วยงาน และลูกหลานมีอนาคตดี', bad: 'คิดเรื่องเงินอยู่เสมอ ลูกหลานหรือลูกน้องมักนำปัญหามาให้' }
         },
         { // ถ่ายเท/กลยุทธ์
-            year: { good: 'ใจกว้าง รู้คุณคน ได้รับความเอ็นดูจากผู้ใหญ่ วัยเด็กไปได้ดี มีโอกาสเดินทางหรือติดต่อต่างแดนตั้งแต่ยังเล็ก และการลงทุนหรือค้าขายทางไกลให้ผลดี', bad: 'ทำดีกับผู้ใหญ่แต่ไม่ค่อยได้รับการเห็นค่า วัยเด็กยังไม่มีทิศทางชัด มักย้ายบ้านหรือเดินทางบ่อยตั้งแต่เด็ก และควรระวังการลงทุนทางไกล' },
+            year: { good: 'ใจกว้าง รู้คุณคน ได้รับความเอ็นดูจากผู้ใหญ่ วัยเด็กไปได้ดี มีโอกาสเดินทางหรือติดต่อต่างแดนตั้งแต่ยังเล็ก และการลงทุนหรือค้าขายทางไกลให้ผลดี', bad: 'ทำดีกับผู้ใหญ่แต่ไม่ค่อยได้รับการเห็นค่า ชีวิตก่อนอายุ 16 ปียังไม่มีทิศทางชัด มักย้ายบ้านหรือเดินทางบ่อยตั้งแต่เด็ก และควรระวังการลงทุนทางไกล' },
             month: { good: 'เข้าสังคมเก่ง ชอบช่วยเพื่อน ขยัน อยู่เฉยไม่ได้ มีฝีมือด้านการแสดงออก การขาย หรือการนำเสนอ และก้าวหน้าตั้งแต่วัยรุ่นถึงวัยทำงาน', bad: 'ขยันแสดงฝีมือแต่ผลตอบแทนไม่คุ้มเหนื่อย โดยเฉพาะช่วงวัยรุ่น และช่วยเพื่อนแล้วมักเสียมากกว่าได้' },
             day: { good: 'รักและเอาใจใส่คู่ครอง เป็นแรงช่วยให้คู่ครองมีชีวิตที่ดีขึ้น และควรเป็นคนดูแลเงินในบ้าน', bad: 'ต้องคอยเอาใจคู่ครองจนบางครั้งเหนื่อยหรือท้อ ควรเป็นคนเก็บเงินเองเพื่อไม่ให้ใช้หมด' },
             hour: { good: 'รักลูกหลานและผลักดันให้ประสบความสำเร็จ ดูแลลูกน้องดีและได้ลูกน้องที่ดี', bad: 'รักลูกจนตามใจเกินไป ดูแลลูกน้องดีแต่ลูกน้องไม่ค่อยได้ดั่งใจ' }
@@ -1334,19 +1349,19 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
             year: { good: 'ครอบครัวมีฐานะ มักได้มรดกหรือมีรายได้ดีตั้งแต่เด็ก และธุรกิจหรือการลงทุนทางไกลให้ผลดี', bad: 'วัยเด็กไม่ค่อยลงรอยกับพ่อหรือต้องดิ้นรนตั้งแต่เล็ก ผู้ชายอาจมีความรักเร็วจนกระทบการเรียน และควรระวังการลงทุนทางไกล' },
             month: { good: 'ชอบค้าขายและการลงทุน หาเงินเก่ง บริหารเก่ง และมีความสามารถสูง ผู้ชายมักมีผู้หญิงช่วยงาน', bad: 'ชอบค้าขายและคิดการใหญ่ แต่ต้องเหนื่อยมากกว่าจะได้ผล' },
             day: { good: 'คู่ครองมีฐานะหรือช่วยหาและเก็บเงิน หลังมีคู่ฐานะการเงินดีขึ้น', bad: 'อยากได้คู่ครองที่มีฐานะ ซึ่งยังมีโอกาส แต่ควรยอมให้คู่ครองเป็นฝ่ายนำเพื่อเลี่ยงความขัดแย้ง' },
-            hour: { good: 'หลังวัยกลางคนมีเงินและมั่งคั่งขึ้น ลูกหลานเก่งและพึ่งตัวเองได้ ผู้ชายอาจมีความรักครั้งใหม่ในช่วงนี้', bad: 'หลังวัยกลางคนยังต้องเหนื่อยหาเงิน ลูกหลานใช้เงินเปลือง ผู้ชายอาจมีความรักครั้งใหม่ที่นำเรื่องยุ่งมาให้' }
+            hour: { good: 'หลังอายุ 46 ปีมีเงินและมั่งคั่งขึ้น ลูกหลานเก่งและพึ่งตัวเองได้ ผู้ชายอาจมีความรักครั้งใหม่ในช่วงนี้', bad: 'หลังอายุ 46 ปียังต้องเหนื่อยหาเงิน ลูกหลานใช้เงินเปลือง ผู้ชายอาจมีความรักครั้งใหม่ที่นำเรื่องยุ่งมาให้' }
         },
         { // พิฆาต/อำนาจ
             year: { good: 'พ่อแม่เข้มงวดแต่หวังดี และมักมีฐานะเป็นที่นับถือ ผ่านความยากมาตั้งแต่เด็กจึงเปลี่ยนวิกฤตเป็นโอกาสได้ มีภาวะผู้นำ อาจมีชื่อเสียงในต่างแดน และให้ความสำคัญกับตำแหน่งและภาพลักษณ์', bad: 'พ่อแม่เข้มงวดเกินไปหรือไม่ค่อยมีเวลาให้ วัยเด็กเจอแรงกดดัน อาจมีอุบัติเหตุหรือเจ็บป่วยหนักที่ส่งผลต่ออารมณ์' },
             month: { good: 'รักอำนาจและตำแหน่ง มีความสามารถบริหาร เปลี่ยนปัญหาในงานเป็นประโยชน์ได้ รู้จังหวะใช้พระเดชพระคุณ ตัดสินใจเก่ง และมีโอกาสขึ้นสู่ตำแหน่งสูง', bad: 'รักอำนาจและตำแหน่ง ถ้ายังไปไม่ถึงก็มักอยู่ใกล้ผู้มีอำนาจ แต่ต้องระวังผู้มีอำนาจเหล่านั้นจะนำความเสียหายมาให้' },
             day: { good: 'รักและห่วงใยคู่ครอง คู่ครองอาจเป็นผู้บริหาร ผู้มีอำนาจ หรือข้าราชการในเครื่องแบบ ผู้หญิงอาจได้คู่ที่อายุห่างหรือเคยผ่านความสัมพันธ์มาก่อน และทำงานได้โดยไม่ต้องมีสำนักงาน', bad: 'คู่ครองความคิดต่างและอารมณ์ร้อน จึงต้องระวังการแยกทาง ผู้หญิงอาจได้คู่ที่อายุห่างหรือเคยผ่านความสัมพันธ์มาก่อน' },
-            hour: { good: 'เข้มงวดกับลูกหลานและลูกน้องเพื่อประโยชน์ของเขาและได้ผลตามที่หวัง วัยหลังมีตำแหน่งและได้รับความนับถือ ลูกหลานมีตำแหน่ง', bad: 'เข้มงวดจนลูกหลานหรือลูกน้องอึดอัด ลูกน้องมักสร้างปัญหา วัยหลังสุขภาพหรืออำนาจในการบริหารถดถอย และควรระวังเรื่องคดีความ' }
+            hour: { good: 'เข้มงวดกับลูกหลานและลูกน้องเพื่อประโยชน์ของเขาและได้ผลตามที่หวัง หลังอายุ 46 ปีมีตำแหน่งและได้รับความนับถือ ลูกหลานมีตำแหน่ง', bad: 'เข้มงวดจนลูกหลานหรือลูกน้องอึดอัด ลูกน้องมักสร้างปัญหา หลังอายุ 46 ปีสุขภาพหรืออำนาจในการบริหารถดถอย และควรระวังเรื่องคดีความ' }
         },
         { // เสริมรอง/เสริมหลัก
             year: { good: 'ถ้าตั้งใจเรียนตั้งแต่เด็กจะเรียนได้โดดเด่น โดยมีแม่และผู้ใหญ่คอยช่วย', bad: 'ฉลาดตั้งแต่เด็ก แต่พ่อแม่อาจตามใจหรือกดดันมากจนอึดอัด' },
             month: { good: 'มีเพื่อนคอยสนับสนุน โดดเด่นทั้งทางวิชาการและการบริหาร ได้ผู้ใหญ่ในที่ทำงานช่วย ตัดสินใจโดยอิงหลักวิชา และเป็นผู้นำทางความคิดของคนอื่น', bad: 'ถูกสังคมรอบตัวผลักให้เป็นผู้นำจนบางครั้งอึดอัด ภาพลักษณ์ดีจึงต้องระวังคนที่เข้ามาประจบหวังผล และมักยึดหลักการของตัวเองจนไม่ยอมใคร' },
             day: { good: 'หน้าตาดี คู่ครองคอยสนับสนุนและผลักดันให้ชีวิตดีขึ้น ทั้งคู่รักการเรียนรู้และพูดกันด้วยเหตุผล', bad: 'คู่ครองคอยดูแลเหมือนเป็นลูกอีกคน จนบางครั้งรู้สึกอึดอัด' },
-            hour: { good: 'หลังวัยกลางคนโดดเด่นทั้งวิชาการ ชื่อเสียง และการงาน มีลูกหลานกตัญญูคอยดูแลยามแก่', bad: 'หลังวัยกลางคนยังโดดเด่น แต่ลูกหลานที่ดูแลบางคนหวังผลประโยชน์ และลูกน้องมักเข้ามาประจบ' }
+            hour: { good: 'หลังอายุ 46 ปีโดดเด่นทั้งวิชาการ ชื่อเสียง และการงาน มีลูกหลานกตัญญูคอยดูแลยามแก่', bad: 'หลังอายุ 46 ปียังโดดเด่น แต่ลูกหลานที่ดูแลบางคนหวังผลประโยชน์ และลูกน้องมักเข้ามาประจบ' }
         }
     ];
 
@@ -1477,21 +1492,24 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
             if (g === 4 && (k === 'month' || k === 'hour') && !hasRoot(relEl(4))) txt += ' · แต่ธาตุส่งเสริมในดวงไม่มีรากรองรับ ความโดดเด่นอาจเป็นภาพภายนอกมากกว่าเนื้อแท้ ควรสร้างความรู้จริงให้หนักแน่น';
             return txt;
         };
+        const JTH = (j) => j > 0 ? 'ให้คุณ' : j < 0 ? 'ให้โทษ' : 'ทั้งให้คุณและให้โทษ';
         for (const k of ['year', 'month', 'day', 'hour']) {
-            const R = PILLAR_ROLE[k], p = P[k], bt = tgOf(p.hidden[0].stem);
+            const R = PILLAR_ROLE[k], T = PILLAR_TOPIC[k], p = P[k], bt = tgOf(p.hidden[0].stem);
             const bJ = judge(B.BRANCH_ELEMENT[p.branch], p.hidden[0].stem), sJ = k === 'day' ? null : judge(B.STEM_ELEMENT[p.stem], p.stem);
-            const sum = sJ == null ? bJ : sJ + bJ;
-            const tone = sum > 0 ? 'มักได้แรงหนุน เรื่องในช่วงนี้มีแนวโน้มราบรื่น' : sum < 0 ? 'มักมีบทเรียนหรือความท้าทาย ต้องใช้ความพยายามมากกว่าปกติ' : 'มีทั้งแรงหนุนและอุปสรรคปนกัน';
-            const items = [['เรื่องที่ดู', PILLAR_PLAIN[k]]];
             const gS = k === 'day' ? null : GROUP_OF[p.tenGod.code], gB = GROUP_OF[bt.code];
-            if (gS != null) items.push([`ราศีบน: ${p.tenGod.th}`, godLine(gS, k, sJ)]);
-            if (gB !== gS) items.push([`ราศีล่าง: ${bt.th}`, godLine(gB, k, bJ)]);
-            else items[items.length - 1][0] = `ราศีบนและล่าง: ${p.tenGod.th}`;
-            items.push(['แนวโน้ม', tone]);
-            relsOf(k).forEach((r, i) => items.push([i === 0 ? 'ความเชื่อมโยง' : '', relPlain(r, k)]));
-            s4.push({ title: `${R.age.replace('ราวอายุ', '(ราว')}${R.age.includes('ราวอายุ') ? ')' : ''}`, items, text: '', source: `${R.name} ${p.zh} · ราศีบน ${k === 'day' ? 'ดิถี' : `${p.tenGod.code} ${p.tenGod.th}`} · ราศีล่าง ${bt.code} ${bt.th}${relsOf(k).length ? ' · ' + relsOf(k).map((r) => r.th).join(', ') : ''}` });
+            const items = [];
+            if (gS != null && gS === gB && sJ === bJ) {
+                items.push([`${KIN[k][0]} และ${KIN[k][1]} (ราศีบน ${B.STEMS[p.stem]} ${p.tenGod.th} · ราศีล่าง ${B.BRANCHES[p.branch]} ${bt.th} · ${JTH(sJ)})`, godLine(gS, k, sJ)]);
+            } else {
+                if (gS != null) items.push([`${KIN[k][0]} (ราศีบน ${B.STEMS[p.stem]} ${p.tenGod.th} · ${JTH(sJ)})`, godLine(gS, k, sJ)]);
+                items.push([`${KIN[k][1]} (ราศีล่าง ${B.BRANCHES[p.branch]} ${bt.th} · ${JTH(bJ)})`, godLine(gB, k, bJ)]);
+            }
+            const rl = relsOf(k).map((r) => relPlain(r, k));
+            if (rl.length) items.push(['ความเชื่อมโยง', rl.join(' · ')]);
+            s4.push({ title: `${R.name} ${p.zh} · ${T.title}`, sub: `เรื่องที่ดู: ${T.topic} · เด่นในช่วง${R.age.replace('ราวอายุ', 'ราว')}`, items, text: '', source: `${R.name} ${p.zh} · ราศีบน ${k === 'day' ? 'ดิถี' : `${p.tenGod.code} ${p.tenGod.th}`} · ราศีล่าง ${bt.code} ${bt.th}${relsOf(k).length ? ' · ' + relsOf(k).map((r) => `${r.th} ${r.note.split(' ')[0]}`).join(', ') : ''}` });
         }
-        sections.push({ id: 'stages', title: 'ช่วงชีวิต', blocks: s4 });
+        s4.push({ text: 'ข้างบนคือพื้นฐานที่ติดตัวมาจากดวงเดิม จังหวะว่าเรื่องไหนจะเกิดช่วงไหน ดูได้ที่เมนูวัยจร ซึ่งแบ่งชีวิตเป็นช่วงละ 10 ปีตามดวงของคุณ', source: 'หลักทั้งสี่ = พื้นดวง · วัยจร = จังหวะเวลา' });
+        sections.push({ id: 'stages', title: 'ครอบครัว คู่ครอง และลูกหลาน', blocks: s4 });
 
         // 5. การงาน
         const s5 = [];
@@ -1617,7 +1635,13 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
             else if (['punish', 'punish3', 'selfPunish', 'harm', 'break'].includes(r.type)) hit.push([`${r.th}: ${o}`, 'มีเรื่องจุกจิก ความเข้าใจผิด หรือแรงกดดันในเรื่องนี้ ควรรอบคอบเรื่องเอกสารและคำพูด']);
             else hit.push([`${r.th}: ${o}`, `เรื่องนี้ได้รับแรงหนุนหรือมีความเคลื่อนไหวที่ดี${r.element != null ? ` (รวมเป็นธาตุ${r.elementTh} ซึ่ง${favE(r.element, r.element === dmEl ? dm : -1) ? 'ช่วยเสริมดวง' : unfE(r.element, -1) ? 'ดวงไม่ต้องการ จึงมีแรงหนุนแต่อาจมาพร้อมภาระ' : 'เป็นกลาง'})` : ''}`]);
         }
-        if (hit.length) out.push({ title: 'เรื่องในชีวิตที่ถูกกระทบ', text: '', items: hit, source: rels.map((r) => `${r.th} ${r.note}`).join(', ') });
+        const PN = { year: 'หลักปี', month: 'หลักเดือน', day: 'หลักดิถี', hour: 'หลักยาม' }, srcX = [];
+        for (const k of ['year', 'month', 'day', 'hour']) {
+            const np = chart.pillars[k];
+            if (np.stem === tp.stem && np.branch === tp.branch) { hit.unshift([`ซ้ำ${PN[k]}: ${PILLAR_PLAIN[k]}`, `${what}ซ้ำกับ${PN[k]}ทุกตัว เรื่อง${PILLAR_PLAIN[k]}จึงเด่นขึ้นเป็นพิเศษ ทั้งด้านดีและด้านที่ต้องระวังตามที่พื้นดวงบอกไว้`]); srcX.push(`ซ้ำ${PN[k]} ${np.zh} (伏吟)`); }
+            else if ((np.branch + 6) % 12 === tp.branch && (B.STEM_ELEMENT[tp.stem] + 2) % 5 === B.STEM_ELEMENT[np.stem]) { hit.unshift([`บนปะทะ-ล่างชง ${PN[k]}: ${PILLAR_PLAIN[k]}`, `เรื่อง${PILLAR_PLAIN[k]}มีโอกาสเปลี่ยนแปลงครั้งใหญ่ ควรเตรียมตัวและไม่ประมาท`]); srcX.push(`บนปะทะ-ล่างชง ${PN[k]} ${np.zh} (反吟)`); }
+        }
+        if (hit.length) out.push({ title: 'ผลต่อหลักดวง', text: '', items: hit, source: srcX.concat(rels.map((r) => `${r.th} ${r.note}`)).join(', ') });
         // คำแนะนำ
         const favEls = [...new Set(fav.filter((x) => !x.position).map((x) => x.element))];
         const tip = sum >= 1 ? 'ใช้ช่วงนี้เดินหน้าเรื่องสำคัญ เริ่มสิ่งใหม่ หรือขยายสิ่งที่ทำอยู่' : sum <= -1 ? 'ตั้งรับ รักษาสิ่งที่มี เลี่ยงการตัดสินใจเรื่องใหญ่หรือการลงทุนเสี่ยง ดูแลสุขภาพและความสัมพันธ์' : 'เลือกเดินหน้าเฉพาะเรื่องที่เตรียมพร้อมแล้ว และระวังเรื่องที่ไม่แน่ชัด';
@@ -1736,7 +1760,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
   let luckSel = null, yearSel = null, readSel = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
-  const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
+  const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${escH(b.sub)}</p>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ชง เฮ้ง ไห่ หรือผั่ว</p>';
   const G_TH = { M: 'ชาย', F: 'หญิง' };
   function setForm(open) {
@@ -1961,7 +1985,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     const drawRead = () => {
       $('readNav').innerHTML = secs.map((x) => `<button type="button" class="dc${x.id === readSel ? ' sel' : ''}" data-r="${x.id}" aria-pressed="${x.id === readSel}">${esc(x.title)}</button>`).join('') + `<button type="button" class="dc${readSel === 'all' ? ' sel' : ''}" data-r="all" aria-pressed="${readSel === 'all'}">ทั้งหมด</button>`;
       $('reading').innerHTML = secs.filter((x) => readSel === 'all' || x.id === readSel).map((sec) => `<section class="panel rsec" id="r-${sec.id}"><h2>${esc(sec.title)}</h2>${sec.blocks.map((b) =>
-        `<div class="rblock${b.element != null ? ' el w' + b.element : ''}">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.items ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : `<p>${esc(b.text)}</p>`}${b.source ? `<p class="src">ที่มา: ${esc(b.source)}</p>` : ''}</div>`).join('')}</section>`).join('');
+        `<div class="rblock${b.element != null ? ' el w' + b.element : ''}">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${esc(b.sub)}</p>` : ''}${b.items ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : `<p>${esc(b.text)}</p>`}${b.source ? `<p class="src">ที่มา: ${esc(b.source)}</p>` : ''}</div>`).join('')}</section>`).join('');
     };
     drawRead();
     $('readNav').onclick = (ev) => { const bt = ev.target.closest('button[data-r]'); if (!bt) return; readSel = bt.dataset.r; drawRead(); };
