@@ -75,5 +75,9 @@ const N = require('../js/narrative.js');
 const rd = N.natal(a1Chart = calc(2014, 8, 25, 9, 35), An.analyze(a1Chart), I.natal(a1Chart));
 eq('คำทำนายมี 9 หัวข้อ และทุกย่อหน้ามีที่มา', [rd.length, rd.every((s) => s.blocks.every((b) => b.source))], [9, true]);
 
+const lp0 = a1Chart.luck.periods[0].pillar;
+const tr = N.transit(a1Chart, An.analyze(a1Chart), lp0, 'luck', I.withTransit(a1Chart, [{ key: 'luck', label: 'วัยจร', stem: lp0.stem, branch: lp0.branch }], 'luck'), 'luck');
+eq('คำทำนายวัยจรมีภาพรวม เรื่องที่เด่น และคำแนะนำ', ['ภาพรวม', 'เรื่องที่เด่นขึ้น', 'คำแนะนำ'].every((t) => tr.some((b) => b.title === t)), true);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

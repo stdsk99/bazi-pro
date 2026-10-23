@@ -315,6 +315,9 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .rsec { background: var(--paper); }
 .rblock h3 { color: var(--jade); }
 @media (max-width: 600px) { .bitem { grid-template-columns: 1fr; gap: 2px; padding: 10px 12px; } .bsl dd { margin-bottom: 0; } }
+
+.pred { display: grid; gap: 0; }
+.badge { font-size: .72rem; font-weight: 500; background: var(--warn-wash); color: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
 </style>
 
 <div class="wrap">
@@ -1289,159 +1292,214 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     const listTh = (arr) => arr.length <= 1 ? (arr[0] || '') : arr.length === 2 ? `${arr[0]}และ${arr[1]}` : arr.slice(0, -1).join(' ') + ' และ' + arr[arr.length - 1];
     const elName = (x) => x.th + (x.polarity ? (x.polarity === 'same' ? ` (${x.stemZh})` : ` (${x.stemZh})`) : '');
 
+    const SPOUSE_PALACE = [
+        'คู่ครองมักเป็นเหมือนเพื่อน เสมอกัน และมีความเป็นตัวของตัวเองสูง',
+        'ความสัมพันธ์มีความสนุกและการแสดงออก แต่อาจคาดหวังกันสูง',
+        'คู่ครองมักช่วยเรื่องความเป็นอยู่และการเงิน',
+        'คู่ครองมีความรับผิดชอบ แต่ความสัมพันธ์อาจมีความเข้มงวดหรือแรงกดดัน',
+        'คู่ครองมักคอยดูแลและสนับสนุนคุณ'
+    ];
+
     function natal(chart, an, rels) {
         rels = rels || [];
-        const dm = chart.pillars.day.stem, dmEl = B.STEM_ELEMENT[dm], D = DAY_MASTER[dm];
+        const P = chart.pillars, dm = P.day.stem, dmEl = B.STEM_ELEMENT[dm], D = DAY_MASTER[dm], M = DM_MORE[dm];
+        const E = (e) => B.ELEMENTS[e], male = (chart.input && chart.input.gender) !== 'F';
         const sections = [];
-        const fav = an.favorable.map((x) => Object.assign({}, x, { stemZh: B.STEMS[x.polarity === 'same' ? dm : dm ^ 1] }));
-        const unf = an.unfavorable.map((x) => Object.assign({}, x, { stemZh: B.STEMS[x.polarity === 'same' ? dm : dm ^ 1] }));
-
-        // 1. ตัวตน
-        const s1 = [];
-        s1.push({ text: `เจ้าชะตาคือ ${B.STEMS[dm]} (${B.STEMS_TH[dm]}) ${B.ELEMENTS[dmEl]}${dm % 2 ? 'หยิน' : 'หยาง'} เปรียบได้กับ${D.image} ${D.core}`, source: `ก้านหลักวัน ${B.STEMS[dm]}` });
-        s1.push({ text: `สิ่งที่ควรระวัง: ${D.care}`, source: `ก้านหลักวัน ${B.STEMS[dm]}` });
-        const pg = patternGroup(an.pattern);
-        if (pg) s1.push({ text: PATTERN[pg], source: `ลักษณะดวง: ${an.patternTh} ${an.patternZh}` });
-        else if (an.strength) s1.push({ text: STRENGTH[an.strength], source: `ลักษณะดวง: ${an.strengthTh} · คะแนนฝ่ายช่วย ${an.score.total}` });
-        sections.push({ id: 'self', title: 'ตัวตนของเจ้าชะตา', blocks: s1 });
-
-        // 2. ธาตุในชีวิตประจำวัน
-        const s2 = [];
-        const favEls = [...new Set(fav.filter((x) => !x.position).map((x) => x.element))];
-        if (favEls.length) {
-            s2.push({ text: `ธาตุที่ให้คุณกับดวงนี้คือ ${listTh(fav.map(elName))} สิ่งที่มีพลังของธาตุเหล่านี้จะช่วยเสริมดวง${unf.length ? ` ส่วนธาตุ${listTh(unf.map(elName))}ควรใช้แต่พอดี` : ''}`, source: `ธาตุให้คุณ/ให้โทษจากหน้าวิเคราะห์ดวง` });
-            for (const e of favEls) {
-                const L = ELEMENT_LIFE[e];
-                s2.push({ title: `ธาตุ${B.ELEMENTS[e]}`, text: `${L.colors} ${L.dir} ${L.season} ${L.env} ${L.work}`, items: [['สี', L.colors], ['ทิศ', L.dir], ['ช่วงที่พลังเด่น', L.season], ['สภาพแวดล้อม', L.env], ['สายงาน', L.work]], source: `ธาตุ${B.ELEMENTS[e]}เป็นธาตุให้คุณ`, element: e });
-            }
-            const split = fav.filter((x) => x.position);
-            if (split.length) s2.push({ text: `ธาตุ${listTh(split.map((x) => x.th))}ให้คุณเฉพาะ${split[0].position === 'stem' ? 'เมื่อมาทางก้าน (เรื่องที่เห็นได้ชัด ภายนอก)' : 'เมื่อมาทางกิ่ง (เรื่องพื้นฐาน ภายใน)'} จึงใช้แต่พอเหมาะ`, source: 'ธาตุที่ดีหรือร้ายต่างกันระหว่างก้านกับกิ่ง' });
-            if (fav.some((x) => x.polarity)) {
-                const p = fav.find((x) => x.polarity);
-                const other = B.STEMS[p.polarity === 'same' ? dm ^ 1 : dm];
-                s2.push({ text: p.polarity === 'same'
-                    ? `ในธาตุ${p.th}ด้วยกัน ${p.stemZh} (比肩 เพื่อนที่เสมอกัน) ให้คุณ แต่ ${other} (劫財 คู่แข่งที่แบ่งทรัพย์) ให้โทษ คนที่ร่วมทางแบบเท่าเทียมจะช่วยได้ ส่วนคนที่เข้ามาแข่งหรือขอแบ่งผลประโยชน์ควรระวัง`
-                    : `ในธาตุ${p.th}ด้วยกัน ${p.stemZh} (劫財) ให้คุณ แต่ ${other} (比肩) ให้โทษ แรงกระตุ้นจากการแข่งขันช่วยผลักดันได้ดีกว่าการมีคนที่เหมือนตัวเองมาอยู่ด้วยมากเกินไป`, source: 'ธาตุเดียวกับเจ้าชะตาแยกตามขั้วหยิน/หยาง' });
-            }
-        } else s2.push({ text: 'ยังสรุปธาตุให้คุณของดวงนี้ไม่ได้', source: '' });
-        sections.push({ id: 'elements', title: 'ธาตุที่ช่วยเสริมในชีวิตประจำวัน', blocks: s2 });
-
-        // 3. สิบเทพ
-        const s3 = [];
-        const { sc, where } = tenGodScores(chart);
-        const monthMain = B.tenGod(dm, chart.pillars.month.hidden[0].stem);
-        const mg = GROUP_OF[monthMain.code];
-        s3.push({ text: `แกนของดวงอยู่ที่กิ่งเดือน ซึ่งปราณหลักเป็น ${monthMain.code} (${monthMain.th}) อยู่ในกลุ่ม${GROUPS[mg].name} บุคลิกพื้นฐานจึงมักเป็นคนที่${GROUPS[mg].strong}`, source: `กิ่งหลักเดือน ${B.BRANCHES[chart.pillars.month.branch]} ปราณหลัก ${chart.pillars.month.hidden[0].zh}` });
-        const relEl = (g) => (dmEl + [0, 1, 2, 3, 4][g]) % 5;
-        const isFavEl = (e) => fav.some((x) => x.element === e && !x.polarity), isUnfEl = (e) => unf.some((x) => x.element === e && !x.polarity);
-        const order = sc.map((v, g) => [v, g]).sort((a, b) => b[0] - a[0]);
-        for (const [v, g] of order) {
-            if (g === mg || v < 2.5) continue;
-            const e = relEl(g), G = GROUPS[g];
-            const tone = isFavEl(e) ? 'และเป็นธาตุให้คุณ จึงเป็นจุดแข็งที่ควรใช้ให้เต็มที่' : isUnfEl(e) ? `แต่เป็นธาตุให้โทษ จึงต้องระวังด้านที่มากเกิน: ${G.over}` : '';
-            s3.push({ text: `กลุ่ม${G.name} (${G.zh}) เด่นในดวง: ${G.strong}${tone ? ' ' + tone : ''}`, source: `${G.rel}ปรากฏที่ ${where[g].join(', ')}` });
-        }
-        for (let g = 1; g < 5; g++) if (sc[g] === 0) s3.push({ text: `ดวงนี้ไม่มีกลุ่ม${GROUPS[g].name} (${GROUPS[g].zh}) เลย ${GROUPS[g].none}`, source: `ไม่พบ${GROUPS[g].rel}ทั้งบนก้านและในราศีแฝง` });
-        sections.push({ id: 'gods', title: 'จุดเด่นจากสิบเทพ', blocks: s3 });
-        // helpers สำหรับหัวข้อเชิงลึก
-        const P = chart.pillars, male = (chart.input && chart.input.gender) !== 'F';
-        const favE = (e, stemIdx) => fav.some((x) => x.element === e && (!x.polarity || stemIdx == null || (x.polarity === 'same') === ((stemIdx % 2) === (dm % 2))));
-        const unfE = (e, stemIdx) => unf.some((x) => x.element === e && (!x.polarity || stemIdx == null || (x.polarity === 'same') === ((stemIdx % 2) === (dm % 2))));
+        const fav = an.favorable, unf = an.unfavorable;
+        const relEl = (g) => (dmEl + g) % 5;
+        const favE = (e, st) => fav.some((x) => x.element === e && (!x.polarity || st == null || (x.polarity === 'same') === ((st % 2) === (dm % 2))));
+        const unfE = (e, st) => unf.some((x) => x.element === e && (!x.polarity || st == null || (x.polarity === 'same') === ((st % 2) === (dm % 2))));
         const judge = (e, st) => favE(e, st) && !unfE(e, st) ? 1 : unfE(e, st) && !favE(e, st) ? -1 : 0;
         const tgOf = (stem) => B.tenGod(dm, stem);
         const groupFav = (g) => favE(relEl(g), g === 0 ? dm : null) && !unfE(relEl(g), g === 0 ? dm : null);
         const groupUnf = (g) => unfE(relEl(g), g === 0 ? dm : null) && !favE(relEl(g), g === 0 ? dm : null);
+        const { sc, where } = tenGodScores(chart);
+        const monthMain = tgOf(P.month.hidden[0].stem), mg = GROUP_OF[monthMain.code];
         const relsOf = (key) => rels.filter((r) => r.members.some((m) => m.key === key));
-        const relText = (r, key) => {
-            const others = r.members.filter((m) => m.key !== key).map((m) => m.label).join(' ');
-            if (r.type === 'clash') return `กิ่งปะทะกับหลัก${others} มักหมายถึงความเปลี่ยนแปลง การเคลื่อนย้าย หรือความไม่ลงรอยในเรื่องของหลักนี้`;
-            if (r.type === 'stemClash') return `ก้านปะทะกับหลัก${others} เรื่องที่แสดงออกภายนอกมักมีความเห็นต่างหรือแรงเสียดทาน`;
-            if (r.type === 'punish' || r.type === 'selfPunish') return `มีการลงโทษ (${r.note}) กับหลัก${others || 'เดียวกัน'} มักหมายถึงเรื่องจุกจิก ความกดดัน หรือการตำหนิที่ต้องระวัง`;
-            if (r.type === 'harm') return `มีการทำร้าย (${r.note}) กับหลัก${others} ระวังความระแวงหรือความสัมพันธ์ที่ไม่ราบรื่น`;
-            if (r.kind === '+') return `${r.th} กับหลัก${others}${r.element != null ? ` (รวมเป็นธาตุ${r.elementTh})` : ''} เรื่องของสองหลักนี้เชื่อมโยงและเกื้อหนุนกัน`;
-            return '';
+        const others = (r, key) => listTh([...new Set(r.members.filter((m) => m.key !== key).map((m) => PILLAR_PLAIN[m.key]))]);
+        const relPlain = (r, key) => {
+            const o = others(r, key) || 'ตัวเอง';
+            if (r.type === 'clash') return `มีจุดขัดกับเรื่อง${o} มักมีความเปลี่ยนแปลง การย้าย หรือความเห็นไม่ตรงกัน`;
+            if (r.type === 'stemClash') return `ความคิดหรือท่าทีภายนอกมักไม่ตรงกับเรื่อง${o}`;
+            if (r.type === 'punish' || r.type === 'selfPunish') return `มีเรื่องจุกจิก แรงกดดัน หรือการถูกตำหนิร่วมกับเรื่อง${o}`;
+            if (r.type === 'harm') return `ระวังความระแวงหรือความไม่ราบรื่นกับเรื่อง${o}`;
+            return `เชื่อมโยงและเกื้อหนุนกับเรื่อง${o}`;
         };
 
-        // 4. ช่วงชีวิตตาม 4 หลัก
+        // 1. ตัวตน
+        const s1 = [];
+        s1.push({ text: `คุณเป็นธาตุ${E(dmEl)}${dm % 2 ? 'หยิน' : 'หยาง'} เปรียบได้กับ${D.image} ${D.core}`, source: `ก้านหลักวัน ${B.STEMS[dm]} (${B.STEMS_TH[dm]})` });
+        s1.push({ text: `สิ่งที่ผลักดันคุณ: ${M.motive} · วิธีทำงาน: ${M.work}`, source: `ก้านหลักวัน ${B.STEMS[dm]}` });
+        s1.push({ text: `สิ่งที่ควรระวัง: ${D.care}`, source: `ก้านหลักวัน ${B.STEMS[dm]}` });
+        const pg = patternGroup(an.pattern);
+        if (pg) s1.push({ text: PATTERN[pg], source: `${an.patternTh} ${an.patternZh}` });
+        else if (an.strength) s1.push({ text: `${STRENGTH_PLAIN[an.strength]}: ${STRENGTH[an.strength].replace('ดวงนี้เจ้าชะตา', 'คุณ').replace('ดวงนี้กำลังของเจ้าชะตา', 'กำลังของคุณ')}`, source: `${an.strengthTh} · คะแนนฝ่ายช่วย ${an.score.total}` });
+        sections.push({ id: 'self', title: 'ตัวตนของคุณ', blocks: s1 });
+
+        // 2. ธาตุที่ช่วยเสริม
+        const s2 = [];
+        const favEls = [...new Set(fav.filter((x) => !x.position).map((x) => x.element))];
+        const unfEls = [...new Set(unf.filter((x) => !x.position && !x.polarity).map((x) => x.element))];
+        if (favEls.length) {
+            s2.push({ text: `ธาตุที่ช่วยเสริมคุณคือ${listTh(favEls.map(E))} การใช้สี ทิศ สภาพแวดล้อม หรืองานที่เป็นธาตุเหล่านี้ช่วยให้ชีวิตราบรื่นขึ้น${unfEls.length ? ` ส่วน${listTh(unfEls.map(E))}ควรใช้แต่พอดี` : ''}`, source: 'ธาตุให้คุณ/ให้โทษจากหน้าวิเคราะห์ดวง' });
+            for (const e of favEls) {
+                const L = ELEMENT_LIFE[e];
+                s2.push({ title: `ธาตุ${E(e)}`, text: '', items: [['ในดวงคุณแทน', ROLE_PLAIN[(e - dmEl + 5) % 5]], ['สี', L.colors], ['ทิศ', L.dir], ['ช่วงที่พลังเด่น', L.season], ['สภาพแวดล้อม', L.env], ['สายงาน', L.work]], source: `ธาตุ${E(e)}เป็นธาตุให้คุณ`, element: e });
+            }
+            const split = fav.filter((x) => x.position);
+            if (split.length) s2.push({ text: `ธาตุ${listTh(split.map((x) => x.th))}ช่วยได้เฉพาะ${split[0].position === 'stem' ? 'เรื่องที่แสดงออกภายนอก' : 'เรื่องพื้นฐานภายใน'} จึงใช้แต่พอเหมาะ`, source: `ดีเฉพาะ${split[0].position === 'stem' ? 'บนก้าน' : 'ในกิ่ง'}` });
+            const pol = fav.find((x) => x.polarity);
+            if (pol) s2.push({ text: pol.polarity === 'same'
+                ? 'ในหมู่คนที่คล้ายคุณ คนที่ร่วมทางแบบเสมอกันจะช่วยได้ ส่วนคนที่เข้ามาแข่งหรือขอแบ่งผลประโยชน์ควรระวัง'
+                : 'ในหมู่คนที่คล้ายคุณ คู่แข่งที่ท้าทายกลับช่วยกระตุ้นให้คุณพัฒนา มากกว่าคนที่เหมือนคุณทุกอย่าง',
+                source: `ธาตุ${pol.th}แยกขั้ว: ${pol.polarity === 'same' ? '比肩 ดี 劫財 ร้าย' : '劫財 ดี 比肩 ร้าย'}` });
+        } else s2.push({ text: 'ยังสรุปธาตุที่ช่วยเสริมของดวงนี้ไม่ได้', source: '-' });
+        sections.push({ id: 'elements', title: 'ธาตุที่ช่วยเสริม', blocks: s2 });
+
+        // 3. จุดเด่น
+        const s3 = [];
+        s3.push({ text: `ลักษณะที่เด่นที่สุดของคุณมาจากเดือนเกิด คือด้าน${GROUPS[mg].name}: ${GROUPS[mg].strong}`, source: `ปราณหลักกิ่งเดือน ${P.month.hidden[0].zh} เป็น ${monthMain.code}` });
+        sc.map((v, g) => [v, g]).sort((x, y) => y[0] - x[0]).forEach(([v, g]) => {
+            if (g === mg || v < 2.5) return;
+            const G = GROUPS[g];
+            const tone = groupFav(g) ? 'และเป็นด้านที่ช่วยเสริมดวง จึงเป็นจุดแข็งที่ควรใช้ให้เต็มที่' : groupUnf(g) ? `แต่ถ้ามากเกินจะเป็นโทษ: ${G.over}` : '';
+            s3.push({ text: `ด้าน${G.name}ก็เด่นเช่นกัน: ${G.strong}${tone ? ' ' + tone : ''}`, source: `${G.zh} ที่ ${where[g].join(', ')}` });
+        });
+        for (let g = 1; g < 5; g++) if (sc[g] === 0) s3.push({ text: `ดวงไม่มีด้าน${GROUPS[g].name}เลย ${GROUPS[g].none}`, source: `ไม่พบ ${GROUPS[g].zh} ในดวง` });
+        sections.push({ id: 'gods', title: 'จุดเด่นในตัวคุณ', blocks: s3 });
+
+        // 4. ช่วงชีวิต
         const s4 = [];
         for (const k of ['year', 'month', 'day', 'hour']) {
             const R = PILLAR_ROLE[k], p = P[k], bt = tgOf(p.hidden[0].stem);
             const bJ = judge(B.BRANCH_ELEMENT[p.branch], p.hidden[0].stem), sJ = k === 'day' ? null : judge(B.STEM_ELEMENT[p.stem], p.stem);
             const sum = sJ == null ? bJ : sJ + bJ;
-            const tone = sum > 0 ? 'โดยรวมเป็นธาตุให้คุณ เรื่องของหลักนี้จึงมักได้แรงหนุน' : sum < 0 ? 'โดยรวมเป็นธาตุให้โทษ เรื่องของหลักนี้จึงมักมีบทเรียนหรือความท้าทาย' : 'มีทั้งธาตุให้คุณและให้โทษ เรื่องของหลักนี้จึงมีทั้งแรงหนุนและอุปสรรค';
-            const stemPart = k === 'day' ? `ก้าน ${B.STEMS[p.stem]} คือตัวเจ้าชะตาเอง` : `ก้าน ${B.STEMS[p.stem]} เป็น ${p.tenGod.code} (${TG_MEAN[p.tenGod.code]})`;
-            const rl = relsOf(k).map((r) => relText(r, k)).filter(Boolean);
-            const items = [['บอกเรื่อง', R.who], ['ก้าน', stemPart.replace(/^ก้าน /, '')], ['กิ่ง', `${B.BRANCHES[p.branch]} ปราณหลักเป็น ${bt.code} (${TG_MEAN[bt.code]})`], ['ภาพรวม', tone]];
-            rl.forEach((t, i) => items.push([i === 0 ? 'ความสัมพันธ์' : '', t]));
-            s4.push({ title: `${R.name} · ${R.age}`, items, text: `${R.name}บอกเรื่อง${R.who} ${stemPart} ${tone}`, source: `${R.name} ${p.zh}${rl.length ? ' · ' + relsOf(k).map((r) => r.th).join(', ') : ''}` });
+            const tone = sum > 0 ? 'มักได้แรงหนุน เรื่องในช่วงนี้มีแนวโน้มราบรื่น' : sum < 0 ? 'มักมีบทเรียนหรือความท้าทาย ต้องใช้ความพยายามมากกว่าปกติ' : 'มีทั้งแรงหนุนและอุปสรรคปนกัน';
+            const shows = k === 'day' ? `ตัวคุณ และคู่ครองที่มีลักษณะ: ${SPOUSE_PALACE[GROUP_OF[bt.code]]}` : p.tenGod.code === bt.code ? TG_MEAN[bt.code] : `${TG_MEAN[p.tenGod.code]} · ${TG_MEAN[bt.code]}`;
+            const items = [['เรื่องที่ดู', PILLAR_PLAIN[k]], ['สิ่งที่ปรากฏ', shows], ['แนวโน้ม', tone]];
+            relsOf(k).forEach((r, i) => items.push([i === 0 ? 'ความเชื่อมโยง' : '', relPlain(r, k)]));
+            s4.push({ title: `${R.age.replace('ราวอายุ', '(ราว')}${R.age.includes('ราวอายุ') ? ')' : ''}`, items, text: '', source: `${R.name} ${p.zh} · ก้าน ${k === 'day' ? 'เจ้าชะตา' : p.tenGod.code} · กิ่ง ${bt.code}${relsOf(k).length ? ' · ' + relsOf(k).map((r) => r.th).join(', ') : ''}` });
         }
-        sections.push({ id: 'stages', title: 'ช่วงชีวิตตาม 4 หลัก', blocks: s4 });
+        sections.push({ id: 'stages', title: 'ช่วงชีวิต', blocks: s4 });
 
         // 5. การงาน
         const s5 = [];
+        s5.push({ text: `งานที่เข้ากับลักษณะเด่นของคุณ: ${CAREER[mg]}`, source: `ปราณหลักกิ่งเดือนเป็น ${monthMain.code}` });
         const favGroups = [0, 1, 2, 3, 4].filter(groupFav);
-        s5.push({ text: `แนวงานพื้นฐานมาจากแกนของดวงคือ ${monthMain.code} (${TG_MEAN[monthMain.code]}) จึงเหมาะกับ${CAREER[mg]}`, source: `ปราณหลักกิ่งเดือน ${chart.pillars.month.hidden[0].zh} เป็น ${monthMain.code}` });
-        if (favGroups.length) s5.push({ text: `สายงานที่ช่วยเสริมดวงคือกลุ่มที่เป็นธาตุให้คุณ: ${favGroups.map((g) => `${GROUPS[g].name} (${CAREER[g]})`).join(' · ')}`, source: `กลุ่มสิบเทพที่เป็นธาตุให้คุณ: ${favGroups.map((g) => GROUPS[g].zh).join(' ')}` });
+        if (favGroups.length) s5.push({ text: `งานที่ช่วยเสริมดวง: ${favGroups.map((g) => CAREER[g]).join(' หรือ')}`, source: `กลุ่มที่เป็นธาตุให้คุณ: ${favGroups.map((g) => GROUPS[g].zh).join(' ')}` });
         const vis = ['year', 'month', 'hour'].map((k) => P[k].tenGod.code);
         const hasG = (g) => sc[g] >= 1;
-        if (hasG(1) && hasG(2) && groupFav(2)) s5.push({ text: 'ดวงมีทั้งธาตุถ่ายเทและธาตุทรัพย์ต่อกันเป็นสาย (食伤生财) ความคิดและฝีมือแปลงเป็นรายได้ได้ดี เหมาะกับงานที่ขายความสามารถของตัวเอง', source: '食伤 และ 财 อยู่ในดวง และธาตุทรัพย์ให้คุณ' });
-        if (hasG(3) && hasG(4) && (groupFav(4) || groupFav(3))) s5.push({ text: 'ดวงมีธาตุอำนาจและธาตุให้กำเนิดหนุนกัน (官印相生) เติบโตได้ดีในองค์กรหรือระบบที่ให้คุณค่ากับความรู้และความรับผิดชอบ', source: '官杀 และ 印 อยู่ในดวง' });
-        if (vis.includes('伤官') && vis.includes('正官')) s5.push({ text: 'มี 伤官 และ 正官 ปรากฏบนก้านพร้อมกัน (伤官见官) ระวังความขัดแย้งกับผู้บังคับบัญชาหรือกฎระเบียบ ควรเลือกงานที่มีอิสระทางความคิด', source: 'ก้าน 伤官 และ 正官 อยู่ในดวง' });
-        if (vis.includes('七杀') && !hasG(4) && !hasG(1)) s5.push({ text: 'มี 七杀 บนก้านโดยไม่มีธาตุให้กำเนิดหรือธาตุถ่ายเทมาช่วยรับ งานมักมาพร้อมแรงกดดันสูง ควรสร้างทักษะเฉพาะทางเป็นเกราะ', source: 'ก้าน 七杀 ไม่มี 印 และ 食伤' });
+        if (hasG(1) && hasG(2) && groupFav(2)) s5.push({ text: 'ความคิดและฝีมือของคุณเปลี่ยนเป็นเงินได้ดี เหมาะกับงานที่ขายความสามารถของตัวเอง เช่น งานอิสระ งานบริการเฉพาะทาง หรือธุรกิจของตัวเอง', source: '食伤生财' });
+        if (hasG(3) && hasG(4) && (groupFav(4) || groupFav(3))) s5.push({ text: 'คุณเติบโตได้ดีในองค์กรหรือระบบที่ให้คุณค่ากับความรู้และความรับผิดชอบ ยิ่งเรียนรู้ยิ่งได้รับตำแหน่ง', source: '官印相生' });
+        if (vis.includes('伤官') && vis.includes('正官')) s5.push({ text: 'คุณมีความคิดเป็นของตัวเองสูงในขณะที่ต้องอยู่กับกฎระเบียบ ระวังขัดแย้งกับหัวหน้า ควรเลือกงานที่มีอิสระทางความคิด', source: '伤官见官' });
+        if (vis.includes('七杀') && !hasG(4) && !hasG(1)) s5.push({ text: 'งานของคุณมักมาพร้อมแรงกดดันสูง ควรสร้างทักษะเฉพาะทางไว้เป็นเกราะ และเลือกงานที่มีระบบรองรับ', source: '七杀 ไม่มีตัวรับ' });
         sections.push({ id: 'career', title: 'การงาน', blocks: s5 });
 
         // 6. การเงิน
         const s6 = [];
+        const wE = E(relEl(2));
         const wealthStems = ['year', 'month', 'hour'].filter((k) => GROUP_OF[P[k].tenGod.code] === 2);
         const wealthHidden = ['year', 'month', 'day', 'hour'].filter((k) => P[k].hidden.some((h) => GROUP_OF[tgOf(h.stem).code] === 2));
-        if (!wealthStems.length && !wealthHidden.length) s6.push({ text: 'ดวงนี้ไม่มีธาตุทรัพย์ปรากฏ เรื่องเงินจึงมาจากความสามารถหลักของตัวเองมากกว่าโชค ต้องอาศัยการวางแผนและวินัยทางการเงิน และจะดีขึ้นในวัยจรหรือปีจรที่ธาตุทรัพย์เข้ามา', source: `ไม่พบธาตุ${B.ELEMENTS[relEl(2)]} (ธาตุทรัพย์) ในดวง` });
+        if (!wealthStems.length && !wealthHidden.length) s6.push({ text: `ดวงคุณไม่มีธาตุที่แทนเงินโดยตรง (ธาตุ${wE}) เงินจึงมาจากความสามารถหลักมากกว่าโชค ต้องอาศัยการวางแผนและวินัยทางการเงิน และจะคล่องขึ้นในช่วงที่ดวงจรนำธาตุ${wE}เข้ามา`, source: `ไม่พบธาตุทรัพย์ (${wE}) ในดวง` });
         else {
-            const kind = sc[2] >= 2.5 ? 'มาก' : 'พอประมาณ';
-            const tone = groupFav(2) ? 'และเป็นธาตุให้คุณ ทรัพย์จึงเป็นสิ่งที่ส่งเสริมชีวิต หาได้และรักษาได้' : groupUnf(2) ? 'แต่เป็นธาตุให้โทษ เงินมักมาพร้อมภาระ ควรเน้นความมั่นคงมากกว่าการเสี่ยง' : '';
-            s6.push({ text: `ดวงนี้มีธาตุทรัพย์${kind} ${tone}`, source: `ธาตุทรัพย์ (${B.ELEMENTS[relEl(2)]}) ที่ ${[...wealthStems.map((k) => 'ก้าน' + POS_TH[k]), ...wealthHidden.map((k) => 'ราศีแฝง' + POS_TH[k])].join(', ')}` });
-            if (wealthStems.length) s6.push({ text: 'ธาตุทรัพย์ปรากฏบนก้าน ทรัพย์และโอกาสเห็นได้ชัด แต่คนรอบข้างก็เห็นด้วย ควรระวังการใช้จ่ายและการถูกขอแบ่ง', source: wealthStems.map((k) => `ก้าน${POS_TH[k]} ${P[k].tenGod.code}`).join(', ') });
-            else s6.push({ text: 'ธาตุทรัพย์อยู่ในราศีแฝงเท่านั้น เป็นทรัพย์ที่ไม่แสดงออก มักเก็บออมเงียบๆ และมีรายได้ที่คนอื่นไม่ค่อยรู้', source: 'ธาตุทรัพย์อยู่ในกิ่งเท่านั้น' });
-            if (sc[0] >= 2.5 && groupUnf(0)) s6.push({ text: 'กลุ่มเพื่อนและคู่แข่งมีมากและเป็นธาตุให้โทษ (比劫夺财) ระวังการร่วมทุน การค้ำประกัน และการให้ยืมเงิน', source: '比劫 เด่นและให้โทษ' });
-            if (hasG(1)) s6.push({ text: 'มีธาตุถ่ายเทช่วยสร้างทรัพย์ รายได้ที่ดีที่สุดมาจากฝีมือและผลงานของตัวเอง', source: '食伤 อยู่ในดวง' });
+            const tone = groupFav(2) ? 'และเงินเป็นสิ่งที่ช่วยเสริมชีวิต หาได้และเก็บได้' : groupUnf(2) ? 'แต่เงินมักมาพร้อมภาระ ควรเน้นความมั่นคงมากกว่าการเสี่ยง' : '';
+            s6.push({ text: `เรื่องเงินในดวงคุณมี${sc[2] >= 2.5 ? 'มาก' : 'พอประมาณ'} ${tone}`, source: `ธาตุทรัพย์ (${wE}) ที่ ${[...wealthStems.map((k) => 'ก้าน' + POS_TH[k]), ...wealthHidden.map((k) => 'ราศีแฝง' + POS_TH[k])].join(', ')}` });
+            s6.push(wealthStems.length ? { text: 'โอกาสเรื่องเงินของคุณมักเห็นชัด แต่คนรอบข้างก็เห็นด้วย ระวังการใช้จ่ายตามสังคมและการถูกขอแบ่ง', source: 'ธาตุทรัพย์บนก้าน' }
+                : { text: 'คุณเป็นคนเก็บเงินแบบเงียบๆ มักออมได้และมีรายได้ที่คนอื่นไม่ค่อยรู้', source: 'ธาตุทรัพย์อยู่ในกิ่งเท่านั้น' });
+            if (sc[0] >= 2.5 && groupUnf(0)) s6.push({ text: 'ระวังการร่วมทุน การค้ำประกัน และการให้ยืมเงิน เพราะดวงมีคนเข้ามาแบ่งผลประโยชน์มาก', source: '比劫夺财' });
+            if (hasG(1)) s6.push({ text: 'รายได้ที่ดีที่สุดของคุณมาจากฝีมือและผลงานของตัวเอง', source: '食伤 อยู่ในดวง' });
             const vault = ['year', 'month', 'day', 'hour'].filter((k) => [1, 4, 7, 10].includes(P[k].branch) && P[k].hidden.some((h) => GROUP_OF[tgOf(h.stem).code] === 2));
-            if (vault.length) s6.push({ text: 'มีกิ่งดินที่เก็บธาตุทรัพย์ไว้ข้างใน ตำราเรียกว่าคลังทรัพย์ (财库) มักเก็บสะสมได้ดีเมื่อมีวินัย', source: vault.map((k) => `กิ่ง${POS_TH[k]} ${B.BRANCHES[P[k].branch]}`).join(', ') });
+            if (vault.length) s6.push({ text: 'ดวงคุณมีที่เก็บเงินแฝงอยู่ ถ้ามีวินัยจะสะสมทรัพย์ได้ดีในระยะยาว', source: `คลังทรัพย์ 财库 ที่กิ่ง ${vault.map((k) => B.BRANCHES[P[k].branch]).join(' ')}` });
         }
         sections.push({ id: 'money', title: 'การเงิน', blocks: s6 });
 
-        // 7. ความรักและคู่ครอง
+        // 7. ความรัก
         const s7 = [];
         const db = P.day.branch, dbt = tgOf(P.day.hidden[0].stem), dbJ = judge(B.BRANCH_ELEMENT[db], P.day.hidden[0].stem);
-        s7.push({ text: `วังคู่ครองคือกิ่งวัน ${B.BRANCHES[db]} มีปราณหลักเป็น ${dbt.code} (${TG_MEAN[dbt.code]}) ${dbJ > 0 ? 'และเป็นธาตุให้คุณ คู่ครองมักเป็นแรงหนุนของชีวิต' : dbJ < 0 ? 'และเป็นธาตุให้โทษ ความสัมพันธ์ต้องอาศัยความเข้าใจและการปรับตัวมากกว่าปกติ' : ''}`, source: `กิ่งหลักวัน ${B.BRANCHES[db]}` });
-        if (GROUP_OF[dbt.code] === (male ? 2 : 3)) s7.push({ text: `ปราณหลักของวังคู่ครองเป็นดาวคู่ครองพอดี (${dbt.code}) ตำราถือว่าเรื่องคู่ครองชัดเจน คู่ครองมีบทบาทสำคัญในชีวิต`, source: `กิ่งวัน ${B.BRANCHES[db]} ปราณหลัก ${dbt.code}` });
-        const starG = male ? 2 : 3, starName = male ? 'ธาตุทรัพย์ (ดาวภรรยา)' : 'ธาตุอำนาจ (ดาวสามี)';
-        const starAt = ['year', 'month', 'day', 'hour'].filter((k) => (k !== 'day' && GROUP_OF[P[k].tenGod.code] === starG) || P[k].hidden.some((h, i) => i === 0 && GROUP_OF[tgOf(h.stem).code] === starG));
-        if (!starAt.length) s7.push({ text: `ไม่พบ${starName}ที่ชัดเจนในดวง เรื่องคู่ครองมักมาช้าหรือต้องใช้เวลาเลือก จะเด่นขึ้นในช่วงวัยจรหรือปีจรที่ธาตุนี้เข้ามา`, source: `ไม่พบ${starName}บนก้านหรือปราณหลัก` });
+        s7.push({ text: `${SPOUSE_PALACE[GROUP_OF[dbt.code]]}${dbJ > 0 ? ' และคู่ครองมักเป็นแรงหนุนของชีวิตคุณ' : dbJ < 0 ? ' ความสัมพันธ์ต้องอาศัยความเข้าใจและการปรับตัวมากกว่าปกติ' : ''}`, source: `ตำแหน่งคู่ครอง (กิ่งวัน ${B.BRANCHES[db]}) ปราณหลักเป็น ${dbt.code}` });
+        const starG = male ? 2 : 3, starEl = E(relEl(starG)), who = male ? 'ภรรยาหรือคนรัก' : 'สามีหรือคนรัก';
+        if (GROUP_OF[dbt.code] === starG) s7.push({ text: `ตำแหน่งคู่ครองของคุณมีธาตุที่แทน${who}อยู่พอดี เรื่องคู่ครองจึงชัดเจนและมีบทบาทสำคัญในชีวิต`, source: `กิ่งวันเป็นดาวคู่ครอง ${dbt.code}` });
+        const starAt = ['year', 'month', 'day', 'hour'].filter((k) => (k !== 'day' && GROUP_OF[P[k].tenGod.code] === starG) || GROUP_OF[tgOf(P[k].hidden[0].stem).code] === starG);
+        if (!starAt.length) s7.push({ text: `ในดวง${male ? 'ผู้ชาย' : 'ผู้หญิง'} ธาตุที่แทน${who}คือธาตุ${starEl} ซึ่งดวงคุณไม่มีชัดเจน เรื่องคู่ครองจึงมักมาช้าหรือต้องใช้เวลาเลือก และจะเด่นขึ้นในช่วงที่ดวงจรนำธาตุ${starEl}เข้ามา`, source: `ไม่พบ${male ? 'ดาวภรรยา (财)' : 'ดาวสามี (官杀)'}บนก้านหรือปราณหลัก` });
         else {
             const near = starAt.includes('day') || starAt.includes('month');
-            s7.push({ text: `${starName} อยู่ที่${starAt.map((k) => POS_TH[k]).join(' ')}${near ? ' ใกล้ตัวเจ้าชะตา ความสัมพันธ์มักเริ่มจากคนใกล้ตัว ที่ทำงาน หรือคนที่ครอบครัวรู้จัก' : ' อยู่ห่างจากหลักวัน คู่ครองอาจมาจากต่างถิ่นหรือพบกันช้า'}${starAt.length >= 3 ? ' ดาวคู่ครองมีหลายตำแหน่ง มีคนเข้ามาในชีวิตมาก ควรชัดเจนเรื่องความสัมพันธ์' : ''}`, source: `${starName}: ${starAt.map((k) => POS_TH[k]).join(', ')}` });
+            s7.push({ text: `ในดวง${male ? 'ผู้ชาย' : 'ผู้หญิง'} ธาตุที่แทน${who}คือธาตุ${starEl} ซึ่งอยู่${near ? 'ใกล้ตัวคุณ ความสัมพันธ์มักเริ่มจากคนใกล้ตัว ที่ทำงาน หรือคนที่ครอบครัวรู้จัก' : 'ห่างจากตัวคุณ คู่ครองอาจมาจากต่างถิ่นหรือพบกันช้า'}${starAt.length >= 3 ? ' และมีหลายตำแหน่ง มีคนเข้ามาในชีวิตมาก ควรชัดเจนเรื่องความสัมพันธ์' : ''}`, source: `${male ? 'ดาวภรรยา (财)' : 'ดาวสามี (官杀)'}ที่${starAt.map((k) => POS_TH[k]).join(' ')}` });
         }
-        relsOf('day').filter((r) => ['clash', 'punish', 'harm', 'selfPunish'].includes(r.type)).forEach((r) => s7.push({ text: `วังคู่ครองมี${r.th}กับหลัก${r.members.filter((m) => m.key !== 'day').map((m) => m.label).join(' ')} ช่วงที่ปะทะถูกกระตุ้นโดยวัยจรหรือปีจร ควรใส่ใจความสัมพันธ์เป็นพิเศษ`, source: `${r.th} ${r.note}` }));
-        relsOf('day').filter((r) => r.type === 'pair' || r.type === 'halfTrio').forEach((r) => s7.push({ text: `วังคู่ครองมี${r.th}กับหลัก${r.members.filter((m) => m.key !== 'day').map((m) => m.label).join(' ')} ความสัมพันธ์มีแรงดึงดูดและผูกพันกับเรื่องของหลักนั้น`, source: `${r.th} ${r.note}` }));
+        relsOf('day').filter((r) => r.kind !== '+').forEach((r) => s7.push({ text: `ตำแหน่งคู่ครอง${relPlain(r, 'day')} ช่วงที่ดวงจรมากระตุ้นจุดนี้ ควรใส่ใจความสัมพันธ์เป็นพิเศษ`, source: `${r.th} ${r.note}` }));
+        relsOf('day').filter((r) => r.kind === '+' && r.type !== 'stemCombo').forEach((r) => s7.push({ text: `ตำแหน่งคู่ครอง${relPlain(r, 'day')} ความสัมพันธ์มีแรงดึงดูดและผูกพันกับเรื่องเหล่านั้น`, source: `${r.th} ${r.note}` }));
         sections.push({ id: 'love', title: 'ความรักและคู่ครอง', blocks: s7 });
 
         // 8. สุขภาพ
         const s8 = [];
         const A = an.seasonal.map((x) => ({ e: x.element, v: x.value }));
-        const hi = A.reduce((a, b) => (b.v > a.v ? b : a)), lo = A.filter((x) => x.v === 0);
-        s8.push({ text: `ธาตุ${B.ELEMENTS[hi.e]}มีกำลังมากที่สุดในดวง ควรดูแล${ORGAN[hi.e].sys}ไม่ให้ทำงานหนักเกิน ${ORGAN[hi.e].tip}`, source: `กำลังธาตุตามฤดู: ${B.ELEMENTS[hi.e]} ${hi.v}` });
-        lo.forEach((x) => s8.push({ text: `ธาตุ${B.ELEMENTS[x.e]}ไม่มีในดวง ส่วนที่สัมพันธ์กับธาตุนี้คือ${ORGAN[x.e].sys} ควรใส่ใจเป็นพิเศษ ${ORGAN[x.e].tip}`, source: `ไม่พบธาตุ${B.ELEMENTS[x.e]}ใน 8 อักษร` }));
+        const hi = A.reduce((x, y) => (y.v > x.v ? y : x)), lo = A.filter((x) => x.v === 0);
+        s8.push({ text: `ธาตุ${E(hi.e)}มีมากที่สุดในดวง ควรดูแล${ORGAN[hi.e].sys}ไม่ให้ทำงานหนักเกิน ${ORGAN[hi.e].tip}`, source: `กำลังธาตุตามฤดู: ${E(hi.e)} ${hi.v}` });
+        lo.forEach((x) => s8.push({ text: `ดวงไม่มีธาตุ${E(x.e)} ส่วนที่สัมพันธ์กับธาตุนี้คือ${ORGAN[x.e].sys} ควรใส่ใจเป็นพิเศษ ${ORGAN[x.e].tip}`, source: `ไม่พบธาตุ${E(x.e)}ใน 8 อักษร` }));
         s8.push({ text: 'หมายเหตุ: เป็นข้อสังเกตตามหลักห้าธาตุ ไม่ใช่การวินิจฉัยทางการแพทย์ หากมีอาการควรปรึกษาแพทย์', source: 'หลักห้าธาตุกับอวัยวะ' });
         sections.push({ id: 'health', title: 'สุขภาพ', blocks: s8 });
 
         // 9. ฤดูเกิด
         const s9 = [];
         const mEl9 = B.BRANCH_ELEMENT[P.month.branch], st9 = SEASON_STATE[stateIdx(dmEl, mEl9)];
-        s9.push({ text: `${st9.short.replace(' — ', ' ')} ${st9.why(B.ELEMENTS[dmEl], B.ELEMENTS[mEl9])} ${st9.mean}`, source: `เจ้าชะตาธาตุ${B.ELEMENTS[dmEl]} เกิดเดือนธาตุ${B.ELEMENTS[mEl9]} (กิ่งเดือน ${B.BRANCHES[P.month.branch]}) · ${st9.name} ${st9.zh}` });
+        s9.push({ text: `${st9.short.replace(' — ', ' ')} ${st9.why(E(dmEl), E(mEl9))} ${st9.mean}`, source: `เจ้าชะตาธาตุ${E(dmEl)} เกิดเดือนธาตุ${E(mEl9)} (กิ่งเดือน ${B.BRANCHES[P.month.branch]}) · ${st9.name} ${st9.zh}` });
         const clim9 = climatePlain(SEASON_OF(P.month.branch), chart.elementCount.map((x) => x.count));
         s9.push({ text: clim9 || 'คุณเกิดในช่วงที่อากาศไม่ร้อนหรือหนาวจัด ดวงจึงไม่ต้องอาศัยธาตุปรับอากาศเป็นพิเศษ', source: `กิ่งเดือน ${B.BRANCHES[P.month.branch]} · หลักปรับอากาศ 調候` });
         sections.push({ id: 'season', title: 'ฤดูเกิด', blocks: s9 });
-
         return sections;
+    }
+
+    // ---------- คำทำนายวัยจร / ปีจร ----------
+    const TOPIC = [
+        { name: 'เพื่อนและการแข่งขัน', good: 'ได้เพื่อนและทีมช่วย มั่นใจในตัวเองมากขึ้น เหมาะกับการร่วมมือและสร้างเครือข่าย', bad: 'มีคู่แข่งหรือคนเข้ามาขอแบ่ง ระวังเรื่องเงินกับเพื่อน การร่วมทุน และการค้ำประกัน' },
+        { name: 'ความคิดและผลงาน', good: 'ความคิดและฝีมือได้แสดงออก ผลงานเด่น เหมาะกับการเริ่มโครงการใหม่หรืองานสร้างสรรค์', bad: 'ใจร้อน พูดตรงจนกระทบผู้ใหญ่ ระวังขัดกับหัวหน้าหรือกฎระเบียบ' },
+        { name: 'เงินและโอกาส', good: 'โอกาสเรื่องเงินเข้ามา รายได้ดีขึ้น เหมาะกับการค้าและการลงทุนที่รอบคอบ', bad: 'เงินเข้าแต่มีรายจ่ายตาม เหนื่อยกับภาระ ไม่ควรลงทุนเสี่ยงหรือขยายเกินตัว' },
+        { name: 'งานและตำแหน่ง', good: 'งานและตำแหน่งก้าวหน้า ได้รับความรับผิดชอบที่สำคัญหรือการยอมรับ', bad: 'แรงกดดันจากงานหรือผู้มีอำนาจมาก ระวังความเครียด ข้อขัดแย้ง และสุขภาพ' },
+        { name: 'การเรียนและผู้ใหญ่', good: 'ได้ผู้ใหญ่ช่วย เหมาะกับการเรียน สอบ ทำเอกสาร หรือเรื่องบ้านและที่อยู่', bad: 'คิดมาก ลังเล พึ่งคนอื่นมากเกิน ระวังพลาดโอกาสเพราะไม่ลงมือ' }
+    ];
+    // tp: เสาจร { stem, branch, hidden, tenGod } · kind: 'luck' | 'year' · rels: ความสัมพันธ์ที่มีเสาจรเกี่ยวข้อง · focus: key ของเสาจรนั้น
+    function transit(chart, an, tp, kind, rels, focus) {
+        const dm = chart.pillars.day.stem, dmEl = B.STEM_ELEMENT[dm], male = (chart.input && chart.input.gender) !== 'F';
+        const E = (e) => B.ELEMENTS[e];
+        const fav = an.favorable, unf = an.unfavorable;
+        const favE = (e, st) => fav.some((x) => x.element === e && (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && (!x.position || x.position === (st === tp.stem ? 'stem' : 'branch')));
+        const unfE = (e, st) => unf.some((x) => x.element === e && (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && (!x.position || x.position === (st === tp.stem ? 'stem' : 'branch')));
+        const judge = (e, st) => favE(e, st) && !unfE(e, st) ? 1 : unfE(e, st) && !favE(e, st) ? -1 : 0;
+        const sEl = B.STEM_ELEMENT[tp.stem], bEl = B.BRANCH_ELEMENT[tp.branch], bMain = tp.hidden[0].stem;
+        const a = judge(sEl, tp.stem), b = judge(bEl, bMain), sum = a + b;
+        const what = kind === 'luck' ? 'ช่วงนี้' : 'ปีนี้';
+        const half = kind === 'luck' ? ['5 ปีแรก', '5 ปีหลัง'] : ['ครึ่งปีแรก', 'ครึ่งปีหลัง'];
+        const out = [];
+        const overall = sum >= 2 ? `${what}เป็นช่วงที่ส่งเสริมคุณ ทั้ง${half[0]}และ${half[1]}ได้ธาตุที่ช่วยเสริมดวง` : sum <= -2 ? `${what}เป็นช่วงที่ต้องระวัง ทั้ง${half[0]}และ${half[1]}เป็นธาตุที่ดวงไม่ต้องการ ควรตั้งรับมากกว่ารุก`
+            : a > b ? `${what}เริ่มต้นดี ${half[0]}ได้แรงหนุน แต่ ${half[1]}ต้องระวังมากขึ้น` : b > a ? `${what}เริ่มต้นช้า ${half[0]}ต้องอดทน แล้ว ${half[1]}จะดีขึ้น` : `${what}มีทั้งเรื่องดีและเรื่องที่ต้องระวังพอๆ กัน`;
+        out.push({ title: 'ภาพรวม', text: overall, source: `ธาตุ${E(sEl)}ด้านบน${a > 0 ? 'ให้คุณ' : a < 0 ? 'ให้โทษ' : 'กลางๆ'} · ธาตุ${E(bEl)}ด้านล่าง${b > 0 ? 'ให้คุณ' : b < 0 ? 'ให้โทษ' : 'กลางๆ'}` });
+        // เรื่องที่เด่นขึ้น
+        const items = [];
+        const gS = GROUP_OF[B.tenGod(dm, tp.stem).code], gB = GROUP_OF[B.tenGod(dm, bMain).code];
+        const both = gS === gB;
+        for (const [g, j, when] of both ? [[gS, a + b >= 0 ? 1 : -1, kind === 'luck' ? 'ตลอดช่วง' : 'ตลอดปี']] : [[gS, a, half[0]], [gB, b, half[1]]]) {
+            items.push([`${TOPIC[g].name} (${when})`, j >= 0 ? TOPIC[g].good : TOPIC[g].bad]);
+            const loveG = male ? 2 : 3;
+            if (g === loveG) items.push(['ความรัก', j >= 0 ? 'เรื่องความรักเด่นขึ้น เหมาะกับการพบคนใหม่หรือก้าวสำคัญในความสัมพันธ์' : 'ความรักมีเรื่องให้คิด ควรสื่อสารให้ชัดและไม่ตัดสินใจเรื่องใหญ่ด้วยอารมณ์']);
+        }
+        out.push({ title: 'เรื่องที่เด่นขึ้น', text: '', items, source: `ก้าน ${B.STEMS[tp.stem]} เป็น ${B.tenGod(dm, tp.stem).code} · กิ่ง ${B.BRANCHES[tp.branch]} ปราณหลักเป็น ${B.tenGod(dm, bMain).code}` });
+        // เรื่องในชีวิตที่ถูกกระทบ
+        const PL = Object.assign({ luck: 'ช่วงวัยจรที่อยู่' }, PILLAR_PLAIN);
+        const hit = [];
+        for (const r of rels) {
+            const o = listTh([...new Set(r.members.filter((m) => m.key !== focus).map((m) => PL[m.key]).filter(Boolean))]);
+            if (!o) continue;
+            const onDay = r.members.some((m) => m.key === 'day') && r.type === 'clash';
+            if (r.type === 'clash') hit.push([`ปะทะ: ${o}`, `มักมีความเปลี่ยนแปลง การย้าย หรือความเห็นไม่ตรงกันในเรื่องนี้${onDay ? ' รวมถึงความสัมพันธ์กับคู่ครองและสุขภาพของตัวเอง' : ''}`]);
+            else if (r.type === 'stemClash') hit.push([`ขัดกัน: ${o}`, 'ความคิดหรือแผนอาจไม่ตรงกัน ควรคุยให้ชัดก่อนตัดสินใจ']);
+            else if (r.type === 'punish' || r.type === 'selfPunish' || r.type === 'harm') hit.push([`ระวัง: ${o}`, 'มีเรื่องจุกจิก ความเข้าใจผิด หรือแรงกดดันในเรื่องนี้ ควรรอบคอบเรื่องเอกสารและคำพูด']);
+            else hit.push([`เชื่อม: ${o}`, `เรื่องนี้ได้รับแรงหนุนหรือมีความเคลื่อนไหวที่ดี${r.element != null ? ` (รวมเป็นธาตุ${r.elementTh} ซึ่ง${favE(r.element, r.element === dmEl ? dm : -1) ? 'ช่วยเสริมดวง' : unfE(r.element, -1) ? 'ดวงไม่ต้องการ จึงมีแรงหนุนแต่อาจมาพร้อมภาระ' : 'เป็นกลาง'})` : ''}`]);
+        }
+        if (hit.length) out.push({ title: 'เรื่องในชีวิตที่ถูกกระทบ', text: '', items: hit, source: rels.map((r) => `${r.th} ${r.note}`).join(', ') });
+        // คำแนะนำ
+        const favEls = [...new Set(fav.filter((x) => !x.position).map((x) => x.element))];
+        const tip = sum >= 1 ? 'ใช้ช่วงนี้เดินหน้าเรื่องสำคัญ เริ่มสิ่งใหม่ หรือขยายสิ่งที่ทำอยู่' : sum <= -1 ? 'ตั้งรับ รักษาสิ่งที่มี เลี่ยงการตัดสินใจเรื่องใหญ่หรือการลงทุนเสี่ยง ดูแลสุขภาพและความสัมพันธ์' : 'เลือกเดินหน้าเฉพาะเรื่องที่เตรียมพร้อมแล้ว และระวังเรื่องที่ไม่แน่ชัด';
+        out.push({ title: 'คำแนะนำ', text: `${tip}${favEls.length ? ` · เสริมด้วยธาตุ${listTh(favEls.map(E))} เช่น สี${favEls.map((e) => ELEMENT_LIFE[e].colors.split(' ')[0]).join(' ')} หรือ${favEls.map((e) => ELEMENT_LIFE[e].dir).join(' ')}` : ''}`, source: 'สรุปจากภาพรวมและธาตุที่ช่วยเสริม' });
+        return out;
     }
 
     // ---------- การ์ดสรุปพื้นดวง (หน้าผังดวง) ----------
@@ -1535,7 +1593,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         return out;
     }
 
-    return { natal, summary, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
+    return { natal, summary, transit, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
 });
 
 </script>
@@ -1554,6 +1612,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
   }
 
   let luckSel = null, yearSel = null, readSel = null;
+  const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ปะทะ หรือการลงโทษ</p>';
   const G_TH = { M: 'ชาย', F: 'หญิง' };
   function setForm(open) {
@@ -1717,7 +1777,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b> — ก้าน${rr.a > 0 ? 'เป็นธาตุให้คุณ' : rr.a < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'} กิ่ง${rr.b > 0 ? 'เป็นธาตุให้คุณ' : rr.b < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'}</div>
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'))}</div>
-        <div class="soon">คำทำนายละเอียดของช่วงนี้ (การงาน การเงิน ความสัมพันธ์ สุขภาพ) จะแสดงที่นี่ · กำลังพัฒนา</div>`;
+        <h3 class="rh">คำทำนายช่วงนี้ <span class="badge">ฉบับร่าง</span></h3>
+        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'), 'luck'))}</div>`;
     };
     drawLuck();
     $('luck').onclick = (ev) => { const b = ev.target.closest('button[data-i]'); if (!b) return; luckSel = Number(b.dataset.i); drawLuck(); if (window.matchMedia('(max-width: 600px)').matches) $('luckDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
@@ -1760,7 +1821,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม${lp ? 'และวัยจร' : ''}</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, trans, 'yr'))}</div>
-        <div class="soon">คำทำนายของปีนี้จะแสดงที่นี่ · กำลังพัฒนา</div>`;
+        <h3 class="rh">คำทำนายปีนี้ <span class="badge">ฉบับร่าง</span></h3>
+        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'year', BaziInteractions.withTransit(r, trans, 'yr'), 'yr'))}</div>`;
     };
     drawYears();
     $('years').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('yearDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };

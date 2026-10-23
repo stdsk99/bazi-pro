@@ -315,6 +315,9 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .rsec { background: var(--paper); }
 .rblock h3 { color: var(--jade); }
 @media (max-width: 600px) { .bitem { grid-template-columns: 1fr; gap: 2px; padding: 10px 12px; } .bsl dd { margin-bottom: 0; } }
+
+.pred { display: grid; gap: 0; }
+.badge { font-size: .72rem; font-weight: 500; background: var(--warn-wash); color: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
 </style>
 
 <div class="wrap">
@@ -458,6 +461,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
   }
 
   let luckSel = null, yearSel = null, readSel = null;
+  const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+  const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ปะทะ หรือการลงโทษ</p>';
   const G_TH = { M: 'ชาย', F: 'หญิง' };
   function setForm(open) {
@@ -621,7 +626,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b> — ก้าน${rr.a > 0 ? 'เป็นธาตุให้คุณ' : rr.a < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'} กิ่ง${rr.b > 0 ? 'เป็นธาตุให้คุณ' : rr.b < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'}</div>
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'))}</div>
-        <div class="soon">คำทำนายละเอียดของช่วงนี้ (การงาน การเงิน ความสัมพันธ์ สุขภาพ) จะแสดงที่นี่ · กำลังพัฒนา</div>`;
+        <h3 class="rh">คำทำนายช่วงนี้ <span class="badge">ฉบับร่าง</span></h3>
+        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'), 'luck'))}</div>`;
     };
     drawLuck();
     $('luck').onclick = (ev) => { const b = ev.target.closest('button[data-i]'); if (!b) return; luckSel = Number(b.dataset.i); drawLuck(); if (window.matchMedia('(max-width: 600px)').matches) $('luckDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
@@ -664,7 +670,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม${lp ? 'และวัยจร' : ''}</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, trans, 'yr'))}</div>
-        <div class="soon">คำทำนายของปีนี้จะแสดงที่นี่ · กำลังพัฒนา</div>`;
+        <h3 class="rh">คำทำนายปีนี้ <span class="badge">ฉบับร่าง</span></h3>
+        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'year', BaziInteractions.withTransit(r, trans, 'yr'), 'yr'))}</div>`;
     };
     drawYears();
     $('years').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('yearDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
