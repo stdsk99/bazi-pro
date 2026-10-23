@@ -323,6 +323,27 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .msec { margin-top: 22px; }
 .mluck ol { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 @media (max-width: 760px) { .mluck ol { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.mpair { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-top: 10px; }
+.mp { border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; background: var(--paper); }
+.mp .cap { font-weight: 600; margin-bottom: 6px; }
+.mres { display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center; }
+.mscore { width: 132px; height: 132px; border-radius: 50%; background: conic-gradient(var(--c) calc(var(--p) * 1%), var(--rule) 0); display: grid; place-items: center; }
+.mscore span { width: 104px; height: 104px; border-radius: 50%; background: var(--sheet); display: flex; align-items: center; justify-content: center; font-size: 2.1rem; font-weight: 700; }
+.mscore small { font-size: .9rem; font-weight: 500; margin-left: 1px; }
+.mhead .kind { color: var(--ink-soft); }
+.mhead .big { font-size: 1.5rem; font-weight: 700; margin: 2px 0 10px; }
+.mrow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: 6px; }
+.mrow .mn { min-width: 72px; font-weight: 600; }
+.mpl { display: inline-flex; flex-direction: column; align-items: center; border: 1px solid var(--rule); border-radius: 8px; padding: 2px 8px; background: var(--paper); }
+.mpl.dm { border-color: var(--jade); }
+.mpl small { color: var(--ink-soft); font-size: .7rem; }
+.mpl b { font-family: var(--f-han); font-size: 1.2rem; }
+.mitem .mih { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.mitem .mih h3 { margin: 0; }
+.mbar { height: 8px; border-radius: 4px; background: var(--rule); overflow: hidden; margin: 6px 0 8px; }
+.mbar i { display: block; height: 100%; border-radius: 4px; }
+.madv { margin: 0; padding-left: 20px; line-height: 1.8; }
+@media (max-width: 760px) { .mpair { grid-template-columns: 1fr; } .mres { grid-template-columns: 1fr; justify-items: center; text-align: center; } .mrow { justify-content: center; } .mrow .mn { flex-basis: 100%; text-align: center; min-width: 0; } }
 .bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
 #printView { display: none; }
 @media print {
@@ -398,6 +419,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     <button type="button" role="tab" id="t-read" data-page="read" aria-controls="p-read">คำทำนาย</button>
     <button type="button" role="tab" id="t-luck" data-page="luck" aria-controls="p-luck">วัยจร</button>
     <button type="button" role="tab" id="t-year" data-page="year" aria-controls="p-year">ปีจร</button>
+    <button type="button" role="tab" id="t-match" data-page="match" aria-controls="p-match">ดวงคู่</button>
   </nav>
 
   <div class="page" id="p-chart" role="tabpanel" aria-labelledby="t-chart">
@@ -471,6 +493,31 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     <section class="panel ldetail" id="monthDetail" aria-live="polite"></section>
   </div>
 
+  <div class="page" id="p-match" role="tabpanel" aria-labelledby="t-match" hidden>
+    <section class="panel">
+      <h2>ดูดวงคู่ 合婚</h2>
+      <p class="sub">เทียบดวงของคุณกับอีกคน ตามหลักตำราดูคู่ครองมาตรฐาน</p>
+      <div class="mpair">
+        <div class="mp"><div class="cap">คนที่ 1</div><div id="m1sum"></div><p class="note" style="margin:4px 0 0">ใช้ข้อมูลเกิดที่กรอกไว้ด้านบน</p></div>
+        <form class="mp" id="f2" autocomplete="off">
+          <div class="cap">คนที่ 2</div>
+          <div class="row">
+            <div class="f"><label class="label" for="name2">ชื่อ</label><input id="name2" size="12" placeholder="ชื่อเล่น"></div>
+            <div class="f"><label class="label" for="date2">วันเกิด (ค.ศ.)</label><input id="date2" type="date" value="1992-06-03" min="1601-01-01" max="2099-12-31"></div>
+            <div class="f"><label class="label" for="time2">เวลาเกิด</label><input id="time2" type="time" value="08:00"></div>
+            <div class="f"><span class="label">เพศ</span>
+              <div class="seg" role="radiogroup" aria-label="เพศคนที่ 2">
+                <label><input type="radio" name="g2" id="g2M" value="M">ชาย</label>
+                <label><input type="radio" name="g2" id="g2F" value="F" checked>หญิง</label>
+              </div></div>
+            <button type="submit">ดูดวงคู่</button>
+          </div>
+        </form>
+      </div>
+    </section>
+    <div id="matchOut" aria-live="polite"></div>
+  </div>
+
   <footer>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
 </div>
 
@@ -482,6 +529,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 <script src="js/analysis.js"></script>
 <script src="js/interactions.js"></script>
 <script src="js/narrative.js"></script>
+<script src="js/compat.js"></script>
 <script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
@@ -496,7 +544,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
   }
 
-  let luckSel = null, yearSel = null, monthSel = null, readSel = null, buildPrint = null;
+  let luckSel = null, yearSel = null, monthSel = null, readSel = null, buildPrint = null, drawMatch = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${escH(b.sub)}</p>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ชง เฮ้ง ไห่ หรือผั่ว</p>';
@@ -506,6 +554,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('edit').setAttribute('aria-expanded', String(open));
   }
   $('toRead').addEventListener('click', () => { readSel = 'self'; render(); show('read'); window.scrollTo({ top: 0 }); });
+  try { const p2 = JSON.parse(localStorage.getItem('bazi.p2') || 'null'); if (p2) { $('name2').value = p2.n || ''; if (p2.d) $('date2').value = p2.d; if (p2.t) $('time2').value = p2.t; (p2.g === 'M' ? $('g2M') : $('g2F')).checked = true; } } catch (e) {}
+  $('f2').addEventListener('submit', (e) => { e.preventDefault(); if (drawMatch) drawMatch(); $('matchOut').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   $('print').addEventListener('click', () => {
     if (!buildPrint) return;
     buildPrint();
@@ -516,7 +566,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     window.print();
   });
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
-  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year'];
+  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'match'];
   function show(pg) {
     if (!PAGES.includes(pg)) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
@@ -534,7 +584,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     const [h, mi] = $('time').value.split(':').map(Number);
     if (!y || isNaN(h)) return;
     const g = document.querySelector('input[name="g"]:checked').value;
-    const r = BaziCore.calculate({ year: y, month: m, day: d, hour: h, minute: mi, gender: g, tz: 7, longitude: Number($('place').value),
+    const r = BaziCore.calculate({ name: $('name').value.trim(), year: y, month: m, day: d, hour: h, minute: mi, gender: g, tz: 7, longitude: Number($('place').value),
       options: { yearChange: $('yearChange').value, ziHour: $('ziHour').value, luckMethod: $('luckMethod').value, monthSystem: $('monthSystem').value, trueSolarTime: $('solar').value === '1', pregnancyMonths: Number($('preg').value) || 9 } });
     const name = $('name').value.trim();
     $('bsum').innerHTML = `<b>${name || 'ไม่ระบุชื่อ'}</b><span>${d}/${m}/${y} · ${pad(h)}:${pad(mi)} น. · ${G_TH[g]} · ${$('place').selectedOptions[0].text}</span>`;
@@ -794,6 +844,31 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <h2>ปีจร ${thisYear} ${ya.pillar.zh} ปี${ya.pillar.animal}</h2>${blocksHTML(BaziNarrative.transit(r, an, ya.pillar, 'year', BaziInteractions.withTransit(r, trY, 'yr'), 'yr'))}
         <p class="pnote">พิมพ์เมื่อ ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()} · คำทำนายเป็นฉบับร่างตามหลักห้าธาตุ ใช้ประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์ การเงิน หรือกฎหมาย</p>`;
     };
+    // ---------- ดวงคู่ ----------
+    $('m1sum').innerHTML = `<b>${esc(name || 'ไม่ระบุชื่อ')}</b> · ${d}/${m}/${y} ${pad(h)}:${pad(mi)} น. · ${G_TH[g]}`;
+    drawMatch = () => {
+      const [y2, m2, d2] = $('date2').value.split('-').map(Number), [h2, mi2] = $('time2').value.split(':').map(Number);
+      if (!y2 || isNaN(h2)) { $('matchOut').innerHTML = ''; return; }
+      const g2 = document.querySelector('input[name="g2"]:checked').value;
+      const r2 = BaziCore.calculate({ name: $('name2').value.trim(), year: y2, month: m2, day: d2, hour: h2, minute: mi2, gender: g2, tz: 7, longitude: Number($('place').value), options: r.options });
+      const res = BaziCompat.compare(r, r2);
+      const row = (rr, nm) => `<div class="mrow"><span class="mn">${esc(nm)}</span>${['hour', 'day', 'month', 'year'].map((k) => { const p = rr.pillars[k]; return `<span class="mpl${k === 'day' ? ' dm' : ''}"><small>${{ hour: 'ยาม', day: 'ดิถี', month: 'เดือน', year: 'ปี' }[k]}</small><b class="han"><span class="e${E(p.stemElement)}">${BaziCore.STEMS[p.stem]}</span><span class="e${E(p.branchElement)}">${BaziCore.BRANCHES[p.branch]}</span></b></span>`; }).join('')}</div>`;
+      const col = res.tone === 'good' ? 'var(--good)' : res.tone === 'bad' ? 'var(--bad)' : 'var(--warn)';
+      $('matchOut').innerHTML = `
+        <section class="panel mres">
+          <div class="mscore" style="--p:${res.total};--c:${col}" role="img" aria-label="คะแนนความเข้ากัน ${res.total} จาก 100"><span>${res.total}<small>%</small></span></div>
+          <div class="mhead"><div class="kind">ความเข้ากันของ${esc(res.names[0])}กับ${esc(res.names[1])}</div><div class="big" style="color:${col}">${res.level}</div>
+            ${row(r, res.names[0])}${row(r2, res.names[1])}</div>
+        </section>
+        <section class="panel">
+          <h2>รายละเอียด 6 ด้าน <span class="badge">ฉบับร่าง</span></h2>
+          ${res.items.map((x) => { const q = x.pts / x.max, c = q >= 0.75 ? 'var(--good)' : q < 0.5 ? 'var(--bad)' : 'var(--warn)'; return `<div class="rblock mitem"><div class="mih"><h3>${x.name}</h3><span class="mono">${x.pts}/${x.max}</span></div><div class="mbar"><i style="width:${q * 100}%;background:${c}"></i></div><p>${esc(x.text)}</p><p class="src">ที่มา: ${esc(x.source)}</p></div>`; }).join('')}
+        </section>
+        <section class="panel"><h2>คำแนะนำสำหรับคู่นี้</h2><ul class="madv">${res.advice.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+          <p class="note">ระบบอ้างอิงไม่มีส่วนดูดวงคู่ หัวข้อนี้ใช้หลักตำราดูคู่ครองมาตรฐาน 合婚 และศัพท์เดียวกับทั้งแอป</p></section>`;
+      try { localStorage.setItem('bazi.p2', JSON.stringify({ n: $('name2').value, d: $('date2').value, t: $('time2').value, g: g2 })); } catch (e) {}
+    };
+    drawMatch();
     $('readNav').onclick = (ev) => { const bt = ev.target.closest('button[data-r]'); if (!bt) return; readSel = bt.dataset.r; drawRead(); };
   }
 

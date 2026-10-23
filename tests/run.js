@@ -95,5 +95,8 @@ eq('ปีจรแยกสิบเทพ (ปี 丙午 ดิถี 庚 ผ�
 
 eq('เดือนจรปี 2026 (เปลี่ยนปีที่ลิบชุง) 庚寅..辛丑 12 เดือน', (() => { const r = calc(1990, 1, 15, 10, 30, 'M', { yearChange: 'lichun' }); const ms = r.monthly(2026); return [ms.length, ms[0].pillar.zh, ms[11].pillar.zh]; })(), [12, '庚寅', '辛丑']);
 
+const Cm = require('../js/compat.js');
+eq('ดวงคู่: 戊 กับ 癸 เป็นบนภาคี และดาวคู่ครองตรงกัน', (() => { const x = Cm.compare(calc(1985, 3, 10, 14, 0, 'M'), calc(1987, 11, 20, 22, 0, 'F')); return [x.items.find((i) => i.id === 'dm').pts, x.items.find((i) => i.id === 'star').pts, x.items.length, x.total >= 0 && x.total <= 100]; })(), [20, 15, 6, true]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
