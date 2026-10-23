@@ -37,7 +37,7 @@ r.luck.periods[0]   // วัยจรช่วงแรก
 |---|---|
 | `yearChange` | `winterSolstice` ตังจี่ (ค่าตั้งต้น) · `lichun` ลิบชุน · `summerSolstice` แฮ่จี่ |
 | `ziHour` | `midnight` วันเปลี่ยน 24.00 น. (ค่าตั้งต้น) · `at23` วันเปลี่ยน 23.00 น. |
-| `luckMethod` | `standard` มาตรฐาน (ค่าตั้งต้น) · `academic` วิชาการ · `proportional` สัดส่วนช่วงเดือน นับเป็นวัน |
+| `luckMethod` | `standard` นับจากวันเปลี่ยนปี (ค่าตั้งต้น) · `academic` นับจากวันเกิด ตามตำรา · `proportional` สัดส่วนช่วงเดือน นับละเอียดเป็นวัน |
 | `monthSystem` | `standard` เปลี่ยนเดือนที่ 节 · `zhongqi` เปลี่ยนเดือนที่ 中气 |
 | `trueSolarTime` | `false` เวลามาตรฐาน (ค่าตั้งต้น) · `true` เวลาสุริยะปรากฏ |
 | `southern` | ซีกโลกใต้ (กิ่งเดือนเลื่อน 6) |

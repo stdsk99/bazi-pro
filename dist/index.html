@@ -124,7 +124,7 @@ footer { color: var(--ink-soft); font-size: .8rem; }
         <div class="f"><label class="label" for="ziHour">ยามจื้อ (23.00–24.00 น.)</label>
           <select id="ziHour"><option value="midnight">วันเปลี่ยน 24.00 น. (ค่าตั้งต้น)</option><option value="at23">วันเปลี่ยน 23.00 น.</option></select></div>
         <div class="f"><label class="label" for="luckMethod">วิธีคิดอายุเริ่มวัยจร</label>
-          <select id="luckMethod"><option value="standard">มาตรฐาน (ค่าตั้งต้น)</option><option value="academic">วิชาการ</option><option value="proportional">สัดส่วนช่วงเดือน (นับเป็นวัน)</option></select></div>
+          <select id="luckMethod"><option value="standard">นับจากวันเปลี่ยนปี (ค่าตั้งต้น)</option><option value="academic">นับจากวันเกิด ตามตำรา</option><option value="proportional">สัดส่วนช่วงเดือน นับละเอียดเป็นวัน</option></select></div>
         <div class="f"><label class="label" for="monthSystem">ระบบเดือนและยาม</label>
           <select id="monthSystem"><option value="standard">มาตรฐาน (เปลี่ยนเดือนที่ 节)</option><option value="zhongqi">เปลี่ยนเดือนที่ 中气</option></select></div>
         <div class="f"><label class="label" for="solar">เวลาที่ใช้คำนวณ</label>
@@ -347,7 +347,7 @@ footer { color: var(--ink-soft); font-size: .8rem; }
         monthSystem: 'standard',      // 'standard' เปลี่ยนเดือนที่ 节 | 'zhongqi' เปลี่ยนเดือนที่ 中气 และยามเริ่มชั่วโมงคู่
         ziHour: 'midnight',           // 'midnight' วันเปลี่ยน 24.00 น. (ค่าตั้งต้น) | 'at23' วันเปลี่ยน 23.00 น.
         trueSolarTime: false,         // true = ใช้เวลาสุริยะปรากฏ (ลองจิจูด + สมการเวลา)
-        luckMethod: 'standard',       // 'academic' วิชาการ | 'standard' มาตรฐาน (ค่าตั้งต้น) | 'proportional' เทียบสัดส่วนในช่วงเดือน นับละเอียดเป็นวัน
+        luckMethod: 'standard',       // 'standard' นับจากวันเปลี่ยนปี (ค่าตั้งต้น) | 'academic' นับจากวันเกิด ตามตำรา | 'proportional' สัดส่วนช่วงเดือน นับละเอียดเป็นวัน
         southern: false,              // ซีกโลกใต้: กิ่งเดือนเลื่อน 6
         pregnancyMonths: 9            // ใช้คำนวณหลักปฏิสนธิ
     };

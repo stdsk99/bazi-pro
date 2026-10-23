@@ -46,7 +46,7 @@
         monthSystem: 'standard',      // 'standard' เปลี่ยนเดือนที่ 节 | 'zhongqi' เปลี่ยนเดือนที่ 中气 และยามเริ่มชั่วโมงคู่
         ziHour: 'midnight',           // 'midnight' วันเปลี่ยน 24.00 น. (ค่าตั้งต้น) | 'at23' วันเปลี่ยน 23.00 น.
         trueSolarTime: false,         // true = ใช้เวลาสุริยะปรากฏ (ลองจิจูด + สมการเวลา)
-        luckMethod: 'standard',       // 'academic' วิชาการ | 'standard' มาตรฐาน (ค่าตั้งต้น) | 'proportional' เทียบสัดส่วนในช่วงเดือน นับละเอียดเป็นวัน
+        luckMethod: 'standard',       // 'standard' นับจากวันเปลี่ยนปี (ค่าตั้งต้น) | 'academic' นับจากวันเกิด ตามตำรา | 'proportional' สัดส่วนช่วงเดือน นับละเอียดเป็นวัน
         southern: false,              // ซีกโลกใต้: กิ่งเดือนเลื่อน 6
         pregnancyMonths: 9            // ใช้คำนวณหลักปฏิสนธิ
     };
