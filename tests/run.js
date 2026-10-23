@@ -59,25 +59,29 @@ eq('ดวงตัวอย่าง 3 = ดิถีอ่อนปานก�
 eq('ดวงตัวอย่าง 3 ธาตุดี/ร้าย', [els(a3.favorable), els(a3.unfavorable)], ['ทอง น้ำ+', 'ดิน น้ำ- ไฟ ไม้']);
 eq('ดวงตัวอย่าง 2 (8.16) = ดิถีอ่อน ใช้ไม้ไฟ', [a2.pattern, a2.strength, els(a2.favorable)], [0, 3, 'ไฟ ไม้']);
 
-// --- ภาคี ปะทะ การลงโทษ ---
+// --- ภาคี ชง เฮ้ง ไห่ ผั่ว ---
 const I = require('../js/interactions.js');
+eq('子酉 ผั่ว', I.find([{ key: 'a', label: 'a', stem: 0, branch: 0 }, { key: 'b', label: 'b', stem: 2, branch: 9 }]).map((x) => x.type).join(), 'break');
+eq('寅巳申 ซำเฮ้ง', I.find([0, 1, 2].map((i) => ({ key: 'k' + i, label: 'k' + i, stem: i, branch: [2, 5, 8][i] }))).some((x) => x.type === 'punish3'), true);
 const it = (arr) => arr.map(([s, b], i) => ({ key: 'k' + i, label: 'k' + i, stem: s, branch: b }));
 const types = (l) => l.map((x) => x.type).sort().join(',');
-eq('寅午戌 ภาคีสามประสาน + 甲己 ก้านรวม + 甲庚 ก้านปะทะ', types(I.find(it([[0, 2], [5, 6], [6, 10]]))), 'stemClash,stemCombo,trio');
-eq('子午 ปะทะ', types(I.find(it([[0, 0], [2, 6]]))), 'clash');
-eq('子卯 ลงโทษ', types(I.find(it([[0, 0], [2, 3]]))), 'punish');
-eq('午午 ลงโทษตัวเอง', types(I.find(it([[0, 6], [2, 6]]))), 'selfPunish');
+eq('寅午戌 ไตรภาคี + 甲己 บนภาคี + 甲庚 บนปะทะ', types(I.find(it([[0, 2], [5, 6], [6, 10]]))), 'stemClash,stemCombo,trio');
+eq('子午 ล่างชง', types(I.find(it([[0, 0], [2, 6]]))), 'clash');
+eq('子卯 เฮ้ง', types(I.find(it([[0, 0], [2, 3]]))), 'punish');
+eq('午午 เฮ้งตัวเอง', types(I.find(it([[0, 6], [2, 6]]))), 'selfPunish');
 eq('ปีจรเริ่มที่ตังจี่ปีก่อน', (() => { const a = calc(2014, 8, 25, 9, 35).annual(2026, 2026)[0]; return [a.pillar.zh, a.start.year, a.start.month]; })(), ['丙午', 2025, 12]);
 
 let a1Chart;
 // --- คำทำนาย ---
 const N = require('../js/narrative.js');
 const rd = N.natal(a1Chart = calc(2014, 8, 25, 9, 35), An.analyze(a1Chart), I.natal(a1Chart));
-eq('คำทำนายมี 9 หัวข้อ และทุกย่อหน้ามีที่มา', [rd.length, rd.every((s) => s.blocks.every((b) => b.source))], [9, true]);
+eq('คำทำนายมี 11 หัวข้อ (รวมทิศบ้านและนักษัตร) และทุกย่อหน้ามีที่มา', [rd.length, rd.every((s) => s.blocks.every((b) => b.source))], [11, true]);
 
 const lp0 = a1Chart.luck.periods[0].pillar;
 const tr = N.transit(a1Chart, An.analyze(a1Chart), lp0, 'luck', I.withTransit(a1Chart, [{ key: 'luck', label: 'วัยจร', stem: lp0.stem, branch: lp0.branch }], 'luck'), 'luck');
 eq('คำทำนายวัยจรมีภาพรวม เรื่องที่เด่น และคำแนะนำ', ['ภาพรวม', 'เรื่องที่เด่นขึ้น', 'คำแนะนำ'].every((t) => tr.some((b) => b.title === t)), true);
+
+eq('ชื่อสิบเทพตามระบบอ้างอิง', [B.tenGod(0, 9).th, B.tenGod(0, 6).th, B.tenGod(0, 5).th], ['เสริมหลัก', 'พิฆาต', 'โชคลาภ']);
 
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

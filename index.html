@@ -463,7 +463,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
   let luckSel = null, yearSel = null, readSel = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
-  const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ปะทะ หรือการลงโทษ</p>';
+  const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ชง เฮ้ง ไห่ หรือผั่ว</p>';
   const G_TH = { M: 'ชาย', F: 'หญิง' };
   function setForm(open) {
     $('f').hidden = !open; $('bbar').hidden = open;
@@ -496,13 +496,13 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('who').innerHTML = name ? `· ${name}${name === 'ตัวอย่าง' ? '<span class="example">ข้อมูลตัวอย่าง</span>' : ''}` : '';
 
     const dmStem = r.pillars.day.stem;
-    const SHORT = { '比肩': 'เพื่อน', '劫财': 'คู่แข่ง', '食神': 'ผลงาน', '伤官': 'ความคิด', '偏财': 'ลาภ', '正财': 'ทรัพย์', '七杀': 'กดดัน', '正官': 'ตำแหน่ง', '偏印': 'ความรู้', '正印': 'อุปถัมภ์' };
+    const SHORT = Object.fromEntries(['比肩', '劫财', '食神', '伤官', '偏财', '正财', '七杀', '正官', '偏印', '正印'].map((c) => [c, BaziCore.tenGod(0, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].find((x) => BaziCore.tenGod(0, x).code === c)).th]));
     const sign = (yang) => (yang ? '+' : '−');
     const tile = (ch, el, yang) => `<div class="tile w${E(el)}"><span class="han">${ch}</span><span class="bd">${el}${sign(yang)}</span></div>`;
     const godOf = (code, th) => `<div class="tg"><b>${code}</b><span>${th}</span></div>`;
     const card = (k, label, full) => {
       const p = r.pillars[k];
-      const sg = k === 'day' ? godOf('日主', 'ตัวเจ้าชะตา') : godOf(p.tenGod.code, p.tenGod.th);
+      const sg = k === 'day' ? godOf('日主', 'ดิถี (ตัวเจ้าชะตา)') : godOf(p.tenGod.code, p.tenGod.th);
       let out = `<div class="pc${k === 'day' ? ' dm' : ''}"><div class="pc-h">${label}</div>${sg}
         ${tile(BaziCore.STEMS[p.stem], p.stemElement, p.stemYang)}<div class="rd">${BaziCore.STEMS_TH[p.stem]}</div>
         ${tile(BaziCore.BRANCHES[p.branch], p.branchElement, p.branchYang)}<div class="rd">${BaziCore.BRANCHES_TH[p.branch]} · ${p.animal}</div>`;
@@ -515,12 +515,12 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
       }
       return out + '</div>';
     };
-    $('pillars').innerHTML = [['hour', 'ยาม'], ['day', 'ดิถี (วัน)'], ['month', 'เดือน'], ['year', 'ปี']].map(([k, l]) => card(k, l, true)).join('');
+    $('pillars').innerHTML = [['hour', 'ยาม'], ['day', 'ดิถี'], ['month', 'เดือน'], ['year', 'ปี']].map(([k, l]) => card(k, l, true)).join('');
     $('extras').innerHTML = `<div class="cap">หลักเสริม</div>${card('conception', 'ปฏิสนธิ', false)}${card('lifePalace', 'ลัคนา', false)}`;
 
     const dm = r.dayMaster, ct = r.calcTime, mt = r.monthTerm;
     $('facts').innerHTML = `
-      <dt>ธาตุประจำตัว</dt><dd><span class="e${E(dm.element)}" style="font-family:var(--f-han);font-weight:700">${dm.zh}</span> ${dm.th} ${dm.element}${dm.yang ? 'หยาง' : 'หยิน'}</dd>
+      <dt>ดิถี (ธาตุประจำตัว)</dt><dd><span class="e${E(dm.element)}" style="font-family:var(--f-han);font-weight:700">${dm.zh}</span> ${dm.th} ${dm.element}${dm.yang ? 'หยาง' : 'หยิน'}</dd>
       <dt>เวลาที่ใช้คำนวณ</dt><dd class="mono">${fmt(ct)}${r.options.trueSolarTime ? ` (ปรับ ${r.solarShiftMinutes} นาที)` : ''}</dd>
       <dt>เดือนเริ่มที่</dt><dd>${mt.start.th} ${mt.start.zh} <span class="mono">${fmt(mt.start)}</span></dd>
       <dt>สารทถัดไป</dt><dd>${mt.next.th} ${mt.next.zh} <span class="mono">${fmt(mt.next)}</span></dd>
@@ -529,13 +529,13 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     const an = BaziAnalysis.analyze(r);
     const dmEl = BaziCore.STEM_ELEMENT[dmStem];
     const polStem = (pol) => BaziCore.STEMS[pol === 'same' ? dmStem : dmStem ^ 1];
-    const posTh = { stem: 'เฉพาะบนก้าน', branch: 'เฉพาะในกิ่ง' };
-    const pill = (x) => `<span class="pill w${x.element}"><span class="dot">${x.polarity ? polStem(x.polarity) : '木火土金水'[x.element]}</span>${x.th}${x.polarity ? `<small>${x.polarity === 'same' ? 'ขั้วเดียวกับเจ้าชะตา' : 'ขั้วตรงข้าม'}</small>` : ''}${x.position ? `<small>${posTh[x.position]}</small>` : ''}</span>`;
+    const posTh = { stem: 'เฉพาะราศีบน', branch: 'เฉพาะราศีล่าง' };
+    const pill = (x) => `<span class="pill w${x.element}"><span class="dot">${x.polarity ? polStem(x.polarity) : '木火土金水'[x.element]}</span>${x.th}${x.polarity ? `<small>${x.polarity === 'same' ? 'ขั้วเดียวกับดิถี' : 'ขั้วตรงข้าม'}</small>` : ''}${x.position ? `<small>${posTh[x.position]}</small>` : ''}</span>`;
     const Z = [[0, 3.125, 'อ่อน', 'var(--w4)'], [3.125, 4.375, 'ค่อนอ่อน', 'var(--w0)'], [4.375, 4.875, 'สมดุล', 'var(--jade-wash)'], [4.875, 8, 'แข็งแรง', 'var(--w1)']];
     const pct = (v) => Math.max(0, Math.min(100, v / 8 * 100));
     const sc = an.score;
     $('verdict').innerHTML = `
-      <div class="kind">${an.pattern ? 'ดวงพิเศษ' : 'ดวงปกติ · กำลังของเจ้าชะตา'}</div>
+      <div class="kind">${an.pattern ? 'ดวงพิเศษ' : 'ดวงปกติ · กำลังของดิถี'}</div>
       <div class="big">${an.pattern ? `${an.patternTh} <span class="han">${an.patternZh}</span>` : `ดวง${an.strengthTh}`}</div>
       <div class="gauge" role="img" aria-label="คะแนนฝ่ายช่วย ${sc.total}">
         <div class="zones">${Z.map(([a, b, , c]) => `<i style="width:${pct(b) - pct(a)}%;background:${c}"></i>`).join('')}</div>
@@ -550,16 +550,16 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
       </div>
       <h2 style="margin-top:18px">กำลังธาตุตามฤดูเกิด</h2>
       <div class="bars">${(() => { const mx = Math.max(...an.seasonal.map((x) => x.value), 1); return [0, 1, 2, 3, 4].map((e) => { const v = an.seasonal.find((x) => x.element === e).value; return `<div class="bar e${e}"><span>${BaziCore.ELEMENTS[e]}</span><span class="track"><span class="fill" style="display:block;width:${v / mx * 100}%"></span></span><span class="mono" style="color:var(--ink)">${v}</span></div>`; }).join(''); })()}</div>
-      <p class="note">จำนวนตัวในดวง ถ่วงน้ำหนักตามธาตุของเดือนเกิด · ยังไม่รวมการแปรธาตุจากการรวม/ชงของกิ่ง</p>`;
+      <p class="note">จำนวนตัวในดวง ถ่วงน้ำหนักตามธาตุของเดือนเกิด · ยังไม่รวมการแปรธาตุจากภาคี/ชงของราศีล่าง</p>`;
 
     // วงจรห้าธาตุ: เรียงตามวงให้กำเนิด ไม้ → ไฟ → ดิน → ทอง → น้ำ
-    const REL = ['ธาตุเดียวกัน', 'ธาตุถ่ายเท', 'ธาตุทรัพย์', 'ธาตุอำนาจ', 'ธาตุให้กำเนิด'];
+    const REL = ['คู่ธาตุ', 'ธาตุถ่ายเท', 'ธาตุโชคลาภ', 'ธาตุอำนาจ', 'ธาตุส่งเสริม'];
     const COL = ['var(--wood)', 'var(--fire)', 'var(--earth)', 'var(--metal)', 'var(--water)'];
     const cx = 200, cy = 196, R = 116, nr = 38;
     const P = [0, 1, 2, 3, 4].map((i) => { const t = -Math.PI / 2 + i * 2 * Math.PI / 5; return [cx + R * Math.cos(t), cy + R * Math.sin(t)]; });
     const isF = (e) => an.favorable.some((x) => x.element === e), isU = (e) => an.unfavorable.some((x) => x.element === e);
     const seg = (a, b, gap) => { const [x1, y1] = P[a], [x2, y2] = P[b], d = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / d, uy = (y2 - y1) / d; return [x1 + ux * gap, y1 + uy * gap, x2 - ux * (gap + 4), y2 - uy * (gap + 4)]; };
-    let svg = `<svg viewBox="0 0 400 396" role="img" aria-label="วงจรห้าธาตุ เจ้าชะตาธาตุ${BaziCore.ELEMENTS[dmEl]}"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-soft)"/></marker></defs>`;
+    let svg = `<svg viewBox="0 0 400 396" role="img" aria-label="วงจรห้าธาตุ ดิถีธาตุ${BaziCore.ELEMENTS[dmEl]}"><defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--ink-soft)"/></marker></defs>`;
     for (let i = 0; i < 5; i++) { const [a, b, c, d] = seg(i, (i + 2) % 5, nr + 6); svg += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--rule)" stroke-width="1.2" stroke-dasharray="4 4"/>`; }
     for (let i = 0; i < 5; i++) { const [a, b, c, d] = seg(i, (i + 1) % 5, nr + 4); svg += `<line x1="${a}" y1="${b}" x2="${c}" y2="${d}" stroke="var(--ink-soft)" stroke-width="1.4" marker-end="url(#ar)"/>`; }
     for (let e = 0; e < 5; e++) {
@@ -570,7 +570,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         ${dm ? `<circle cx="${x}" cy="${y}" r="${nr + 6}" fill="none" stroke="var(--jade)" stroke-width="1.5" stroke-dasharray="3 3"/>` : ''}
         <text x="${x}" y="${y - 2}" text-anchor="middle" font-size="17" font-weight="600" fill="${COL[e]}">${BaziCore.ELEMENTS[e]}</text>
         <text x="${x}" y="${y + 16}" text-anchor="middle" font-size="15" fill="var(--ink)">${r.elementCount[e].count}</text>
-        <text x="${x}" y="${y + (y > cy ? nr + 23 : -nr - 29)}" text-anchor="middle" font-size="15.5" fill="var(--ink-soft)">${dm ? 'เจ้าชะตา' : REL[(e - dmEl + 5) % 5]}</text>
+        <text x="${x}" y="${y + (y > cy ? nr + 23 : -nr - 29)}" text-anchor="middle" font-size="15.5" fill="var(--ink-soft)">${dm ? 'ดิถี' : REL[(e - dmEl + 5) % 5]}</text>
         ${st ? `<text x="${x}" y="${y + (y > cy ? nr + 42 : -nr - 10)}" text-anchor="middle" font-size="15.5" font-weight="600" fill="${stc}">${st}</text>` : ''}</g>`;
     }
     $('wheel').innerHTML = svg + '</svg>';
@@ -618,12 +618,12 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
-            <div class="lrow"><span class="k">ก้าน (5 ปีแรก)</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(rr.a)}</span></div>
-            <div class="lrow"><span class="k">กิ่ง (5 ปีหลัง)</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(rr.b)}</span></div>
+            <div class="lrow"><span class="k">ราศีบน (5 ปีแรก)</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(rr.a)}</span></div>
+            <div class="lrow"><span class="k">ราศีล่าง (5 ปีหลัง)</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(rr.b)}</span></div>
             <div class="lrow"><span class="k">ราศีแฝง</span><span>${q.hidden.map((h) => { const t = BaziCore.tenGod(dmStem, h.stem); return `<span class="e${E(h.element)}" style="font-family:var(--f-han);font-weight:700">${h.zh}</span> ${t.code} ${SHORT[t.code]}`; }).join(' · ')}</span></div>
           </div>
         </div>
-        <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b> — ก้าน${rr.a > 0 ? 'เป็นธาตุให้คุณ' : rr.a < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'} กิ่ง${rr.b > 0 ? 'เป็นธาตุให้คุณ' : rr.b < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'}</div>
+        <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b> — ราศีบน${rr.a > 0 ? 'เป็นธาตุให้คุณ' : rr.a < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'} ราศีล่าง${rr.b > 0 ? 'เป็นธาตุให้คุณ' : rr.b < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'}</div>
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'))}</div>
         <h3 class="rh">คำทำนายช่วงนี้ <span class="badge">ฉบับร่าง</span></h3>
@@ -663,8 +663,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
-            <div class="lrow"><span class="k">ก้าน</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(rr.a)}</span></div>
-            <div class="lrow"><span class="k">กิ่ง</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(rr.b)}</span></div>
+            <div class="lrow"><span class="k">ราศีบน</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(rr.a)}</span></div>
+            <div class="lrow"><span class="k">ราศีล่าง</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(rr.b)}</span></div>
           </div>
         </div>
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>

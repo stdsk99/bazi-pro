@@ -1,4 +1,4 @@
-// interactions.js — ความสัมพันธ์ระหว่างก้านและกิ่ง: ภาคี ปะทะ การลงโทษ การทำร้าย
+// interactions.js — ความสัมพันธ์ระหว่างราศีบนและราศีล่าง: ภาคี ชง เฮ้ง ไห่ ผั่ว (ศัพท์ตามระบบอ้างอิง)
 // รหัสก้าน 0..9 = 甲..癸, กิ่ง 0..11 = 子..亥, ธาตุ 0 ไม้ 1 ไฟ 2 ดิน 3 ทอง 4 น้ำ (เหมือน BaziCore)
 (function (root, factory) {
     if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'));
@@ -9,16 +9,18 @@
     const EL = ['ไม้', 'ไฟ', 'ดิน', 'ทอง', 'น้ำ'];
     // ชนิดความสัมพันธ์: kind ใช้จัดสี (+ ส่งเสริม/รวม, − ขัดแย้ง)
     const TYPES = {
-        stemCombo: { zh: '天干合', th: 'ก้านรวม', kind: '+' },
-        stemClash: { zh: '天干冲', th: 'ก้านปะทะ', kind: '−' },
-        trio: { zh: '三合', th: 'ภาคีสามประสาน', kind: '+' },
-        season: { zh: '三會', th: 'ภาคีฤดู', kind: '+' },
-        halfTrio: { zh: '半合', th: 'ภาคีครึ่ง', kind: '+' },
-        pair: { zh: '六合', th: 'ภาคีคู่', kind: '+' },
-        clash: { zh: '六冲', th: 'ปะทะ (ชง)', kind: '−' },
-        punish: { zh: '刑', th: 'การลงโทษ (เฮ้ง)', kind: '−' },
-        selfPunish: { zh: '自刑', th: 'ลงโทษตัวเอง', kind: '−' },
-        harm: { zh: '六害', th: 'การทำร้าย (ไห่)', kind: '−' }
+        stemCombo: { zh: '天干合', th: 'บนภาคี', kind: '+' },
+        stemClash: { zh: '天干冲', th: 'บนปะทะ', kind: '−' },
+        trio: { zh: '三合', th: 'ไตรภาคี', kind: '+' },
+        season: { zh: '三會', th: 'ภาคีไตรทิศ', kind: '+' },
+        halfTrio: { zh: '半合', th: 'ล่างครึ่งภาคี', kind: '+' },
+        pair: { zh: '六合', th: 'ล่างภาคีคู่', kind: '+' },
+        clash: { zh: '六冲', th: 'ล่างชง', kind: '−' },
+        punish3: { zh: '三刑', th: 'ซำเฮ้ง', kind: '−' },
+        punish: { zh: '刑', th: 'เฮ้ง', kind: '−' },
+        selfPunish: { zh: '自刑', th: 'เฮ้งตัวเอง', kind: '−' },
+        harm: { zh: '六害', th: 'ไห่', kind: '−' },
+        break: { zh: '破', th: 'ผั่ว', kind: '−' }
     };
 
     const STEM_COMBO = [[0, 5, 2], [1, 6, 3], [2, 7, 4], [3, 8, 0], [4, 9, 1]]; // 甲己土 乙庚金 丙辛水 丁壬木 戊癸火
@@ -29,6 +31,7 @@
     const HARM = [[0, 7], [1, 6], [2, 5], [3, 4], [8, 11], [9, 10]];
     const PUNISH3 = [[2, 5, 8], [1, 10, 7]];                                        // 寅巳申 丑戌未
     const SELF = [4, 6, 9, 11];                                                     // 辰午酉亥
+    const BREAK = [[0, 9], [3, 6], [4, 1], [7, 10], [2, 11], [5, 8]];               // 子酉 卯午 辰丑 未戌 寅亥 巳申
 
     const same2 = (a, b, x, y) => (a === x && b === y) || (a === y && b === x);
 
@@ -64,28 +67,29 @@
                 const a = items[i], b = items[j];
                 const other = a.branch === mid ? b.branch : b.branch === mid ? a.branch : -1;
                 if (other !== set[0] && other !== set[2]) continue;
-                add('halfTrio', [a, b], e, `${B.BRANCHES[mid]}${B.BRANCHES[other]} ภาคีครึ่งธาตุ${EL[e]}`);
+                add('halfTrio', [a, b], e, `${B.BRANCHES[mid]}${B.BRANCHES[other]} ครึ่งภาคีธาตุ${EL[e]}`);
             }
         }
         for (const set of PUNISH3) {
             const g = pick(set);
             const present = g.filter((x) => x.length);
-            if (present.length >= 2) add('punish', present.map((x) => x[0]), null, `${set.filter((b, i) => g[i].length).map((b) => B.BRANCHES[b]).join('')}${present.length === 3 ? ' ครบชุด' : ''}`);
+            if (present.length >= 2) add(present.length === 3 ? 'punish3' : 'punish', present.map((x) => x[0]), null, `${set.filter((b, i) => g[i].length).map((b) => B.BRANCHES[b]).join('')}${present.length === 3 ? ' ครบชุด' : ''}`);
         }
         // กิ่ง: เป็นคู่
         for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) {
             const a = items[i], b = items[j], x = a.branch, y = b.branch, pr = `${B.BRANCHES[x]}${B.BRANCHES[y]}`;
             for (const [p, q, e] of PAIR) if (same2(x, y, p, q)) add('pair', [a, b], e, `${pr} รวมเป็นธาตุ${EL[e]}`);
             if ((x + 6) % 12 === y) add('clash', [a, b], null, pr);
-            if (same2(x, y, 0, 3)) add('punish', [a, b], null, `${pr} (ลงโทษไร้มารยาท)`);
+            if (same2(x, y, 0, 3)) add('punish', [a, b], null, `${pr} `);
             if (x === y && SELF.includes(x)) add('selfPunish', [a, b], null, pr);
             for (const [p, q] of HARM) if (same2(x, y, p, q)) add('harm', [a, b], null, pr);
+            for (const [p, q] of BREAK) if (same2(x, y, p, q)) add('break', [a, b], null, pr);
         }
         return out;
     }
 
     // ผังดวงเดิม 4 เสาหลัก
-    const NATAL = [['year', 'ปี'], ['month', 'เดือน'], ['day', 'วัน'], ['hour', 'ยาม']];
+    const NATAL = [['year', 'ปี'], ['month', 'เดือน'], ['day', 'ดิถี'], ['hour', 'ยาม']];
     function natalItems(chart) {
         return NATAL.map(([k, l]) => ({ key: k, label: l, stem: chart.pillars[k].stem, branch: chart.pillars[k].branch }));
     }

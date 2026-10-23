@@ -28,16 +28,17 @@
     const termName = (m, type) => { const t = TERMS[(m - 1) * 2 + type]; return { zh: t[0], th: t[1] }; };
 
     // สิบเทพ 十神 เทียบกับธาตุประจำตัว (ก้านวัน)
+    // ชื่อสิบเทพ (ศัพท์ตามระบบอ้างอิง) + คำอธิบายสั้น
     const TEN_GODS = {
-        '比肩': 'เพื่อนร่วมธาตุ', '劫财': 'คู่แข่งร่วมธาตุ', '食神': 'ผลงาน ความสุข', '伤官': 'ความคิด การแสดงออก',
-        '偏财': 'ลาภ ทรัพย์จร', '正财': 'ทรัพย์ประจำ', '七杀': 'แรงกดดัน อำนาจ', '正官': 'ตำแหน่ง ระเบียบ',
-        '偏印': 'ความรู้เฉพาะทาง', '正印': 'ผู้อุปถัมภ์ การเรียน'
+        '比肩': ['คู่ธาตุ', 'เพื่อนร่วมธาตุ'], '劫财': ['คู่แข่ง', 'คู่แข่งร่วมธาตุ'], '食神': ['ถ่ายเท', 'ผลงาน ความสุข'], '伤官': ['กลยุทธ์', 'ความคิด การแสดงออก'],
+        '偏财': ['โชคลอย', 'ลาภ ทรัพย์จร'], '正财': ['โชคลาภ', 'ทรัพย์ประจำ'], '七杀': ['พิฆาต', 'แรงกดดัน ความท้าทาย'], '正官': ['อำนาจ', 'ตำแหน่ง ระเบียบ'],
+        '偏印': ['เสริมรอง', 'ความรู้เฉพาะทาง'], '正印': ['เสริมหลัก', 'ผู้อุปถัมภ์ การเรียน']
     };
     function tenGod(dayStem, stem) {
         const a = STEM_ELEMENT[dayStem], b = STEM_ELEMENT[stem], same = (dayStem % 2) === (stem % 2);
         const rel = (b - a + 5) % 5; // 0 เดียวกัน, 1 เราให้กำเนิด, 2 เราข่ม, 3 ข่มเรา, 4 ให้กำเนิดเรา
         const code = [['比肩', '劫财'], ['食神', '伤官'], ['偏财', '正财'], ['七杀', '正官'], ['偏印', '正印']][rel][same ? 0 : 1];
-        return { code, th: TEN_GODS[code] };
+        return { code, th: TEN_GODS[code][0], desc: TEN_GODS[code][1] };
     }
 
     // ---------- ตัวเลือก (ค่าตั้งต้นตามระบบที่ตกลงกันไว้) ----------
@@ -205,7 +206,7 @@
 
         const pillars = { conception: conceptionP, lifePalace: lifePalaceP, hour: hourP, day: dayP, month: monthP, year: yearP };
         for (const k of Object.keys(pillars)) if (k !== 'day') pillars[k].tenGod = tenGod(dayP.stem, pillars[k].stem);
-        pillars.day.tenGod = { code: '日主', th: 'ตัวเจ้าชะตา' };
+        pillars.day.tenGod = { code: '日主', th: 'ดิถี', desc: 'ตัวเจ้าชะตา' };
         const counts = [0, 0, 0, 0, 0];
         for (const k of ['year', 'month', 'day', 'hour']) { counts[STEM_ELEMENT[pillars[k].stem]]++; counts[BRANCH_ELEMENT[pillars[k].branch]]++; }
 
