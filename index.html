@@ -402,6 +402,19 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 .mb { padding: 6px 0; border-top: 1px dashed var(--rule); } .mb:first-of-type { border-top: 0; }
 .mb p { margin: 2px 0 0; }
 @media (max-width: 760px) { .ycards { grid-template-columns: 1fr 1fr; } }
+.dphero { display: grid; grid-template-columns: 180px 1fr; gap: 14px; align-items: center; width: 100%; text-align: left; font: inherit; font-weight: 400; color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 8px; margin: 6px 0 12px; cursor: pointer; }
+.dphero:hover { border-color: var(--jade); }
+.dpimg svg, .dpbig svg { display: block; width: 100%; height: auto; border-radius: 9px; aspect-ratio: 16 / 10; }
+.dptx { display: flex; flex-direction: column; gap: 2px; }
+.dptx small { color: var(--ink-soft); } .dptx b { font-size: 1.15rem; } .dptx em { font-style: normal; color: var(--jade); font-weight: 600; margin-top: 4px; }
+.dpcard { overflow: hidden; }
+.dpbig { margin: -4px -4px 10px; }
+.dphead h2 { margin: 0; } .dphead p { margin: 2px 0 8px; color: var(--ink-soft); }
+.dpcard h3 { margin: 14px 0 4px; }
+.dpcard p { margin: 0; line-height: 1.75; }
+.dptip { background: var(--warn-wash); border-radius: 10px; padding: 10px 14px; margin-top: 16px; }
+.dptip b { color: var(--warn); }
+@media (max-width: 600px) { .dphero { grid-template-columns: 120px 1fr; } }
 .bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
 #printView { display: none; }
 @media print {
@@ -493,6 +506,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     </section>
     <section class="panel basis" aria-labelledby="h-basis">
       <h2 id="h-basis">พื้นดวงของคุณ</h2>
+      <div id="dpHero"></div>
       <dl class="bsl" id="basis"></dl>
       <button type="button" class="ghost" id="toRead">อ่านคำทำนายละเอียด</button>
     </section>
@@ -625,6 +639,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 <script src="js/compat.js"></script>
 <script src="js/store.js"></script>
 <script src="js/yearly.js"></script>
+<script src="js/daypillar.js"></script>
 <script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
@@ -1049,13 +1064,24 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     // ---------- คำทำนาย ----------
     const esc = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
     const secs = BaziNarrative.natal(r, an, BaziInteractions.natal(r));
+    // ---------- บุคลิกตามเสาวัน 60 แบบ ----------
+    const dpZh = r.pillars.day.zh, DP = BaziDayPillar.get(dpZh);
+    const secTxt = (id, n) => { const x = secs.find((q) => q.id === id); return x ? x.blocks.slice(0, n).map((b) => b.text || (b.items || []).map(([k, v]) => `${k}: ${v}`).join(' · ')).filter(Boolean).join(' ') : ''; };
+    const favE = [...new Set(an.favorable.filter((x) => !x.position).map((x) => x.element))];
+    const tipFull = DP ? `${DP.tip}${favE.length ? ` · ธาตุที่ช่วยเสริมดวงคุณคือ${favE.map((e) => BaziCore.ELEMENTS[e]).join(' ')} ใช้สี${favE.map((e) => BaziNarrative.ELEMENT_LIFE[e].colors.split(' ')[0]).join(' ')} และหันไปทาง${favE.map((e) => BaziNarrative.ELEMENT_LIFE[e].dir).join(' ')}` : ''}` : '';
+    $('dpHero').innerHTML = DP ? `<button type="button" class="dphero" id="dpGo"><span class="dpimg">${BaziDayPillar.card(dpZh)}</span><span class="dptx"><small>บุคลิกตามเสาวัน ${dpZh}</small><b>${DP.img}</b><span>${DP.tag}</span><em>อ่านบุคลิกเต็ม ›</em></span></button>` : '';
+    const dpHTML = DP ? `<section class="panel dpcard"><div class="dpbig">${BaziDayPillar.card(dpZh)}</div><div class="dphead"><h2>${DP.img}</h2><p>${DP.tag} · เสาวัน ${dpZh}</p></div>
+      ${[['ตัวตนของคุณ', DP.self], ['จุดแข็ง', DP.strong], ['สิ่งที่ควรระวัง', DP.care], ['การงาน', secTxt('career', 3)], ['การเงิน', secTxt('money', 3)], ['ความรักและความสัมพันธ์', secTxt('love', 2)]].map(([k, v]) => v ? `<h3>${k}</h3><p>${esc(v)}</p>` : '').join('')}
+      <div class="dptip"><b>เคล็ดลับเสริมดวง</b><p>${esc(tipFull)}</p></div>
+      <p class="src">ที่มา: ตัวตน จุดแข็ง สิ่งที่ควรระวัง และเคล็ดลับ ดูจากเสาวัน ${dpZh} (ดิถี ${BaziCore.STEMS[r.pillars.day.stem]} กับวังคู่ครอง ${BaziCore.BRANCHES[r.pillars.day.branch]}) · การงาน การเงิน และความรัก ดูจากทั้งดวง (สรุปจากหัวข้อนั้นๆ)</p></section>` : '';
     if (!readSel || (readSel !== 'all' && !secs.some((x) => x.id === readSel))) readSel = secs[0].id;
     const drawRead = () => {
       $('readNav').innerHTML = secs.map((x) => `<button type="button" class="dc${x.id === readSel ? ' sel' : ''}" data-r="${x.id}" aria-pressed="${x.id === readSel}">${esc(x.title)}</button>`).join('') + `<button type="button" class="dc${readSel === 'all' ? ' sel' : ''}" data-r="all" aria-pressed="${readSel === 'all'}">ทั้งหมด</button>`;
-      $('reading').innerHTML = secs.filter((x) => readSel === 'all' || x.id === readSel).map((sec) => `<section class="panel rsec" id="r-${sec.id}"><h2>${esc(sec.title)}</h2>${sec.blocks.map((b) =>
+      $('reading').innerHTML = secs.filter((x) => readSel === 'all' || x.id === readSel).map((sec) => `${sec.id === 'self' ? dpHTML : ''}<section class="panel rsec" id="r-${sec.id}"><h2>${esc(sec.title)}</h2>${sec.blocks.map((b) =>
         `<div class="rblock${b.element != null ? ' el w' + b.element : ''}">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${esc(b.sub)}</p>` : ''}${b.items ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : `<p>${esc(b.text)}</p>`}${b.source ? `<p class="src">ที่มา: ${esc(b.source)}</p>` : ''}</div>`).join('')}</section>`).join('');
     };
     drawRead();
+    if ($('dpGo')) $('dpGo').onclick = () => { readSel = 'self'; drawRead(); show('read'); window.scrollTo({ top: 0 }); };
     // ---------- พิมพ์ / PDF ----------
     buildPrint = () => {
       const lp = curIdx >= 0 ? L.periods[curIdx] : null, ya = r.annual(thisYear, thisYear)[0];

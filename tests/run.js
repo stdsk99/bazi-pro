@@ -116,5 +116,8 @@ eq('ด้านที่เด่น/ต้องระวัง (ดวงต�
 const Yr = require('../js/yearly.js');
 eq('สรุปปี 2026 (ปีมะเมีย เกิดปีมะเมีย = ปีนักษัตรตัวเองแบบเฮ้งตัวเอง) และปี 2030 ชงวังคู่ครอง', (() => { const r = calc(1990, 1, 15, 10, 30); const a = Yr.summary(r, An.analyze(r), 2026), b = Yr.summary(r, An.analyze(r), 2030); return [a.topics.length, a.months.months.length, a.months.best.length >= 1, a.taisui[0].hits[0].name.startsWith('ปีนักษัตรตัวเอง'), b.taisui[0].hits.some((h) => h.by === 'ดิถี'), b.topics.find((t) => t.id === 'love').tone]; })(), [4, 12, true, true, true, -1]);
 
+const DPm = require('../js/daypillar.js');
+eq('เสาวัน 60 แบบครบ มีข้อความทุกช่อง และภาพ SVG', [DPm.list().length, DPm.list().every((k) => { const d = DPm.get(k); return d.img && d.tag && d.self && d.strong && d.care && d.tip && DPm.card(k).startsWith('<svg'); }), new Set(DPm.list().map((k) => DPm.get(k).img)).size], [60, true, 60]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
