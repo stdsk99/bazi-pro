@@ -38,7 +38,9 @@
             ['สุขภาพโดยรวมปกติ', 'ตรวจสุขภาพประจำปีและพักผ่อนให้พอ'],
             ['ร่างกายและใจเหนื่อยง่าย ระวังความเครียด อุบัติเหตุ และโรคเดิมกำเริบ', 'พักผ่อนให้พอ ตรวจสุขภาพ และขับรถระมัดระวัง']] }
     };
-    function topics(chart, an, q) {
+    function topics(chart, an, q, kind) {
+        const W = { luck: ['ช่วงนี้', 'ช่วงถัดไป'], month: ['เดือนนี้', 'เดือนถัดไป'] }[kind] || ['ปีนี้', 'ปีถัดไป'];
+        const w = (t) => t.replace(/ปีนี้/g, W[0]).replace(/ปีถัดไป/g, W[1]);
         const P = chart.pillars, dm = P.day.stem, male = (chart.input && chart.input.gender) !== 'F';
         const J = judgeFn(chart, an)(q);
         const cS = B.tenGod(dm, q.stem).code, cB = B.tenGod(dm, q.hidden[0].stem).code;
@@ -48,7 +50,7 @@
         const out = [];
         const add = (id, score, why) => {
             const lvl = score >= 1 ? 0 : score <= -1 ? 2 : 1, T = TOPIC[id];
-            out.push({ id, name: T.name, level: ['เด่น', 'ปกติ', 'ต้องระวัง'][lvl], tone: [1, 0, -1][lvl], text: T.lv[lvl][0], todo: T.lv[lvl][1], why: why.join(' · ') || 'ปีนี้ไม่มีธาตุที่เกี่ยวกับด้านนี้โดยตรง' });
+            out.push({ id, name: T.name, level: ['เด่น', 'ปกติ', 'ต้องระวัง'][lvl], tone: [1, 0, -1][lvl], text: w(T.lv[lvl][0]), todo: w(T.lv[lvl][1]), why: why.join(' · ') || w('ปีนี้ไม่มีธาตุที่เกี่ยวกับด้านนี้โดยตรง') });
         };
         // การงาน: อำนาจ (官杀) และความคิด/ผลงาน (食伤) · ราศีล่างเดือน = ฐานการงาน
         { let s = 0; const why = [];

@@ -505,7 +505,15 @@
         const out = [];
         const overall = sum >= 2 ? `${what}เป็นช่วงที่ส่งเสริมคุณ ทั้ง${half[0]}และ${half[1]}ได้ธาตุที่ช่วยเสริมดวง` : sum <= -2 ? `${what}เป็นช่วงที่ต้องระวัง ทั้ง${half[0]}และ${half[1]}เป็นธาตุที่ดวงไม่ต้องการ ควรตั้งรับมากกว่ารุก`
             : a > b ? `${what}เริ่มต้นดี ${half[0]}ได้แรงหนุน แต่ ${half[1]}ต้องระวังมากขึ้น` : b > a ? `${what}เริ่มต้นช้า ${half[0]}ต้องอดทน แล้ว ${half[1]}จะดีขึ้น` : `${what}มีทั้งเรื่องดีและเรื่องที่ต้องระวังพอๆ กัน`;
-        out.push({ title: 'ภาพรวม', text: overall, source: `ธาตุ${E(sEl)}ราศีบน${a > 0 ? 'ให้คุณ' : a < 0 ? 'ให้โทษ' : 'กลางๆ'} · ธาตุ${E(bEl)}ราศีล่าง${b > 0 ? 'ให้คุณ' : b < 0 ? 'ให้โทษ' : 'กลางๆ'}` });
+        // บอกให้ชัดว่าระวังเรื่องอะไร / เด่นเรื่องอะไร (ตามสิบเทพของราศีบนและราศีล่าง)
+        const cS0 = B.tenGod(dm, tp.stem).code, cB0 = B.tenGod(dm, bMain).code;
+        const tpc = (c) => TRANSIT_GOD[c].topic;
+        const careL = [], goodL = [];
+        if (cS0 === cB0) { if (a < 0 || b < 0) careL.push(`เรื่อง${tpc(cS0)}`); else if (a > 0 || b > 0) goodL.push(`เรื่อง${tpc(cS0)}`); }
+        else { if (a < 0) careL.push(`${half[0]}: เรื่อง${tpc(cS0)}`); else if (a > 0) goodL.push(`${half[0]}: เรื่อง${tpc(cS0)}`);
+            if (b < 0) careL.push(`${half[1]}: เรื่อง${tpc(cB0)}`); else if (b > 0) goodL.push(`${half[1]}: เรื่อง${tpc(cB0)}`); }
+        const overall2 = overall + (careL.length ? ` · สิ่งที่ต้องระวัง ${careL.join(' · ')}` : '') + (goodL.length ? ` · เรื่องที่ไปได้ดี ${goodL.join(' · ')}` : '') + (careL.length ? ' (รายละเอียดในหัวข้อถัดไป)' : '');
+        out.push({ title: 'ภาพรวม', text: overall2, source: `ธาตุ${E(sEl)}ราศีบน${a > 0 ? 'ให้คุณ' : a < 0 ? 'ให้โทษ' : 'กลางๆ'} · ธาตุ${E(bEl)}ราศีล่าง${b > 0 ? 'ให้คุณ' : b < 0 ? 'ให้โทษ' : 'กลางๆ'}` });
         // เรื่องที่เด่นขึ้น: ความหมายของสิบเทพราศีบนและราศีล่างของเสาจร
         const items = [];
         const cS = B.tenGod(dm, tp.stem).code, cB = B.tenGod(dm, bMain).code;

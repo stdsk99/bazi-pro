@@ -642,6 +642,12 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
   let luckSel = null, yearSel = null, monthSel = null, readSel = null, buildPrint = null, drawMatch = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${escH(b.sub)}</p>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
+  // แทรกบล็อก "ผลต่อ 4 ด้าน" (งาน เงิน ความรัก สุขภาพ) ต่อจากภาพรวม
+  const withFour = (blocks, chart, an, q, kind) => {
+    const tp = BaziYearly.topics(chart, an, q, kind);
+    const fb = { title: 'ผลต่อ 4 ด้าน', text: '', items: tp.map((t) => [`${t.name} · ${t.level}`, `${t.text} · ควรทำ: ${t.todo}`]), source: tp.map((t) => `${t.name}: ${t.why}`).join(' / ') };
+    return [blocks[0], fb].concat(blocks.slice(1));
+  };
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ชง เฮ้ง ไห่ หรือผั่ว</p>';
   const G_TH = { M: 'ชาย', F: 'หญิง' };
   function setForm(open) {
@@ -932,7 +938,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'))}</div>
         <h3 class="rh">คำทำนายช่วงนี้</h3>
-        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'), 'luck'))}</div>`;
+        <div class="pred">${blocksHTML(withFour(BaziNarrative.transit(r, an, q, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'), 'luck'), r, an, q, 'luck'))}</div>`;
     };
     drawLuck();
     $('luck').onclick = (ev) => { const b = ev.target.closest('button[data-i]'); if (!b) return; luckSel = Number(b.dataset.i); drawLuck(); if (window.matchMedia('(max-width: 600px)').matches) $('luckDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
@@ -1030,7 +1036,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม วัยจร และปีจร</h3>
         <div class="rels">${relHTML(rels)}</div>
         <h3 class="rh">คำทำนายเดือนนี้</h3>
-        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'month', rels, 'mo'))}</div>`;
+        <div class="pred">${blocksHTML(withFour(BaziNarrative.transit(r, an, q, 'month', rels, 'mo'), r, an, q, 'month'))}</div>`;
     };
     $('months').onclick = (ev) => { const b = ev.target.closest('button[data-m]'); if (!b) return; monthSel = Number(b.dataset.m); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('monthDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     drawYears();
