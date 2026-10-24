@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ผังดวงสี่เสา</title>
+<title>Bazi Pro · ผังดวงสี่เสา</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+SC:wght@500;700&display=swap">
@@ -170,6 +170,7 @@ input, select, button { min-height: 44px; font-size: 1rem; }
 dt { font-size: .92rem; }
 .warn { font-size: .95rem; }
 footer { font-size: .85rem; }
+.disc { margin: 0 0 6px; }
 
 /* วัยจร: การ์ดที่ตัดขึ้นบรรทัดใหม่ได้ ไม่ต้องเลื่อนข้าง */
 .luck { overflow: visible; }
@@ -394,8 +395,8 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 
 <div class="wrap">
   <header>
-    <h1><span class="han">四柱八字</span>ผังดวงสี่เสา</h1>
-    <p class="sub">หน้าทดสอบ</p>
+    <h1><span class="han">四柱八字</span>Bazi Pro</h1>
+    <p class="sub">ผังดวงสี่เสา พื้นดวง คำทำนาย วัยจร ปีจร และดวงคู่</p>
   </header>
 
   <div class="birthbar" id="bbar" hidden>
@@ -490,7 +491,6 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
   </div>
 
   <div class="page" id="p-read" role="tabpanel" aria-labelledby="t-read" hidden>
-    <div class="draft">ฉบับร่าง · ข้อความแม่แบบตามตำรามาตรฐาน รอผู้เชี่ยวชาญตรวจแก้ · ทุกย่อหน้าบอกที่มาในดวง</div>
     <div class="decades" id="readNav" role="group" aria-label="หัวข้อคำทำนาย"></div>
     <div id="reading" class="reading"></div>
   </div>
@@ -564,7 +564,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     </section>
   </div>
 
-  <footer>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
+  <footer><p class="disc">คำทำนายเรียบเรียงตามหลักห้าธาตุและตำราโหราศาสตร์จีน ใช้เป็นแนวทางประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์ การเงิน หรือกฎหมาย</p>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
 </div>
 
 <div id="printView" aria-hidden="true"></div>
@@ -2502,7 +2502,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b> — ราศีบน${rr.a > 0 ? 'เป็นธาตุให้คุณ' : rr.a < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'} ราศีล่าง${rr.b > 0 ? 'เป็นธาตุให้คุณ' : rr.b < 0 ? 'เป็นธาตุให้โทษ' : 'เป็นกลาง'}</div>
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'))}</div>
-        <h3 class="rh">คำทำนายช่วงนี้ <span class="badge">ฉบับร่าง</span></h3>
+        <h3 class="rh">คำทำนายช่วงนี้</h3>
         <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'), 'luck'))}</div>`;
     };
     drawLuck();
@@ -2546,7 +2546,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม${lp ? 'และวัยจร' : ''}</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, trans, 'yr'))}</div>
-        <h3 class="rh">คำทำนายปีนี้ <span class="badge">ฉบับร่าง</span></h3>
+        <h3 class="rh">คำทำนายปีนี้</h3>
         <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'year', BaziInteractions.withTransit(r, trans, 'yr'), 'yr'))}</div>`;
       drawMonths(trans);
     };
@@ -2582,7 +2582,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม วัยจร และปีจร</h3>
         <div class="rels">${relHTML(rels)}</div>
-        <h3 class="rh">คำทำนายเดือนนี้ <span class="badge">ฉบับร่าง</span></h3>
+        <h3 class="rh">คำทำนายเดือนนี้</h3>
         <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'month', rels, 'mo'))}</div>`;
     };
     $('months').onclick = (ev) => { const b = ev.target.closest('button[data-m]'); if (!b) return; monthSel = Number(b.dataset.m); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('monthDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
@@ -2613,7 +2613,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       const basisHTML = BaziNarrative.summary(r, an, BaziInteractions.natal(r)).map((x) => `<div class="bitem"><dt>${x.label}</dt><dd>${x.text}${x.more && x.more.length ? `<dl class="ritems">${x.more.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>` : ''}<span class="src">ที่มา: ${x.source}</span></dd></div>`).join('');
       const today = new Date();
       $('printView').innerHTML = `
-        <div class="ph"><h1>ผังดวงสี่เสา ${esc(name || '')}</h1><p>เกิด ${d}/${m}/${y} เวลา ${pad(h)}:${pad(mi)} น. · ${G_TH[g]} · ${esc($('place').selectedOptions[0].text)} · ดิถี ${dm.zh} ${dm.th} ${dm.element}${dm.yang ? 'หยาง' : 'หยิน'}</p></div>
+        <div class="ph"><h1>Bazi Pro · ผังดวงสี่เสา ${esc(name || '')}</h1><p>เกิด ${d}/${m}/${y} เวลา ${pad(h)}:${pad(mi)} น. · ${G_TH[g]} · ${esc($('place').selectedOptions[0].text)} · ดิถี ${dm.zh} ${dm.th} ${dm.element}${dm.yang ? 'หยาง' : 'หยิน'}</p></div>
         <h2>ผังดวง</h2><div class="board"><div class="main4">${$('pillars').innerHTML}</div></div>
         <div class="panel"><h3>${an.pattern ? `ดวงพิเศษ: ${an.patternTh}` : `กำลังดวง: ดวง${an.strengthTh}`} · คะแนนฝ่ายช่วย ${sc.total}</h3>
           <p>ธาตุให้คุณ: ${an.favorable.map((x) => x.th).join(' ') || '—'} · ธาตุให้โทษ: ${an.unfavorable.map((x) => x.th).join(' ') || '—'}</p></div>
@@ -2623,7 +2623,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         ${secs.map(secHTML).join('')}
         ${lp ? `<div class="pbreak"></div><h2>วัยจรปัจจุบัน ${lp.pillar.zh} · อายุ ${lp.ageAtStart.years}–${lp.ageAtStart.years + 10} ปี (${lp.start.day}/${lp.start.month}/${lp.start.year} – ${lp.end.day}/${lp.end.month}/${lp.end.year})</h2>${blocksHTML(BaziNarrative.transit(r, an, lp.pillar, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: lp.pillar.stem, branch: lp.pillar.branch }], 'luck'), 'luck'))}` : ''}
         <h2>ปีจร ${thisYear} ${ya.pillar.zh} ปี${ya.pillar.animal}</h2>${blocksHTML(BaziNarrative.transit(r, an, ya.pillar, 'year', BaziInteractions.withTransit(r, trY, 'yr'), 'yr'))}
-        <p class="pnote">พิมพ์เมื่อ ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()} · คำทำนายเป็นฉบับร่างตามหลักห้าธาตุ ใช้ประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์ การเงิน หรือกฎหมาย</p>`;
+        <p class="pnote">พิมพ์เมื่อ ${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()} · คำทำนายเรียบเรียงตามหลักห้าธาตุ ใช้ประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์ การเงิน หรือกฎหมาย</p>`;
     };
     // ---------- ดวงคู่ ----------
     $('m1sum').innerHTML = `<b>${esc(name || 'ไม่ระบุชื่อ')}</b> · ${d}/${m}/${y} ${pad(h)}:${pad(mi)} น. · ${G_TH[g]}`;
@@ -2642,7 +2642,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
             ${row(r, res.names[0])}${row(r2, res.names[1])}</div>
         </section>
         <section class="panel">
-          <h2>รายละเอียด 6 ด้าน <span class="badge">ฉบับร่าง</span></h2>
+          <h2>รายละเอียด 6 ด้าน</h2>
           ${res.items.map((x) => { const q = x.pts / x.max, c = q >= 0.75 ? 'var(--good)' : q < 0.5 ? 'var(--bad)' : 'var(--warn)'; return `<div class="rblock mitem"><div class="mih"><h3>${x.name}</h3><span class="mono">${x.pts}/${x.max}</span></div><div class="mbar"><i style="width:${q * 100}%;background:${c}"></i></div><p>${esc(x.text)}</p><p class="mpred"><b>คำทำนาย</b> ${esc(x.pred)}</p><p class="src">ที่มา: ${esc(x.source)}</p></div>`; }).join('')}
         </section>
         <section class="panel">
