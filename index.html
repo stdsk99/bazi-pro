@@ -674,11 +674,20 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     $('save2').checked = false;
     if (drawMatch) drawMatch();
   });
-  $('exportBtn').addEventListener('click', () => {
+  // สำรองเป็นไฟล์: ในหน้าแอปบน Claude ใช้ความสามารถ downloads (ผู้ชมกดยืนยัน) · เปิดจากที่อื่นใช้ลิงก์ดาวน์โหลดปกติ
+  const dlCap = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('downloads').catch(() => null) : Promise.resolve(undefined);
+  $('exportBtn').addEventListener('click', async () => {
     const n = St.list().length; if (!n) { flash('ioMsg', 'ยังไม่มีดวงที่บันทึก'); return; }
-    const d = new Date(), a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([St.exportText()], { type: 'application/json' }));
-    a.download = `bazi-charts-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.json`;
+    const d = new Date(), filename = `bazi-charts-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.json`, text = St.exportText();
+    const dl = await dlCap;
+    if (dl) {
+      try { await dl.save({ filename, data: text }); flash('ioMsg', `สำรอง ${n} ดวงแล้ว`); }
+      catch (e) { flash('ioMsg', e && e.code === 'declined' ? 'ยกเลิกการบันทึกไฟล์' : 'บันทึกไฟล์ในหน้านี้ไม่ได้'); }
+      return;
+    }
+    if (dl === null) { flash('ioMsg', 'หน้านี้บันทึกไฟล์ไม่ได้'); return; }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'application/json' })); a.download = filename;
     document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
     flash('ioMsg', `สำรอง ${n} ดวงแล้ว`);
   });
