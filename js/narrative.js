@@ -641,5 +641,45 @@
         return out.map((b) => Object.assign({}, b, { source: b.source ? tagStr(b.source) : b.source }));
     }
 
-    return { natal, summary, transit, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
+    // ---------- ด้านที่เด่น / ด้านที่ต้องระวัง (หน้าวิเคราะห์ดวง) ----------
+    function highlights(chart, an, rels) {
+        rels = rels || [];
+        const P = chart.pillars, dm = P.day.stem, dmEl = B.STEM_ELEMENT[dm];
+        const fav = an.favorable, unf = an.unfavorable, E = (e) => B.ELEMENTS[e];
+        const relEl = (g) => (dmEl + g) % 5;
+        const has = (l, e, st) => l.some((x) => x.element === e && (!x.polarity || st == null || (x.polarity === 'same') === ((st % 2) === (dm % 2))));
+        const gFav = (g) => has(fav, relEl(g), g === 0 ? dm : null) && !has(unf, relEl(g), g === 0 ? dm : null);
+        const gUnf = (g) => has(unf, relEl(g), g === 0 ? dm : null) && !has(fav, relEl(g), g === 0 ? dm : null);
+        const { sc, where } = tenGodScores(chart);
+        const mg = GROUP_OF[B.tenGod(dm, P.month.hidden[0].stem).code];
+        const strong = [], caution = [];
+        const src = (g) => `${GROUPS[g].gth} (${GROUPS[g].zh}) ที่ ${where[g].join(', ') || 'ราศีแฝง'} · ธาตุ${E(relEl(g))}`;
+        // ด้านเด่นจากเดือนเกิด
+        if (gUnf(mg)) caution.push({ title: `ด้าน${GROUPS[mg].name} เด่นที่สุดแต่ต้องใช้ให้พอดี`, text: `${GROUPS[mg].strong} แต่ธาตุนี้ดวงไม่ต้องการ ถ้ามากเกิน${GROUPS[mg].over}`, source: `ราศีแฝงหลักของราศีล่างเดือน · ${src(mg)}` });
+        else strong.push({ title: `ด้าน${GROUPS[mg].name} (เด่นที่สุด)`, text: `${GROUPS[mg].strong}${gFav(mg) ? ' และเป็นด้านที่ช่วยเสริมดวง ควรใช้ให้เต็มที่' : ''}`, source: `ราศีแฝงหลักของราศีล่างเดือน · ${src(mg)}` });
+        // ด้านอื่นที่มีมาก
+        sc.map((v, g) => [v, g]).sort((x, y) => y[0] - x[0]).forEach(([v, g]) => {
+            if (g === mg || v < 2.5) return;
+            if (gUnf(g)) caution.push({ title: `ด้าน${GROUPS[g].name}มากเกินไป`, text: GROUPS[g].over, source: src(g) });
+            else strong.push({ title: `ด้าน${GROUPS[g].name}`, text: `${GROUPS[g].strong}${gFav(g) ? ' และเป็นด้านที่ช่วยเสริมดวง' : ''}`, source: src(g) });
+        });
+        // ด้านที่ช่วยเสริมดวงแต่มีน้อย
+        for (let g = 0; g < 5; g++) if (gFav(g) && sc[g] > 0 && sc[g] < 1.5 && g !== mg) strong.push({ title: `ด้าน${GROUPS[g].name} (มีน้อยแต่ช่วยเสริมดวง)`, text: `ด้านนี้ช่วยดวงคุณได้มาก แม้ในดวงจะมีไม่มาก ช่วงวัยจรหรือปีจรที่นำธาตุ${E(relEl(g))}มาจะเป็นโอกาสให้ด้านนี้เด่นขึ้น`, source: src(g) });
+        // ด้านที่ขาด
+        for (let g = 1; g < 5; g++) if (sc[g] === 0) caution.push({ title: `ขาดด้าน${GROUPS[g].name}`, text: `${GROUPS[g].none}${gFav(g) ? ` · ด้านนี้ช่วยเสริมดวง ช่วงที่ธาตุ${E(relEl(g))}เข้ามาจะเป็นโอกาสสำคัญ` : ''}`, source: `ไม่พบ ${GROUPS[g].gth} (${GROUPS[g].zh}) ในดวง` });
+        // ความสัมพันธ์ในดวงที่เกี่ยวกับดิถีหรือเดือน
+        const PL = { year: PILLAR_PLAIN.year, month: PILLAR_PLAIN.month, day: PILLAR_PLAIN.day, hour: PILLAR_PLAIN.hour };
+        for (const r of rels.filter((r) => r.members.some((m) => m.key === 'day' || m.key === 'month'))) {
+            const who = [...new Set(r.members.map((m) => PL[m.key]).filter(Boolean))].join(' กับ ');
+            if (r.kind === '+') strong.push({ title: `${r.th}: ${who}`, text: 'เรื่องเหล่านี้เกื้อหนุนกัน ได้ความช่วยเหลือจากกันหรือไปในทางเดียวกัน', source: `${r.th} ${r.zh} ${r.note}` });
+            else caution.push({ title: `${r.th}: ${who}`, text: r.type === 'clash' ? 'เรื่องเหล่านี้มักมีความเปลี่ยนแปลง การย้าย หรือความเห็นไม่ตรงกัน ควรเผื่อใจและวางแผนสำรอง' : 'เรื่องเหล่านี้มักมีเรื่องจุกจิก ความเข้าใจผิด หรือแรงกดดัน ควรรอบคอบเรื่องคำพูดและเอกสาร', source: `${r.th} ${r.zh} ${r.note}` });
+        }
+        if (!strong.length) strong.push({ title: 'ดวงกระจายสมดุล', text: 'ไม่มีด้านใดโดดเด่นเป็นพิเศษ ทำได้หลายอย่างพอๆ กัน ควรเลือกพัฒนาด้านที่ใช้ธาตุที่ช่วยเสริมดวง', source: 'คะแนนสิบเทพทุกกลุ่มไม่ถึงเกณฑ์เด่น' });
+        if (!caution.length) caution.push({ title: 'ไม่มีจุดที่ต้องระวังเป็นพิเศษ', text: 'ดวงไม่มีด้านที่มากเกินหรือขาดหาย และไม่มีชงหรือเฮ้งที่ดิถีหรือเดือน ใช้ชีวิตตามจังหวะวัยจรได้', source: '-' });
+        const bars = sc.map((v, g) => ({ name: GROUPS[g].name, gth: GROUPS[g].gth, el: relEl(g), v: Math.round(v * 10) / 10, tone: gFav(g) ? 1 : gUnf(g) ? -1 : 0, main: g === mg }));
+        const T = (b) => Object.assign({}, b, { source: b.source && b.source !== '-' ? tagStr(b.source) : b.source });
+        return { strong: strong.map(T), caution: caution.map(T), bars };
+    }
+
+    return { natal, summary, transit, highlights, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
 });

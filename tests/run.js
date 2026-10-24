@@ -111,5 +111,7 @@ eq('นำเข้าไฟล์เสีย', S.importText('xx').ok, false);
 
 eq('ดวงคู่มีคำทำนายทุกด้าน และจังหวะเวลา 10 ปี', (() => { const x = Cm.compare(calc(1990, 1, 15, 10, 30, 'M'), calc(1992, 6, 3, 8, 0, 'F'), { fromYear: 2026 }); return [x.items.every((i) => i.pred), x.timing.to - x.timing.from, x.timing.caution.some((c) => c[0].includes('2030'))]; })(), [true, 9, true]);
 
+eq('ด้านที่เด่น/ต้องระวัง (ดวงตัวอย่าง)', (() => { const r = calc(1990, 1, 15, 10, 30); const h = N.highlights(r, An.analyze(r), I.natal(r)); return [h.bars.length, h.strong[0].title.includes('ความรู้และผู้อุปถัมภ์'), h.caution.some((c) => c.title.includes('เพื่อนและคู่แข่งมากเกินไป'))]; })(), [5, true, true]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

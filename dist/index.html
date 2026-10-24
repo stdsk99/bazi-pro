@@ -368,6 +368,23 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 .pfoot .note { margin: 0; }
 .chk { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .btnlike { display: inline-flex; align-items: center; cursor: pointer; border: 1px solid var(--jade); color: var(--jade); border-radius: 6px; padding: 8px 18px; font-weight: 600; }
+.tgbars { display: grid; gap: 8px; margin: 10px 0 16px; }
+.tgb { display: grid; grid-template-columns: minmax(150px, 1.3fr) 2fr 36px 72px; gap: 10px; align-items: center; }
+.tgb .tn { display: flex; flex-direction: column; line-height: 1.3; }
+.tgb .tn em { font-style: normal; font-size: .72rem; color: var(--jade); }
+.tgb .tn small { color: var(--ink-soft); font-size: .75rem; }
+.tgb .track { height: 10px; border-radius: 5px; background: var(--rule); overflow: hidden; }
+.tgb .fill { height: 100%; border-radius: 5px; }
+.tg-good { background: var(--good); } .tg-bad { background: var(--bad); } .tg-mid { background: var(--ink-soft); }
+.tgb .tt { font-size: .8rem; font-weight: 600; text-align: right; }
+.hl { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.hlcol { border-radius: 10px; padding: 10px 12px; border: 1px solid var(--rule); background: var(--paper); }
+.hlcol.good { border-top: 3px solid var(--good); } .hlcol.bad { border-top: 3px solid var(--bad); }
+.hlcol h3 { margin: 0 0 6px; } .hlcol.good h3 { color: var(--good); } .hlcol.bad h3 { color: var(--bad); }
+.hli { padding: 8px 0; border-top: 1px dashed var(--rule); } .hli:first-of-type { border-top: 0; }
+.hli p { margin: 4px 0 0; }
+.hli .src { font-size: .8rem; color: var(--ink-soft); }
+@media (max-width: 760px) { .hl { grid-template-columns: 1fr; } .tgb { grid-template-columns: 1fr auto; } .tgb .track { grid-column: 1 / -1; grid-row: 2; } .tgb .mono { display: none; } }
 .bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
 #printView { display: none; }
 @media print {
@@ -486,6 +503,15 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <h2>วงจรห้าธาตุของดวงนี้</h2>
         <div id="wheel"></div>
         <div class="legend"><span><i style="border-color:var(--ink-soft)"></i>ให้กำเนิด</span><span><i style="border-color:var(--rule);border-top-style:dashed"></i>ข่ม</span><span>ตัวเลข = จำนวนตัวใน 8 อักษร</span></div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>ด้านที่เด่น และด้านที่ต้องระวัง</h2>
+      <p class="sub" style="margin-top:0">น้ำหนักของสิบเทพแต่ละกลุ่มในดวง (ราศีบน + ราศีแฝง) สีบอกว่าด้านนั้นช่วยเสริมดวงหรือไม่</p>
+      <div class="tgbars" id="tgbars"></div>
+      <div class="hl">
+        <div class="hlcol good"><h3>ด้านที่เด่น</h3><div id="hlGood"></div></div>
+        <div class="hlcol bad"><h3>ด้านที่ต้องระวัง</h3><div id="hlBad"></div></div>
       </div>
     </section>
   </div>
@@ -1976,7 +2002,47 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         return out.map((b) => Object.assign({}, b, { source: b.source ? tagStr(b.source) : b.source }));
     }
 
-    return { natal, summary, transit, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
+    // ---------- ด้านที่เด่น / ด้านที่ต้องระวัง (หน้าวิเคราะห์ดวง) ----------
+    function highlights(chart, an, rels) {
+        rels = rels || [];
+        const P = chart.pillars, dm = P.day.stem, dmEl = B.STEM_ELEMENT[dm];
+        const fav = an.favorable, unf = an.unfavorable, E = (e) => B.ELEMENTS[e];
+        const relEl = (g) => (dmEl + g) % 5;
+        const has = (l, e, st) => l.some((x) => x.element === e && (!x.polarity || st == null || (x.polarity === 'same') === ((st % 2) === (dm % 2))));
+        const gFav = (g) => has(fav, relEl(g), g === 0 ? dm : null) && !has(unf, relEl(g), g === 0 ? dm : null);
+        const gUnf = (g) => has(unf, relEl(g), g === 0 ? dm : null) && !has(fav, relEl(g), g === 0 ? dm : null);
+        const { sc, where } = tenGodScores(chart);
+        const mg = GROUP_OF[B.tenGod(dm, P.month.hidden[0].stem).code];
+        const strong = [], caution = [];
+        const src = (g) => `${GROUPS[g].gth} (${GROUPS[g].zh}) ที่ ${where[g].join(', ') || 'ราศีแฝง'} · ธาตุ${E(relEl(g))}`;
+        // ด้านเด่นจากเดือนเกิด
+        if (gUnf(mg)) caution.push({ title: `ด้าน${GROUPS[mg].name} เด่นที่สุดแต่ต้องใช้ให้พอดี`, text: `${GROUPS[mg].strong} แต่ธาตุนี้ดวงไม่ต้องการ ถ้ามากเกิน${GROUPS[mg].over}`, source: `ราศีแฝงหลักของราศีล่างเดือน · ${src(mg)}` });
+        else strong.push({ title: `ด้าน${GROUPS[mg].name} (เด่นที่สุด)`, text: `${GROUPS[mg].strong}${gFav(mg) ? ' และเป็นด้านที่ช่วยเสริมดวง ควรใช้ให้เต็มที่' : ''}`, source: `ราศีแฝงหลักของราศีล่างเดือน · ${src(mg)}` });
+        // ด้านอื่นที่มีมาก
+        sc.map((v, g) => [v, g]).sort((x, y) => y[0] - x[0]).forEach(([v, g]) => {
+            if (g === mg || v < 2.5) return;
+            if (gUnf(g)) caution.push({ title: `ด้าน${GROUPS[g].name}มากเกินไป`, text: GROUPS[g].over, source: src(g) });
+            else strong.push({ title: `ด้าน${GROUPS[g].name}`, text: `${GROUPS[g].strong}${gFav(g) ? ' และเป็นด้านที่ช่วยเสริมดวง' : ''}`, source: src(g) });
+        });
+        // ด้านที่ช่วยเสริมดวงแต่มีน้อย
+        for (let g = 0; g < 5; g++) if (gFav(g) && sc[g] > 0 && sc[g] < 1.5 && g !== mg) strong.push({ title: `ด้าน${GROUPS[g].name} (มีน้อยแต่ช่วยเสริมดวง)`, text: `ด้านนี้ช่วยดวงคุณได้มาก แม้ในดวงจะมีไม่มาก ช่วงวัยจรหรือปีจรที่นำธาตุ${E(relEl(g))}มาจะเป็นโอกาสให้ด้านนี้เด่นขึ้น`, source: src(g) });
+        // ด้านที่ขาด
+        for (let g = 1; g < 5; g++) if (sc[g] === 0) caution.push({ title: `ขาดด้าน${GROUPS[g].name}`, text: `${GROUPS[g].none}${gFav(g) ? ` · ด้านนี้ช่วยเสริมดวง ช่วงที่ธาตุ${E(relEl(g))}เข้ามาจะเป็นโอกาสสำคัญ` : ''}`, source: `ไม่พบ ${GROUPS[g].gth} (${GROUPS[g].zh}) ในดวง` });
+        // ความสัมพันธ์ในดวงที่เกี่ยวกับดิถีหรือเดือน
+        const PL = { year: PILLAR_PLAIN.year, month: PILLAR_PLAIN.month, day: PILLAR_PLAIN.day, hour: PILLAR_PLAIN.hour };
+        for (const r of rels.filter((r) => r.members.some((m) => m.key === 'day' || m.key === 'month'))) {
+            const who = [...new Set(r.members.map((m) => PL[m.key]).filter(Boolean))].join(' กับ ');
+            if (r.kind === '+') strong.push({ title: `${r.th}: ${who}`, text: 'เรื่องเหล่านี้เกื้อหนุนกัน ได้ความช่วยเหลือจากกันหรือไปในทางเดียวกัน', source: `${r.th} ${r.zh} ${r.note}` });
+            else caution.push({ title: `${r.th}: ${who}`, text: r.type === 'clash' ? 'เรื่องเหล่านี้มักมีความเปลี่ยนแปลง การย้าย หรือความเห็นไม่ตรงกัน ควรเผื่อใจและวางแผนสำรอง' : 'เรื่องเหล่านี้มักมีเรื่องจุกจิก ความเข้าใจผิด หรือแรงกดดัน ควรรอบคอบเรื่องคำพูดและเอกสาร', source: `${r.th} ${r.zh} ${r.note}` });
+        }
+        if (!strong.length) strong.push({ title: 'ดวงกระจายสมดุล', text: 'ไม่มีด้านใดโดดเด่นเป็นพิเศษ ทำได้หลายอย่างพอๆ กัน ควรเลือกพัฒนาด้านที่ใช้ธาตุที่ช่วยเสริมดวง', source: 'คะแนนสิบเทพทุกกลุ่มไม่ถึงเกณฑ์เด่น' });
+        if (!caution.length) caution.push({ title: 'ไม่มีจุดที่ต้องระวังเป็นพิเศษ', text: 'ดวงไม่มีด้านที่มากเกินหรือขาดหาย และไม่มีชงหรือเฮ้งที่ดิถีหรือเดือน ใช้ชีวิตตามจังหวะวัยจรได้', source: '-' });
+        const bars = sc.map((v, g) => ({ name: GROUPS[g].name, gth: GROUPS[g].gth, el: relEl(g), v: Math.round(v * 10) / 10, tone: gFav(g) ? 1 : gUnf(g) ? -1 : 0, main: g === mg }));
+        const T = (b) => Object.assign({}, b, { source: b.source && b.source !== '-' ? tagStr(b.source) : b.source });
+        return { strong: strong.map(T), caution: caution.map(T), bars };
+    }
+
+    return { natal, summary, transit, highlights, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
 });
 
 </script>
@@ -2450,6 +2516,14 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         ${st ? `<text x="${x}" y="${y + (y > cy ? nr + 42 : -nr - 10)}" text-anchor="middle" font-size="15.5" font-weight="600" fill="${stc}">${st}</text>` : ''}</g>`;
     }
     $('wheel').innerHTML = svg + '</svg>';
+
+    // ด้านที่เด่น / ด้านที่ต้องระวัง
+    const hl = BaziNarrative.highlights(r, an, BaziInteractions.natal(r));
+    const mxB = Math.max(4, ...hl.bars.map((b) => b.v));
+    $('tgbars').innerHTML = hl.bars.map((b) => `<div class="tgb"><span class="tn">${b.name}${b.main ? ' <em>เด่นสุด</em>' : ''}<small>${b.gth} · ธาตุ${BaziCore.ELEMENTS[b.el]}</small></span><span class="track"><span class="fill ${b.tone > 0 ? 'tg-good' : b.tone < 0 ? 'tg-bad' : 'tg-mid'}" style="display:block;width:${b.v / mxB * 100}%"></span></span><span class="mono">${b.v.toFixed(1)}</span><span class="tt ${b.tone > 0 ? 'r-good' : b.tone < 0 ? 'r-bad' : 'r-mix'}">${b.tone > 0 ? 'ช่วยเสริม' : b.tone < 0 ? 'ใช้พอดี' : 'กลางๆ'}</span></div>`).join('');
+    const hlItem = (x) => `<div class="hli"><b>${escH(x.title)}</b><p>${escH(x.text)}</p>${x.source && x.source !== '-' ? `<p class="src">ที่มา: ${escH(x.source)}</p>` : ''}</div>`;
+    $('hlGood').innerHTML = hl.strong.map(hlItem).join('');
+    $('hlBad').innerHTML = hl.caution.map(hlItem).join('');
 
     $('warns').innerHTML = r.warnings.length ? r.warnings.map((w) => `<div class="warn">${w}</div>`).join('') : '<p class="note" style="margin:0">เวลาเกิดไม่อยู่ใกล้รอยต่อของปี เดือน หรือยาม ผลไม่อ่อนไหวต่อความคลาดเคลื่อนของเวลาเกิดเล็กน้อย</p>';
 
