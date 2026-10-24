@@ -277,7 +277,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 #readNav { flex-wrap: wrap; overflow: visible; padding-bottom: 0; }
 .ritems { grid-template-columns: max-content 1fr; gap: 4px 14px; }
 .ritems dt { color: var(--ink-soft); }
-.ritems dd { color: var(--ink); }
+.ritems dd { color: var(--ink); white-space: pre-line; }
 @media (max-width: 600px) { .ritems { grid-template-columns: 1fr; gap: 0; } .ritems dd { margin-bottom: 6px; } }
 .draft { background: var(--warn-wash); color: var(--warn); border-radius: 10px; padding: 10px 14px; font-size: .92rem; }
 .reading { display: grid; gap: 16px; }
@@ -366,6 +366,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 .bmsg:empty { display: none; }
 .pfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 16px; }
 .pfoot .note { margin: 0; }
+.tnote { font-size: .86rem; line-height: 1.6; background: var(--jade-wash); border-left: 3px solid var(--jade); padding: 6px 10px; border-radius: 6px; margin: 6px 0; }
 .chk { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .btnlike { display: inline-flex; align-items: center; cursor: pointer; border: 1px solid var(--jade); color: var(--jade); border-radius: 6px; padding: 8px 18px; font-weight: 600; }
 .tgbars { display: grid; gap: 8px; margin: 10px 0 16px; }
@@ -660,7 +661,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
   // แทรกบล็อก "ผลต่อ 4 ด้าน" (งาน เงิน ความรัก สุขภาพ) ต่อจากภาพรวม
   const withFour = (blocks, chart, an, q, kind) => {
     const tp = BaziYearly.topics(chart, an, q, kind);
-    const fb = { title: 'ผลต่อ 4 ด้าน', text: '', items: tp.map((t) => [`${t.name} · ${t.level}`, `${t.text} · ควรทำ: ${t.todo}`]), source: tp.map((t) => `${t.name}: ${t.why}`).join(' / ') };
+    const fb = { title: 'ผลต่อ 4 ด้าน', text: '', items: tp.map((t) => [`${t.name} · ${t.level}`, `${t.text} · ควรทำ: ${t.todo}${t.note ? `\nทำไมไม่ตรงกับภาพรวม: ${t.note}` : ''}`]), source: tp.map((t) => `${t.name}: ${t.why}`).join(' / ') };
     return [blocks[0], fb].concat(blocks.slice(1));
   };
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ชง เฮ้ง ไห่ หรือผั่ว</p>';
@@ -1012,7 +1013,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <button type="button" class="ycard" data-go="mBest"><b>เดือนที่ดีที่สุดของคุณ</b><span>${bestTxt}</span><small>${M.best.length === 1 ? M.best[0].good[0] || '' : `${M.best.length} เดือนคะแนนเท่ากัน`}</small></button>
         <button type="button" class="ycard" data-go="taisui"><b>ไท้ส่วยปีนี้ · ปีหน้า</b><span><span class="${tcls(T[0].tone)}">${T[0].year} ${T[0].status}</span> · <span class="${tcls(T[1].tone)}">${T[1].year} ${T[1].status}</span></span><small>สถานะกับไท้ส่วย ช่วงที่ควรระวัง และแนวทางไหว้</small></button>
       </div>`;
-      $('ytopics').innerHTML = `<h2>อ่านทีละด้าน ปี ${yearSel}</h2>${S.topics.map((t) => `<div class="rblock ytopic"><div class="mih"><h3>${t.name}</h3><span class="tlv ${tcls(t.tone)}">${t.level}</span></div><p>${escH(t.text)}</p><p class="mpred"><b>ควรทำ</b> ${escH(t.todo)}</p><p class="src">ที่มา: ${escH(t.why)}</p></div>`).join('')}`;
+      $('ytopics').innerHTML = `<h2>อ่านทีละด้าน ปี ${yearSel}</h2>${S.topics.map((t) => `<div class="rblock ytopic"><div class="mih"><h3>${t.name}</h3><span class="tlv ${tcls(t.tone)}">${t.level}</span></div><p>${escH(t.text)}</p><p class="mpred"><b>ควรทำ</b> ${escH(t.todo)}</p>${t.note ? `<p class="tnote"><b>ทำไมไม่ตรงกับภาพรวม</b> ${escH(t.note)}</p>` : ''}<p class="src">ที่มา: ${escH(t.why)}</p></div>`).join('')}`;
       $('taisui').innerHTML = `<h2>ไท้ส่วย 太岁</h2><p class="sub" style="margin-top:0">ไท้ส่วยคือเทพประจำปีตามนักษัตรของปีนั้น ดูว่าปีเกิดและวังคู่ครองของคุณชง เฮ้ง ไห่ หรือผั่วกับปีไหม</p>${T.map((x) => `<div class="rblock"><div class="mih"><h3>ปี ${x.year} ${x.zh} ปี${x.animal}${x.year === yearSel ? ' (ปีที่เลือก)' : ' (ปีหน้า)'}</h3><span class="tlv ${tcls(x.tone)}">${x.status}</span></div>${x.hits.length ? `<dl class="ritems">${x.hits.map((h) => `<dt>${escH(h.name)}</dt><dd>${escH(h.text)}<br><b>ควรระวัง:</b> ${escH(h.care)}<span class="src" style="display:block">ที่มา: ${escH(h.source)}</span></dd>`).join('')}</dl><p class="note">${escH(x.pray)}</p>` : '<p>ปีเกิดและวังคู่ครองไม่ชง เฮ้ง ไห่ หรือผั่วกับไท้ส่วยปีนี้ จึงไม่อยู่ในกลุ่มที่นิยมไหว้แก้ชง</p>'}</div>`).join('')}`;
       $('mSum').innerHTML = `<div class="mcount"><span>ดีมาก <b class="r-good">${M.count.great}</b></span><span>ดี <b class="r-good">${M.count.good}</b></span><span>ผสม <b class="r-mix">${M.count.mix}</b></span><span>ควรระวัง <b class="r-bad">${M.count.bad}</b></span><span class="unit">เดือน</span></div>
         <div class="panel mbest" id="mBest"><h3>เดือนที่ดีที่สุดของคุณในปี ${yearSel}</h3>${M.best.map((m) => `<div class="mb"><b>${m.label}</b> <span class="r-good">${m.level}</span><p>เหมาะกับ: ${m.good.length ? m.good.join(' · ') : 'งานประจำและการวางแผน'}</p></div>`).join('')}${M.top <= 0 ? '<p class="note">ปีนี้ไม่มีเดือนที่ธาตุส่งเสริมชัดเจน เดือนข้างบนคือเดือนที่ดีที่สุดเมื่อเทียบกันในปีนี้</p>' : ''}<p class="note">${M.rule}</p></div>`;

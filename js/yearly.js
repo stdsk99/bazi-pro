@@ -48,31 +48,42 @@
         const jt = (j) => j > 0 ? 'ให้คุณ' : j < 0 ? 'ให้โทษ' : 'กลางๆ';
         const rMonth = rel2(q.branch, P.month.branch), rDay = rel2(q.branch, P.day.branch);
         const out = [];
-        const add = (id, score, why) => {
-            const lvl = score >= 1 ? 0 : score <= -1 ? 2 : 1, T = TOPIC[id];
-            out.push({ id, name: T.name, level: ['เด่น', 'ปกติ', 'ต้องระวัง'][lvl], tone: [1, 0, -1][lvl], text: w(T.lv[lvl][0]), todo: w(T.lv[lvl][1]), why: why.join(' · ') || w('ปีนี้ไม่มีธาตุที่เกี่ยวกับด้านนี้โดยตรง') });
+        // ภาพรวมของช่วงนั้น (ธาตุทั้งเสา) ใช้เทียบกับแต่ละด้าน ถ้าทิศทางสวนกันจะอธิบายเหตุผลไว้ให้
+        const overall = J.sum > 0 ? 1 : J.sum < 0 ? -1 : 0;
+        const th2 = (r) => r.th.replace(/^ล่าง/, '');
+        const jt2 = (d) => d > 0 ? 'ให้คุณ' : 'ให้โทษ';
+        const add = (id, score, why, drv) => {
+            const lvl = score >= 1 ? 0 : score <= -1 ? 2 : 1, T = TOPIC[id], tone = [1, 0, -1][lvl];
+            const o = { id, name: T.name, level: ['เด่น', 'ปกติ', 'ต้องระวัง'][lvl], tone, text: w(T.lv[lvl][0]), todo: w(T.lv[lvl][1]), why: why.join(' · ') || w('ปีนี้ไม่มีธาตุที่เกี่ยวกับด้านนี้โดยตรง') };
+            if (overall && tone === -overall) {
+                const key = drv.filter((x) => Math.sign(x[1]) === tone).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).map((x) => x[0]);
+                const because = key.length ? ` เพราะ${key.slice(0, 2).join(' และ')}` : '';
+                const head = tone > 0 ? `ภาพรวมปีนี้ต้องระวัง แต่ด้าน${T.name}ยังไปได้ดี` : `ภาพรวมปีนี้ดี แต่ด้าน${T.name}ควรระวัง`;
+                o.note = w(`${head}${because} ภาพรวมดูจากธาตุของทั้งเสาว่าดวงต้องการหรือไม่ ส่วนแต่ละด้านดูจากดาวและวังที่เกี่ยวกับด้านนั้นโดยตรง ผลจึงต่างกันได้`);
+            }
+            out.push(o);
         };
         // การงาน: อำนาจ (官杀) และความคิด/ผลงาน (食伤) · ราศีล่างเดือน = ฐานการงาน
-        { let s = 0; const why = [];
-            for (const [g, j, lab] of parts) if (g === 3 || g === 1) { s += j !== 0 ? j : g === 3 ? 0.5 : 0; why.push(`${lab} ${jt(j)}`); }
-            if (rMonth && rMonth.type === 'clash') { s -= 1; why.push(`ชงราศีล่างเดือน (ฐานการงาน)`); } else if (rMonth && rMonth.kind === '+') { s += 0.5; why.push(`${rMonth.th}กับราศีล่างเดือน`); }
-            add('work', s, why); }
+        { let s = 0; const why = [], drv = [];
+            for (const [g, j, lab] of parts) if (g === 3 || g === 1) { const d = j !== 0 ? j : g === 3 ? 0.5 : 0; s += d; why.push(`${lab} ${jt(j)}`); if (d) drv.push([`${lab}${jt2(d)}`, d]); }
+            if (rMonth && rMonth.type === 'clash') { s -= 1; why.push(`ชงราศีล่างเดือน (ฐานการงาน)`); drv.push(['ราศีล่างของปีนี้ไปชงฐานการงาน (ราศีล่างของเสาเดือนเกิด)', -1]); } else if (rMonth && rMonth.kind === '+') { s += 0.5; why.push(`${rMonth.th}กับราศีล่างเดือน`); drv.push([`ราศีล่างของปีนี้${th2(rMonth)}กับฐานการงาน (ราศีล่างของเสาเดือนเกิด)`, 0.5]); }
+            add('work', s, why, drv); }
         // การเงิน: โชคลาภ/โชคลอย (财) ดีหรือร้ายตามธาตุ · คู่ธาตุ/คู่แข่ง (比劫) ที่ให้โทษ = แย่งทรัพย์
-        { let s = 0; const why = [];
-            for (const [g, j, lab] of parts) { if (g === 2) { s += j !== 0 ? j : 0.5; why.push(`${lab} ${jt(j)}`); } if (g === 0 && j <= 0) { s -= 1; why.push(`${lab} ${jt(j)} (แย่งทรัพย์)`); } }
-            add('money', s, why); }
+        { let s = 0; const why = [], drv = [];
+            for (const [g, j, lab] of parts) { if (g === 2) { const d = j !== 0 ? j : 0.5; s += d; why.push(`${lab} ${jt(j)}`); drv.push([`${lab}เป็นดาวทรัพย์ที่${jt2(d)}`, d]); } if (g === 0 && j <= 0) { s -= 1; why.push(`${lab} ${jt(j)} (แย่งทรัพย์)`); drv.push([`${lab}มาแย่งทรัพย์`, -1]); } }
+            add('money', s, why, drv); }
         // ความรัก: ดาวคู่ครอง (ชาย 财 หญิง 官杀) · ภาคี/ชงกับวังคู่ครอง
-        { let s = 0; const why = [], star = male ? 2 : 3;
-            for (const [g, j, lab] of parts) if (g === star) { s += j >= 0 ? 1 : -1; why.push(`${lab} เป็นดาวคู่ครอง ${jt(j)}`); }
-            if (rDay && rDay.type === 'clash') { s -= 1; why.push('ชงวังคู่ครอง (ราศีล่างดิถี)'); } else if (rDay && rDay.kind === '+') { s += 1; why.push(`${rDay.th}กับวังคู่ครอง`); } else if (rDay) { s -= 0.5; why.push(`${rDay.th}กับวังคู่ครอง`); }
-            add('love', s, why); }
+        { let s = 0; const why = [], drv = [], star = male ? 2 : 3;
+            for (const [g, j, lab] of parts) if (g === star) { const d = j >= 0 ? 1 : -1; s += d; why.push(`${lab} เป็นดาวคู่ครอง ${jt(j)}`); drv.push([`${lab}เป็นดาวคู่ครองที่${jt2(d)}`, d]); }
+            if (rDay && rDay.type === 'clash') { s -= 1; why.push('ชงวังคู่ครอง (ราศีล่างดิถี)'); drv.push(['ราศีล่างของปีนี้ไปชงวังคู่ครอง (ราศีล่างของดิถี)', -1]); } else if (rDay && rDay.kind === '+') { s += 1; why.push(`${rDay.th}กับวังคู่ครอง`); drv.push([`ราศีล่างของปีนี้${th2(rDay)}กับวังคู่ครอง (ราศีล่างของดิถี) ซึ่งเป็นแรงดึงดูดเข้าหากัน`, 1]); } else if (rDay) { s -= 0.5; why.push(`${rDay.th}กับวังคู่ครอง`); drv.push([`ราศีล่างของปีนี้${th2(rDay)}กับวังคู่ครอง (ราศีล่างของดิถี)`, -0.5]); }
+            add('love', s, why, drv); }
         // สุขภาพ: ธาตุให้โทษของปี · ชงราศีล่างดิถี (ตัวเอง)
-        { let s = 0; const why = [];
+        { let s = 0; const why = [], drv = [];
             const badE = [];
-            for (const [, j, lab, el] of parts) { if (j < 0) { s -= 0.75; why.push(`${lab} ให้โทษ`); badE.push(el); } }
-            if (J.a > 0 && J.b > 0) { s += 1; why.push('ทั้งราศีบนและราศีล่างให้คุณ'); }
-            if (rDay && rDay.type === 'clash') { s -= 1; why.push('ชงราศีล่างดิถี (ตัวเอง)'); }
-            add('health', s, why);
+            for (const [, j, lab, el] of parts) { if (j < 0) { s -= 0.75; why.push(`${lab} ให้โทษ`); drv.push([`${lab}ให้โทษ`, -0.75]); badE.push(el); } }
+            if (J.a > 0 && J.b > 0) { s += 1; why.push('ทั้งราศีบนและราศีล่างให้คุณ'); drv.push(['ทั้งราศีบนและราศีล่างให้คุณ', 1]); }
+            if (rDay && rDay.type === 'clash') { s -= 1; why.push('ชงราศีล่างดิถี (ตัวเอง)'); drv.push(['ราศีล่างของปีนี้ไปชงราศีล่างของดิถี (ตัวคุณเอง)', -1]); }
+            add('health', s, why, drv);
             const h = out[out.length - 1];
             if (h.tone < 0 && badE.length && N && N.ORGAN) h.todo += ` และดูแล${N.ORGAN[badE[0]].sys} (ธาตุ${EL[badE[0]]})`; }
         return out;

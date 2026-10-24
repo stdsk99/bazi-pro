@@ -116,6 +116,8 @@ eq('ด้านที่เด่น/ต้องระวัง (ดวงต�
 const Yr = require('../js/yearly.js');
 eq('สรุปปี 2026 (ปีมะเมีย เกิดปีมะเมีย = ปีนักษัตรตัวเองแบบเฮ้งตัวเอง) และปี 2030 ชงวังคู่ครอง', (() => { const r = calc(1990, 1, 15, 10, 30); const a = Yr.summary(r, An.analyze(r), 2026), b = Yr.summary(r, An.analyze(r), 2030); return [a.topics.length, a.months.months.length, a.months.best.length >= 1, a.taisui[0].hits[0].name.startsWith('ปีนักษัตรตัวเอง'), b.taisui[0].hits.some((h) => h.by === 'ดิถี'), b.topics.find((t) => t.id === 'love').tone]; })(), [4, 12, true, true, true, -1]);
 
+eq('ด้านที่สวนกับภาพรวมมีคำอธิบาย (เดือน 庚子 ปี 2026: ภาพรวมต้องระวัง แต่ความรักเด่นเพราะครึ่งภาคีกับวังคู่ครอง)', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r); const m = r.monthly(2026).find((x) => x.pillar.zh === '庚子'); const t = Yr.topics(r, an, m.pillar, 'month'); const love = t.find((x) => x.id === 'love'); return [love.level, /^ภาพรวมเดือนนี้ต้องระวัง/.test(love.note || ''), /ครึ่งภาคีกับวังคู่ครอง/.test(love.note || ''), t.filter((x) => x.note).every((x) => x.tone !== 0)]; })(), ['เด่น', true, true, true]);
+
 const DPm = require('../js/daypillar.js');
 eq('เสาวัน 60 แบบครบ มีข้อความทุกช่อง และภาพ SVG', [DPm.list().length, DPm.list().every((k) => { const d = DPm.get(k); return d.img && d.tag && d.self && d.strong && d.care && d.tip && DPm.card(k).startsWith('<svg'); }), new Set(DPm.list().map((k) => DPm.get(k).img)).size], [60, true, 60]);
 
