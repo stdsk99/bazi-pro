@@ -342,6 +342,9 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .mitem .mih h3 { margin: 0; }
 .mbar { height: 8px; border-radius: 4px; background: var(--rule); overflow: hidden; margin: 6px 0 8px; }
 .mbar i { display: block; height: 100%; border-radius: 4px; }
+.mpred { background: var(--jade-wash); border-radius: 8px; padding: 8px 10px; margin: 6px 0; }
+.mpred b { color: var(--jade); margin-right: 4px; }
+.rh.good { color: var(--good); } .rh.bad { color: var(--bad); }
 .madv { margin: 0; padding-left: 20px; line-height: 1.8; }
 @media (max-width: 760px) { .mpair { grid-template-columns: 1fr; } .mres { grid-template-columns: 1fr; justify-items: center; text-align: center; } .mrow { justify-content: center; } .mrow .mn { flex-basis: 100%; text-align: center; min-width: 0; } }
 .slist { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
@@ -2004,7 +2007,29 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     const BR_SCORE = { pair: 1, halfTrio: 0.9, none: 0.6, same: 0.7, selfPunish: 0.35, punish: 0.3, harm: 0.3, break: 0.35, clash: 0.1 };
     const brKey = (a, b) => { const r = branchRel(a, b); return r ? r.type : a === b ? 'same' : 'none'; };
 
-    function compare(c1, c2) {
+    // คำทำนายแต่ละด้าน [ดี, กลาง, ต้องใส่ใจ] — สำนวนของเรา จากความหมายในตำราดูคู่ 合婚
+    const PRED = {
+        elements: ['อยู่ด้วยกันแล้วชีวิตทั้งสองฝ่ายมักดีขึ้น งาน เงิน และสภาพใจมั่นคงขึ้นหลังคบหรือแต่งงาน คนรอบข้างมักเห็นว่าคู่นี้ส่งเสริมกัน',
+            'ช่วยกันได้ในบางเรื่อง ช่วงแรกอาจยังไม่เห็นผลชัด แต่เมื่ออยู่ด้วยกันนานขึ้นจะรู้ว่าอีกฝ่ายเติมจุดไหนให้ ควรแบ่งบทบาทตามจุดแข็งของแต่ละคน',
+            'อยู่ใกล้กันนานๆ อาจรู้สึกเหนื่อยหรือพลังตก โดยเฉพาะช่วงที่ดวงของฝ่ายใดฝ่ายหนึ่งไม่ดี ควรมีเวลาส่วนตัวและกิจกรรมที่เติมพลังของตัวเอง'],
+        dm: ['ความรักมักเริ่มเร็วและผูกพันลึก ทะเลาะแล้วคืนดีกันง่าย เมื่อเวลาผ่านไปจะเป็นทั้งคู่รักและเพื่อนคู่คิด',
+            'ความสัมพันธ์ไปได้ดีถ้ามีเป้าหมายร่วมกัน ช่วงที่ต่างคนต่างยุ่งอาจห่างกันได้ ควรหาเวลาคุยเรื่องอนาคตด้วยกันเป็นระยะ',
+            'ช่วงแรกอาจดึงดูดกันเพราะความต่าง แต่พออยู่ด้วยกันจะเห็นความต่างชัดขึ้น ถ้าผ่านสองสามปีแรกไปได้ด้วยการยอมรับกัน ความสัมพันธ์จะแข็งแรงขึ้น'],
+        palace: ['ชีวิตในบ้านราบรื่น มักได้อยู่ด้วยกันเป็นหลักแหล่ง สร้างบ้านหรือครอบครัวได้เร็ว และบ้านเป็นที่พักใจของทั้งคู่',
+            'ชีวิตในบ้านปกติ ไม่หวือหวา ความสุขขึ้นกับการใส่ใจเรื่องเล็กๆ ในแต่ละวัน',
+            'ชีวิตคู่มักมีช่วงที่ต้องอยู่ห่างกัน ย้ายที่อยู่ หรือมีเรื่องให้ปรับตัวบ่อย ปีที่ชงวังคู่ครองควรระวังเป็นพิเศษ (ดูจังหวะเวลาด้านล่าง)'],
+        star: ['ตามตำรา คู่นี้มักรู้สึกว่า "ใช่" ตั้งแต่ต้น และมีแนวโน้มลงเอยเป็นคู่ชีวิตจริงจังมากกว่าคบกันชั่วคราว',
+            'ไม่ใช่รักแรกพบ แต่ความรู้สึกค่อยๆ เพิ่มขึ้นจากการได้อยู่ใกล้และช่วยเหลือกัน',
+            'แรงดึงดูดตามดวงไม่สูง ความสัมพันธ์จะยืนยาวได้เพราะการตัดสินใจเลือกกันและความเข้าใจ มากกว่าความหวั่นไหว'],
+        zodiac: ['ครอบครัวสองฝ่ายมักยอมรับกันง่าย งานรวมญาติหรือเทศกาลราบรื่น',
+            'ครอบครัวสองฝ่ายไม่ค่อยมีปัญหา แต่ก็ไม่ได้สนิทกันเป็นพิเศษ',
+            'ผู้ใหญ่สองฝ่ายอาจเห็นต่างเรื่องงานแต่ง ที่อยู่ หรือการเลี้ยงลูก ควรตกลงกันเองก่อนแล้วค่อยคุยกับครอบครัว'],
+        month: ['จังหวะชีวิตและการงานไปด้วยกันได้ เหมาะทำธุรกิจหรือโครงการร่วมกัน',
+            'ต่างคนต่างมีจังหวะของตัวเอง ทำงานแยกกันแล้วมาเจอกันที่บ้านจะลงตัวกว่าทำธุรกิจด้วยกัน',
+            'ตารางชีวิตและนิสัยการทำงานต่างกัน ไม่ควรรีบร่วมลงทุนหรือทำธุรกิจด้วยกัน จนกว่าจะตกลงบทบาทให้ชัด']
+    };
+
+    function compare(c1, c2, opts) {
         const a1 = An.analyze(c1), a2 = An.analyze(c2);
         const P1 = c1.pillars, P2 = c2.pillars;
         const nm = (c, d) => { const n = (c.input.name || '').trim() || d; return /[A-Za-z0-9.]$/.test(n) ? n + ' ' : n; };
@@ -2083,6 +2108,26 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         const k6 = brKey(P1.month.branch, P2.month.branch);
         items.push({ id: 'month', name: 'พื้นเพและจังหวะชีวิต', max: 10, pts: r1(10 * BR_SCORE[k6]), text: MTXT[k6], source: `ราศีล่างเดือน ${B.BRANCHES[P1.month.branch]} กับ ${B.BRANCHES[P2.month.branch]} · ${TH[k6]}` });
 
+        // คำทำนายของแต่ละด้าน (ตามระดับคะแนน: ดี / กลาง / ต้องใส่ใจ)
+        for (const it of items) { const q = it.pts / it.max, P = PRED[it.id]; it.pred = q >= 0.75 ? P[0] : q >= 0.5 ? P[1] : P[2]; }
+
+        // จังหวะเวลาของคู่นี้: 10 ปีข้างหน้า ปีที่ดีกับทั้งสองคน และปีที่ควรระวัง
+        const nd1 = needs(a1), nd2 = needs(a2);
+        const rate = (nd, st, br) => (nd.fav.includes(B.STEM_ELEMENT[st]) ? 1 : nd.unf.includes(B.STEM_ELEMENT[st]) ? -1 : 0) + (nd.fav.includes(B.BRANCH_ELEMENT[br]) ? 1 : nd.unf.includes(B.BRANCH_ELEMENT[br]) ? -1 : 0);
+        const y0 = opts && opts.fromYear || new Date().getFullYear(), good = [], caution = [];
+        for (const a of c1.annual(y0, y0 + 9)) {
+            const q = a.pillar, v1 = rate(nd1, q.stem, q.branch), v2 = rate(nd2, q.stem, q.branch);
+            const clash = [[P1.day.branch, n1], [P2.day.branch, n2]].filter(([b]) => (b + 6) % 12 === q.branch).map(([, n]) => n.trim());
+            const bind = brKey(q.branch, P1.day.branch), bind2 = brKey(q.branch, P2.day.branch);
+            const ylab = `${a.year} ${q.zh} ปี${q.animal}`;
+            if (clash.length) caution.push([ylab, `ปีนี้ชงวังคู่ครองของ${clash.join('และ')} มักมีความเปลี่ยนแปลงในชีวิตคู่ เช่น ย้ายที่อยู่ งานแยกกัน หรือมีเรื่องให้ทบทวนกัน ไม่ควรตัดสินใจเรื่องใหญ่ด้วยอารมณ์`]);
+            else if (v1 <= -1 && v2 <= -1) caution.push([ylab, 'ปีนี้เป็นธาตุที่ทั้งสองคนไม่ต้องการ ต่างคนต่างเหนื่อยจนอาจหงุดหงิดใส่กัน ควรประคองกันและเลื่อนเรื่องใหญ่ออกไปถ้าทำได้']);
+            else if (v1 >= 1 && v2 >= 1) good.push([ylab, `ปีนี้ส่งเสริมทั้งสองคน${(bind === 'pair' || bind2 === 'pair' || bind === 'halfTrio' || bind2 === 'halfTrio') ? ' และเป็นภาคีกับวังคู่ครอง' : ''} เหมาะกับก้าวสำคัญร่วมกัน เช่น แต่งงาน ซื้อบ้าน หรือเริ่มสิ่งใหม่ด้วยกัน`]);
+            else if ((bind === 'pair' && v1 >= 0) || (bind2 === 'pair' && v2 >= 0)) good.push([ylab, 'ปีนี้เป็นภาคีคู่กับวังคู่ครอง เรื่องความรักและครอบครัวเด่นขึ้น เหมาะกับการคบหาจริงจังหรือหมั้นหมาย']);
+        }
+        const merge = (l) => { const out = []; for (const [k, v] of l) { const m = out.find((x) => x[1] === v); if (m) m[0] += ` · ${k}`; else out.push([k, v]); } return out; };
+        const timing = { from: y0, to: y0 + 9, good: merge(good), caution: merge(caution), source: `ปีจร ${y0}–${y0 + 9} เทียบธาตุให้คุณ/ให้โทษของทั้งสองคน และภาคี/ชงกับราศีล่างดิถี (วังคู่ครอง)` };
+
         const total = Math.round(items.reduce((s, x) => s + x.pts, 0));
         const level = total >= 80 ? ['เข้ากันดีมาก', 'good'] : total >= 65 ? ['เข้ากันดี', 'good'] : total >= 50 ? ['ปานกลาง ต้องปรับเข้าหากัน', 'mix'] : ['ต้องใช้ความเข้าใจมาก', 'bad'];
         const sorted = items.slice().sort((x, y) => x.pts / x.max - y.pts / y.max);
@@ -2093,7 +2138,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         const mix = [...new Set(g12.nd.fav.filter((e) => g21.nd.fav.includes(e)))];
         if (mix.length) advice.push(`ทั้งสองคนได้ประโยชน์จากธาตุ${list(mix.map((e) => EL[e]))} เหมือนกัน การตกแต่งบ้านหรือทำกิจกรรมที่เป็นธาตุนี้จะช่วยทั้งคู่`);
         advice.push('ดวงคู่บอกแนวโน้มของความเข้ากัน ความสัมพันธ์จริงขึ้นกับการสื่อสาร ความเคารพ และการดูแลกันของทั้งสองคน');
-        return { total, level: level[0], tone: level[1], items, advice, a1, a2, names: [n1.trim(), n2.trim()] };
+        return { total, level: level[0], tone: level[1], items, advice, timing, a1, a2, names: [n1.trim(), n2.trim()] };
     }
 
     return { compare };
@@ -2598,7 +2643,13 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         </section>
         <section class="panel">
           <h2>รายละเอียด 6 ด้าน <span class="badge">ฉบับร่าง</span></h2>
-          ${res.items.map((x) => { const q = x.pts / x.max, c = q >= 0.75 ? 'var(--good)' : q < 0.5 ? 'var(--bad)' : 'var(--warn)'; return `<div class="rblock mitem"><div class="mih"><h3>${x.name}</h3><span class="mono">${x.pts}/${x.max}</span></div><div class="mbar"><i style="width:${q * 100}%;background:${c}"></i></div><p>${esc(x.text)}</p><p class="src">ที่มา: ${esc(x.source)}</p></div>`; }).join('')}
+          ${res.items.map((x) => { const q = x.pts / x.max, c = q >= 0.75 ? 'var(--good)' : q < 0.5 ? 'var(--bad)' : 'var(--warn)'; return `<div class="rblock mitem"><div class="mih"><h3>${x.name}</h3><span class="mono">${x.pts}/${x.max}</span></div><div class="mbar"><i style="width:${q * 100}%;background:${c}"></i></div><p>${esc(x.text)}</p><p class="mpred"><b>คำทำนาย</b> ${esc(x.pred)}</p><p class="src">ที่มา: ${esc(x.source)}</p></div>`; }).join('')}
+        </section>
+        <section class="panel">
+          <h2>จังหวะเวลาของคู่นี้ <small class="sub">${res.timing.from}–${res.timing.to}</small></h2>
+          ${res.timing.good.length ? `<h3 class="rh good">ปีที่ดีสำหรับก้าวสำคัญร่วมกัน</h3><dl class="ritems">${res.timing.good.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '<p>ใน 10 ปีนี้ไม่มีปีที่ส่งเสริมทั้งสองคนพร้อมกันชัดเจน ให้เลือกปีที่ดีกับฝ่ายใดฝ่ายหนึ่งจากเมนูปีจรของแต่ละคน</p>'}
+          ${res.timing.caution.length ? `<h3 class="rh bad">ปีที่ควรประคองกันเป็นพิเศษ</h3><dl class="ritems">${res.timing.caution.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '<p>ใน 10 ปีนี้ไม่มีปีที่ชงวังคู่ครองหรือไม่ดีกับทั้งสองคนพร้อมกัน</p>'}
+          <p class="src">ที่มา: ${esc(res.timing.source)}</p>
         </section>
         <section class="panel"><h2>คำแนะนำสำหรับคู่นี้</h2><ul class="madv">${res.advice.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
           <p class="note">ระบบอ้างอิงไม่มีส่วนดูดวงคู่ หัวข้อนี้ใช้หลักตำราดูคู่ครองมาตรฐาน 合婚 และศัพท์เดียวกับทั้งแอป</p></section>`;

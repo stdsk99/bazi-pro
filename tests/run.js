@@ -109,5 +109,7 @@ const ex = S.exportText(); S.remove(S.list()[1].id); const im = S.importText(ex)
 eq('สำรองแล้วนำเข้า: กู้ดวงที่ลบคืนได้ ไม่ซ้ำ', [im.added, im.updated, S.list().length, S.list().filter((o) => o.mine).length], [1, 1, 2, 1]);
 eq('นำเข้าไฟล์เสีย', S.importText('xx').ok, false);
 
+eq('ดวงคู่มีคำทำนายทุกด้าน และจังหวะเวลา 10 ปี', (() => { const x = Cm.compare(calc(1990, 1, 15, 10, 30, 'M'), calc(1992, 6, 3, 8, 0, 'F'), { fromYear: 2026 }); return [x.items.every((i) => i.pred), x.timing.to - x.timing.from, x.timing.caution.some((c) => c[0].includes('2030'))]; })(), [true, 9, true]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

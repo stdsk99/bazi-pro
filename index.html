@@ -342,6 +342,9 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .mitem .mih h3 { margin: 0; }
 .mbar { height: 8px; border-radius: 4px; background: var(--rule); overflow: hidden; margin: 6px 0 8px; }
 .mbar i { display: block; height: 100%; border-radius: 4px; }
+.mpred { background: var(--jade-wash); border-radius: 8px; padding: 8px 10px; margin: 6px 0; }
+.mpred b { color: var(--jade); margin-right: 4px; }
+.rh.good { color: var(--good); } .rh.bad { color: var(--bad); }
 .madv { margin: 0; padding-left: 20px; line-height: 1.8; }
 @media (max-width: 760px) { .mpair { grid-template-columns: 1fr; } .mres { grid-template-columns: 1fr; justify-items: center; text-align: center; } .mrow { justify-content: center; } .mrow .mn { flex-basis: 100%; text-align: center; min-width: 0; } }
 .slist { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
@@ -1013,7 +1016,13 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         </section>
         <section class="panel">
           <h2>รายละเอียด 6 ด้าน <span class="badge">ฉบับร่าง</span></h2>
-          ${res.items.map((x) => { const q = x.pts / x.max, c = q >= 0.75 ? 'var(--good)' : q < 0.5 ? 'var(--bad)' : 'var(--warn)'; return `<div class="rblock mitem"><div class="mih"><h3>${x.name}</h3><span class="mono">${x.pts}/${x.max}</span></div><div class="mbar"><i style="width:${q * 100}%;background:${c}"></i></div><p>${esc(x.text)}</p><p class="src">ที่มา: ${esc(x.source)}</p></div>`; }).join('')}
+          ${res.items.map((x) => { const q = x.pts / x.max, c = q >= 0.75 ? 'var(--good)' : q < 0.5 ? 'var(--bad)' : 'var(--warn)'; return `<div class="rblock mitem"><div class="mih"><h3>${x.name}</h3><span class="mono">${x.pts}/${x.max}</span></div><div class="mbar"><i style="width:${q * 100}%;background:${c}"></i></div><p>${esc(x.text)}</p><p class="mpred"><b>คำทำนาย</b> ${esc(x.pred)}</p><p class="src">ที่มา: ${esc(x.source)}</p></div>`; }).join('')}
+        </section>
+        <section class="panel">
+          <h2>จังหวะเวลาของคู่นี้ <small class="sub">${res.timing.from}–${res.timing.to}</small></h2>
+          ${res.timing.good.length ? `<h3 class="rh good">ปีที่ดีสำหรับก้าวสำคัญร่วมกัน</h3><dl class="ritems">${res.timing.good.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '<p>ใน 10 ปีนี้ไม่มีปีที่ส่งเสริมทั้งสองคนพร้อมกันชัดเจน ให้เลือกปีที่ดีกับฝ่ายใดฝ่ายหนึ่งจากเมนูปีจรของแต่ละคน</p>'}
+          ${res.timing.caution.length ? `<h3 class="rh bad">ปีที่ควรประคองกันเป็นพิเศษ</h3><dl class="ritems">${res.timing.caution.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '<p>ใน 10 ปีนี้ไม่มีปีที่ชงวังคู่ครองหรือไม่ดีกับทั้งสองคนพร้อมกัน</p>'}
+          <p class="src">ที่มา: ${esc(res.timing.source)}</p>
         </section>
         <section class="panel"><h2>คำแนะนำสำหรับคู่นี้</h2><ul class="madv">${res.advice.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
           <p class="note">ระบบอ้างอิงไม่มีส่วนดูดวงคู่ หัวข้อนี้ใช้หลักตำราดูคู่ครองมาตรฐาน 合婚 และศัพท์เดียวกับทั้งแอป</p></section>`;
