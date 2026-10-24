@@ -681,5 +681,5 @@
         return { strong: strong.map(T), caution: caution.map(T), bars };
     }
 
-    return { natal, summary, transit, highlights, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
+    return { natal, summary, transit, highlights, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS, ORGAN };
 });

@@ -113,5 +113,8 @@ eq('ดวงคู่มีคำทำนายทุกด้าน และ
 
 eq('ด้านที่เด่น/ต้องระวัง (ดวงตัวอย่าง)', (() => { const r = calc(1990, 1, 15, 10, 30); const h = N.highlights(r, An.analyze(r), I.natal(r)); return [h.bars.length, h.strong[0].title.includes('ความรู้และผู้อุปถัมภ์'), h.caution.some((c) => c.title.includes('เพื่อนและคู่แข่งมากเกินไป'))]; })(), [5, true, true]);
 
+const Yr = require('../js/yearly.js');
+eq('สรุปปี 2026 (ปีมะเมีย เกิดปีมะเมีย = ปีนักษัตรตัวเองแบบเฮ้งตัวเอง) และปี 2030 ชงวังคู่ครอง', (() => { const r = calc(1990, 1, 15, 10, 30); const a = Yr.summary(r, An.analyze(r), 2026), b = Yr.summary(r, An.analyze(r), 2030); return [a.topics.length, a.months.months.length, a.months.best.length >= 1, a.taisui[0].hits[0].name.startsWith('ปีนักษัตรตัวเอง'), b.taisui[0].hits.some((h) => h.by === 'ดิถี'), b.topics.find((t) => t.id === 'love').tone]; })(), [4, 12, true, true, true, -1]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

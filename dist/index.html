@@ -385,6 +385,23 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 .hli p { margin: 4px 0 0; }
 .hli .src { font-size: .8rem; color: var(--ink-soft); }
 @media (max-width: 760px) { .hl { grid-template-columns: 1fr; } .tgb { grid-template-columns: 1fr auto; } .tgb .track { grid-column: 1 / -1; grid-row: 2; } .tgb .mono { display: none; } }
+.ysum { margin: 16px 0 6px; }
+#ytopics, #taisui, #h-month, #mBest { scroll-margin-top: 72px; }
+.ysum h2 { margin-bottom: 8px; }
+.ycards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.ycard { display: flex; flex-direction: column; align-items: flex-start; text-align: left; font: inherit; font-weight: 400; cursor: pointer; gap: 4px; padding: 12px 14px; border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); color: var(--ink); text-decoration: none; }
+.ycard:hover { border-color: var(--jade); }
+.ycard b { font-size: 1rem; }
+.ycard small { color: var(--ink-soft); font-size: .8rem; }
+.ytopic .tlv, .rblock .tlv { font-weight: 700; font-size: .9rem; }
+.mcount { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; margin: 6px 0 10px; }
+.mcount b { font-size: 1.3rem; margin-left: 4px; }
+.mcount .unit { color: var(--ink-soft); }
+.mbest { margin: 0 0 12px; }
+.mbest h3 { margin: 0 0 6px; color: var(--good); }
+.mb { padding: 6px 0; border-top: 1px dashed var(--rule); } .mb:first-of-type { border-top: 0; }
+.mb p { margin: 2px 0 0; }
+@media (max-width: 760px) { .ycards { grid-template-columns: 1fr 1fr; } }
 .bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
 #printView { display: none; }
 @media print {
@@ -537,10 +554,14 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       <div class="decades" id="decades" role="group" aria-label="ช่วงวัยจร"></div>
       <div class="luck"><ol id="years"></ol></div>
     </section>
+    <section class="ysum" id="ysum" aria-label="สรุปปี"></section>
     <section class="panel ldetail" id="yearDetail" aria-live="polite"></section>
+    <section class="panel" id="ytopics" aria-live="polite"></section>
+    <section class="panel" id="taisui" aria-live="polite"></section>
     <section aria-labelledby="h-month" class="msec">
       <h2 id="h-month">เดือนจร 流月 <span id="mYear"></span></h2>
       <p class="sub">เดือนจรเริ่มที่สารทเปลี่ยนเดือน กดเดือนที่ต้องการดู</p>
+      <div id="mSum"></div>
       <div class="luck mluck"><ol id="months"></ol></div>
     </section>
     <section class="panel ldetail" id="monthDetail" aria-live="polite"></section>
@@ -2042,7 +2063,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         return { strong: strong.map(T), caution: caution.map(T), bars };
     }
 
-    return { natal, summary, transit, highlights, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS };
+    return { natal, summary, transit, highlights, tenGodScores, DAY_MASTER, ELEMENT_LIFE, GROUPS, ORGAN };
 });
 
 </script>
@@ -2267,6 +2288,134 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         setCur: (rec) => { try { storage.setItem(CUR, JSON.stringify(rec)); } catch (e) {} }
     };
     return api;
+});
+
+</script>
+<script>
+// yearly.js — สรุปปี: อ่านทีละด้าน (งาน เงิน ความรัก สุขภาพ) · 12 เดือน · เดือนที่ดีที่สุด · ไท้ส่วย
+// ระบบอ้างอิงไม่มีส่วนสรุปรายด้านและไท้ส่วย หัวข้อนี้ใช้หลักตำรามาตรฐาน และใช้ศัพท์เดียวกับทั้งแอป
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'), require('./interactions.js'), require('./narrative.js'));
+    else root.BaziYearly = factory(root.BaziCore, root.BaziInteractions, root.BaziNarrative);
+})(typeof self !== 'undefined' ? self : this, function (B, I, N) {
+    'use strict';
+    const EL = ['ไม้', 'ไฟ', 'ดิน', 'ทอง', 'น้ำ'];
+    const GROUP_OF = { '比肩': 0, '劫财': 0, '食神': 1, '伤官': 1, '偏财': 2, '正财': 2, '七杀': 3, '正官': 3, '偏印': 4, '正印': 4 };
+    const TG_TH = { '比肩': 'คู่ธาตุ', '劫财': 'คู่แข่ง', '食神': 'ถ่ายเท', '伤官': 'กลยุทธ์', '偏财': 'โชคลอย', '正财': 'โชคลาภ', '七杀': 'พิฆาต', '正官': 'อำนาจ', '偏印': 'เสริมรอง', '正印': 'เสริมหลัก' };
+    const MTH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+    // ให้คุณ/ให้โทษของธาตุในเสาจร — เกณฑ์เดียวกับป้ายบนการ์ดวัยจร ปีจร เดือนจร
+    function judgeFn(chart, an) {
+        const dm = chart.pillars.day.stem;
+        const ok = (x, st, pos) => (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && (!x.position || x.position === pos);
+        const j = (e, st, pos) => { const f = an.favorable.some((x) => x.element === e && ok(x, st, pos)), u = an.unfavorable.some((x) => x.element === e && ok(x, st, pos)); return f && !u ? 1 : u && !f ? -1 : 0; };
+        return (q) => { const a = j(B.STEM_ELEMENT[q.stem], q.stem, 'stem'), b = j(B.BRANCH_ELEMENT[q.branch], q.hidden[0].stem, 'branch'); return { a, b, sum: a + b }; };
+    }
+    const rel2 = (x, y) => { const r = I.find([{ key: 'a', label: 'a', stem: 0, branch: x }, { key: 'b', label: 'b', stem: 1, branch: y }], null).filter((t) => !t.type.startsWith('stem')); const o = ['clash', 'punish', 'selfPunish', 'harm', 'break', 'pair', 'halfTrio']; return o.map((t) => r.find((z) => z.type === t)).find(Boolean) || null; };
+
+    // ---------- 1. อ่านทีละด้าน ----------
+    const TOPIC = {
+        work: { name: 'การงาน', lv: [
+            ['งานมีโอกาสก้าวหน้า ได้รับมอบหมายงานสำคัญหรือได้รับการยอมรับ ผลงานเป็นที่เห็น', 'เสนอโครงการ ขอเลื่อนตำแหน่ง หรือรับงานที่ท้าทาย'],
+            ['งานเดินไปตามปกติ ไม่มีเรื่องใหญ่', 'ใช้ปีนี้พัฒนาทักษะและเก็บผลงาน เตรียมพร้อมสำหรับโอกาสในปีถัดไป'],
+            ['งานมีแรงกดดัน ขัดแย้งกับหัวหน้าหรือเพื่อนร่วมงาน หรือมีความเปลี่ยนแปลงที่ไม่ได้เลือก', 'ทำงานให้รอบคอบ เก็บหลักฐานการทำงาน ไม่ลาออกหรือเปลี่ยนงานด้วยอารมณ์']] },
+        money: { name: 'การเงิน', lv: [
+            ['รายได้ดีขึ้น มีโอกาสทางการเงินหรือรายได้เสริม', 'เก็บออมหรือลงทุนอย่างมีแผน ขยายงานที่ทำกำไรอยู่แล้ว'],
+            ['การเงินทรงตัว รายรับรายจ่ายใกล้เคียงเดิม', 'ทำงบประมาณ ลดรายจ่ายที่ไม่จำเป็น'],
+            ['มีรายจ่ายไม่คาดคิด เสียเงินจากคนใกล้ตัว หรือการลงทุนเสี่ยง', 'ไม่ค้ำประกัน ไม่ให้ยืมเงินก้อน ไม่ลงทุนเกินตัว และกันเงินสำรองไว้']] },
+        love: { name: 'ความรัก', lv: [
+            ['เรื่องความรักเด่น คนโสดมีโอกาสพบคนที่ใช่ คนมีคู่ความสัมพันธ์แน่นแฟ้นขึ้น', 'เปิดใจพบคนใหม่ หรือวางแผนก้าวสำคัญกับคนรัก'],
+            ['ความรักราบรื่นตามปกติ', 'หาเวลาคุณภาพกับคนรักหรือครอบครัวสม่ำเสมอ'],
+            ['ความสัมพันธ์มีเรื่องให้คิด ความเห็นไม่ตรงกัน หรือต้องอยู่ห่างกัน', 'สื่อสารให้ชัด ไม่ตัดสินใจเรื่องใหญ่ในความสัมพันธ์ด้วยอารมณ์']] },
+        health: { name: 'สุขภาพ', lv: [
+            ['สุขภาพแข็งแรง มีพลังทำสิ่งต่างๆ', 'เริ่มออกกำลังกายหรือวางแผนดูแลสุขภาพระยะยาว'],
+            ['สุขภาพโดยรวมปกติ', 'ตรวจสุขภาพประจำปีและพักผ่อนให้พอ'],
+            ['ร่างกายและใจเหนื่อยง่าย ระวังความเครียด อุบัติเหตุ และโรคเดิมกำเริบ', 'พักผ่อนให้พอ ตรวจสุขภาพ และขับรถระมัดระวัง']] }
+    };
+    function topics(chart, an, q) {
+        const P = chart.pillars, dm = P.day.stem, male = (chart.input && chart.input.gender) !== 'F';
+        const J = judgeFn(chart, an)(q);
+        const cS = B.tenGod(dm, q.stem).code, cB = B.tenGod(dm, q.hidden[0].stem).code;
+        const parts = [[GROUP_OF[cS], J.a, `ราศีบน ${B.STEMS[q.stem]} ${TG_TH[cS]}`, B.STEM_ELEMENT[q.stem]], [GROUP_OF[cB], J.b, `ราศีล่าง ${B.BRANCHES[q.branch]} ${TG_TH[cB]}`, B.BRANCH_ELEMENT[q.branch]]];
+        const jt = (j) => j > 0 ? 'ให้คุณ' : j < 0 ? 'ให้โทษ' : 'กลางๆ';
+        const rMonth = rel2(q.branch, P.month.branch), rDay = rel2(q.branch, P.day.branch);
+        const out = [];
+        const add = (id, score, why) => {
+            const lvl = score >= 1 ? 0 : score <= -1 ? 2 : 1, T = TOPIC[id];
+            out.push({ id, name: T.name, level: ['เด่น', 'ปกติ', 'ต้องระวัง'][lvl], tone: [1, 0, -1][lvl], text: T.lv[lvl][0], todo: T.lv[lvl][1], why: why.join(' · ') || 'ปีนี้ไม่มีธาตุที่เกี่ยวกับด้านนี้โดยตรง' });
+        };
+        // การงาน: อำนาจ (官杀) และความคิด/ผลงาน (食伤) · ราศีล่างเดือน = ฐานการงาน
+        { let s = 0; const why = [];
+            for (const [g, j, lab] of parts) if (g === 3 || g === 1) { s += j !== 0 ? j : g === 3 ? 0.5 : 0; why.push(`${lab} ${jt(j)}`); }
+            if (rMonth && rMonth.type === 'clash') { s -= 1; why.push(`ชงราศีล่างเดือน (ฐานการงาน)`); } else if (rMonth && rMonth.kind === '+') { s += 0.5; why.push(`${rMonth.th}กับราศีล่างเดือน`); }
+            add('work', s, why); }
+        // การเงิน: โชคลาภ/โชคลอย (财) ดีหรือร้ายตามธาตุ · คู่ธาตุ/คู่แข่ง (比劫) ที่ให้โทษ = แย่งทรัพย์
+        { let s = 0; const why = [];
+            for (const [g, j, lab] of parts) { if (g === 2) { s += j !== 0 ? j : 0.5; why.push(`${lab} ${jt(j)}`); } if (g === 0 && j <= 0) { s -= 1; why.push(`${lab} ${jt(j)} (แย่งทรัพย์)`); } }
+            add('money', s, why); }
+        // ความรัก: ดาวคู่ครอง (ชาย 财 หญิง 官杀) · ภาคี/ชงกับวังคู่ครอง
+        { let s = 0; const why = [], star = male ? 2 : 3;
+            for (const [g, j, lab] of parts) if (g === star) { s += j >= 0 ? 1 : -1; why.push(`${lab} เป็นดาวคู่ครอง ${jt(j)}`); }
+            if (rDay && rDay.type === 'clash') { s -= 1; why.push('ชงวังคู่ครอง (ราศีล่างดิถี)'); } else if (rDay && rDay.kind === '+') { s += 1; why.push(`${rDay.th}กับวังคู่ครอง`); } else if (rDay) { s -= 0.5; why.push(`${rDay.th}กับวังคู่ครอง`); }
+            add('love', s, why); }
+        // สุขภาพ: ธาตุให้โทษของปี · ชงราศีล่างดิถี (ตัวเอง)
+        { let s = 0; const why = [];
+            const badE = [];
+            for (const [, j, lab, el] of parts) { if (j < 0) { s -= 0.75; why.push(`${lab} ให้โทษ`); badE.push(el); } }
+            if (J.a > 0 && J.b > 0) { s += 1; why.push('ทั้งราศีบนและราศีล่างให้คุณ'); }
+            if (rDay && rDay.type === 'clash') { s -= 1; why.push('ชงราศีล่างดิถี (ตัวเอง)'); }
+            add('health', s, why);
+            const h = out[out.length - 1];
+            if (h.tone < 0 && badE.length && N && N.ORGAN) h.todo += ` และดูแล${N.ORGAN[badE[0]].sys} (ธาตุ${EL[badE[0]]})`; }
+        return out;
+    }
+
+    // ---------- 2–3. 12 เดือน และเดือนที่ดีที่สุด ----------
+    const DO = ['สร้างเครือข่าย หาหุ้นส่วน ทำงานเป็นทีม', 'เริ่มงานใหม่ เปิดตัวผลงาน นำเสนอ เจรจาขาย', 'เจรจาธุรกิจ ลงทุน ซื้อขายทรัพย์สิน', 'สมัครงาน ขอเลื่อนตำแหน่ง ติดต่อราชการ สอบ', 'เรียน สอบ เซ็นสัญญา ทำเอกสาร ซื้อบ้าน'];
+    const LEVEL = (v) => v >= 2 ? 'ดีมาก' : v === 1 ? 'ดี' : v === 0 ? 'ผสม' : v === -1 ? 'ค่อนข้างติดขัด' : 'ต้องระวัง';
+    function months(chart, an, year) {
+        const P = chart.pillars, dm = P.day.stem, R = judgeFn(chart, an);
+        const ms = chart.monthly(year).map((m) => {
+            const q = m.pillar, r = R(q), cl = (q.branch + 6) % 12 === P.day.branch;
+            const gS = GROUP_OF[B.tenGod(dm, q.stem).code], gB = GROUP_OF[B.tenGod(dm, q.hidden[0].stem).code];
+            const doIt = [...new Set([r.a >= 0 ? gS : null, r.b >= 0 ? gB : null].filter((x) => x != null))].map((g) => DO[g]);
+            return Object.assign({}, m, { score: r.sum, level: LEVEL(r.sum), clashDay: cl, rank: r.sum - (cl ? 1 : 0), good: doIt, label: `เดือน${q.animal} ${q.zh} (${m.start.day} ${MTH[m.start.month - 1]} – ${m.end.day} ${MTH[m.end.month - 1]} ${m.end.year})` });
+        });
+        const count = { great: ms.filter((m) => m.score >= 2).length, good: ms.filter((m) => m.score === 1).length, mix: ms.filter((m) => m.score === 0).length, bad: ms.filter((m) => m.score <= -1).length };
+        const top = Math.max(...ms.map((m) => m.rank)), best = ms.filter((m) => m.rank === top);
+        return { months: ms, count, best, top,
+            rule: 'เกณฑ์: ให้คะแนนแต่ละเดือนจากธาตุของราศีบนและราศีล่างของเดือน ธาตุที่ดวงต้องการ +1 ธาตุที่ดวงไม่ต้องการ −1 (เต็ม +2) ถ้าเดือนนั้นชงวังคู่ครอง (ราศีล่างดิถี) หัก 1 แล้วเลือกเดือนที่ได้คะแนนสูงสุด ถ้าเท่ากันแสดงทุกเดือน ส่วน "เหมาะกับ" ดูจากสิบเทพของเดือนนั้น' };
+    }
+
+    // ---------- 4. ไท้ส่วย ----------
+    const TS = {
+        same: { name: 'ปีนักษัตรตัวเอง (值太岁)', sev: 2, text: 'ปีนี้เป็นปีนักษัตรเดียวกับปีเกิด ตามความเชื่อถือว่าเป็นปีชง มักมีความเปลี่ยนแปลงในตัวเอง อารมณ์ขึ้นลง และมีเรื่องที่ต้องตัดสินใจด้วยตัวเอง', care: 'ทำเรื่องสำคัญอย่างรอบคอบ ไม่ใจร้อน และดูแลสุขภาพใจ' },
+        clash: { name: 'ชงไท้ส่วย (冲太岁)', sev: 3, text: 'ปีเกิดชงกับไท้ส่วยโดยตรง เป็นกลุ่มที่นิยมไหว้แก้ชงมากที่สุด มักมีการเปลี่ยนแปลงใหญ่ เช่น ย้ายงาน ย้ายบ้าน เดินทางไกล หรือต้องเริ่มบางเรื่องใหม่', care: 'วางแผนล่วงหน้า เผื่อเงินและเวลา ระวังการเดินทางและการตัดสินใจเรื่องใหญ่ด้วยอารมณ์' },
+        punish: { name: 'เฮ้งไท้ส่วย (刑太岁)', sev: 2, text: 'ปีเกิดเฮ้งกับไท้ส่วย ระวังเรื่องกฎหมาย เอกสาร สัญญา และคำพูดที่กระทบคนอื่น', care: 'อ่านสัญญาให้ละเอียด เก็บเอกสารให้ครบ และระวังคำพูด' },
+        selfPunish: { name: 'ปีนักษัตรตัวเองแบบเฮ้งตัวเอง (值太岁 自刑)', sev: 2, text: 'ปีนี้เป็นปีนักษัตรเดียวกับปีเกิด และเป็นกิ่งเฮ้งตัวเอง มักคิดมาก กดดันตัวเอง หรือทำเรื่องให้ยากเกินจำเป็น', care: 'ลดความคาดหวังกับตัวเอง ปรึกษาคนที่ไว้ใจก่อนตัดสินใจ' },
+        harm: { name: 'ไห่ไท้ส่วย (害太岁)', sev: 1, text: 'ปีเกิดไห่กับไท้ส่วย ระวังความเข้าใจผิด คนรอบตัวคิดไม่ซื่อ หรือถูกนินทา', care: 'สื่อสารให้ชัด ไม่เล่าเรื่องส่วนตัวกับคนที่ยังไม่สนิท' },
+        break: { name: 'ผั่วไท้ส่วย (破太岁)', sev: 1, text: 'ปีเกิดผั่วกับไท้ส่วย แผนที่วางไว้มักต้องปรับ งานบางอย่างสะดุดกลางทาง', care: 'มีแผนสำรอง และไม่ลงทุนทั้งหมดในครั้งเดียว' }
+    };
+    const PRAY = 'แนวทางตามความนิยม: คนที่ชง เฮ้ง ไห่ หรือผั่วกับไท้ส่วย นิยมไหว้ไท้ส่วยประจำปีช่วงต้นปีจีน ที่ศาลเจ้าที่มีองค์ไท้ส่วย ขั้นตอนและเครื่องไหว้ของแต่ละศาลเจ้าไม่เหมือนกัน ควรสอบถามศาลเจ้านั้นโดยตรง';
+    function taisui(chart, year) {
+        const P = chart.pillars, a = chart.annual(year, year)[0], q = a.pillar;
+        const yb = P.year.branch, db = P.day.branch;
+        let key = null;
+        if (yb === q.branch) key = [4, 6, 9, 11].includes(yb) ? 'selfPunish' : 'same';
+        else { const r = rel2(yb, q.branch); if (r && TS[r.type]) key = r.type; }
+        const hits = [];
+        if (key) hits.push({ by: 'ปีเกิด', name: TS[key].name, sev: TS[key].sev, text: TS[key].text, care: TS[key].care, source: `ปีเกิด ${B.BRANCHES[yb]} ปี${P.year.animal} กับไท้ส่วย ${B.BRANCHES[q.branch]} ปี${q.animal}` });
+        if ((db + 6) % 12 === q.branch) hits.push({ by: 'ดิถี', name: 'ชงวังคู่ครอง (ราศีล่างดิถี)', sev: 2, text: 'ตามหลักบาจื้อ ปีนี้ชงราศีล่างดิถีซึ่งเป็นวังของตัวเองและคู่ครอง แม้ปีเกิดไม่ชง ก็มักมีความเปลี่ยนแปลงในชีวิตส่วนตัวหรือชีวิตคู่', care: 'ใส่ใจคนใกล้ตัว และระวังสุขภาพกับการเดินทาง', source: `ราศีล่างดิถี ${B.BRANCHES[db]} ชงกับ ${B.BRANCHES[q.branch]}` });
+        const sev = hits.reduce((m, h) => Math.max(m, h.sev), 0);
+        return { year, pillar: q, animal: q.animal, zh: q.zh, hits, status: !hits.length ? 'ไม่ชง' : sev >= 3 ? 'ชงแรง' : sev === 2 ? 'ชง' : 'ชงเล็กน้อย', tone: !hits.length ? 1 : sev >= 2 ? -1 : 0, pray: hits.length ? PRAY : '' };
+    }
+
+    function summary(chart, an, year) {
+        const a = chart.annual(year, year)[0];
+        const tp = topics(chart, an, a.pillar), mo = months(chart, an, year);
+        return { year, pillar: a.pillar, topics: tp, good: tp.filter((t) => t.tone > 0), bad: tp.filter((t) => t.tone < 0), months: mo, taisui: [taisui(chart, year), taisui(chart, year + 1)] };
+    }
+    return { summary, topics, months, taisui };
 });
 
 </script>
@@ -2623,7 +2772,25 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <h3 class="rh">คำทำนายปีนี้</h3>
         <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'year', BaziInteractions.withTransit(r, trans, 'yr'), 'yr'))}</div>`;
       drawMonths(trans);
+      drawYearSum();
     };
+    // ---------- สรุปปี: อ่านทีละด้าน · 12 เดือน · เดือนที่ดีที่สุด · ไท้ส่วย ----------
+    const drawYearSum = () => {
+      const S = BaziYearly.summary(r, an, yearSel), M = S.months, T = S.taisui;
+      const tcls = (t) => t > 0 ? 'r-good' : t < 0 ? 'r-bad' : 'r-mix';
+      const bestTxt = M.best.map((m) => `เดือน${m.pillar.animal}`).join(' · ');
+      $('ysum').innerHTML = `<h2>สรุปปี ${yearSel} <span class="han" style="font-family:var(--f-han)">${S.pillar.zh}</span></h2><div class="ycards">
+        <button type="button" class="ycard" data-go="ytopics"><b>อ่านทีละด้าน</b><span>เด่น <strong class="r-good">${S.good.length}</strong> ด้าน · ระวัง <strong class="r-bad">${S.bad.length}</strong> ด้าน</span><small>${S.topics.map((t) => `<span class="${tcls(t.tone)}">${t.name}</span>`).join(' · ')}</small></button>
+        <button type="button" class="ycard" data-go="h-month"><b>12 เดือนของปี ${yearSel}</b><span>ดีมาก <strong class="r-good">${M.count.great}</strong> · ดี <strong class="r-good">${M.count.good}</strong> · ระวัง <strong class="r-bad">${M.count.bad}</strong> เดือน</span><small>ผสม ${M.count.mix} เดือน</small></button>
+        <button type="button" class="ycard" data-go="mBest"><b>เดือนที่ดีที่สุดของคุณ</b><span>${bestTxt}</span><small>${M.best.length === 1 ? M.best[0].good[0] || '' : `${M.best.length} เดือนคะแนนเท่ากัน`}</small></button>
+        <button type="button" class="ycard" data-go="taisui"><b>ไท้ส่วยปีนี้ · ปีหน้า</b><span><span class="${tcls(T[0].tone)}">${T[0].year} ${T[0].status}</span> · <span class="${tcls(T[1].tone)}">${T[1].year} ${T[1].status}</span></span><small>สถานะกับไท้ส่วย ช่วงที่ควรระวัง และแนวทางไหว้</small></button>
+      </div>`;
+      $('ytopics').innerHTML = `<h2>อ่านทีละด้าน ปี ${yearSel}</h2>${S.topics.map((t) => `<div class="rblock ytopic"><div class="mih"><h3>${t.name}</h3><span class="tlv ${tcls(t.tone)}">${t.level}</span></div><p>${escH(t.text)}</p><p class="mpred"><b>ควรทำ</b> ${escH(t.todo)}</p><p class="src">ที่มา: ${escH(t.why)}</p></div>`).join('')}`;
+      $('taisui').innerHTML = `<h2>ไท้ส่วย 太岁</h2><p class="sub" style="margin-top:0">ไท้ส่วยคือเทพประจำปีตามนักษัตรของปีนั้น ดูว่าปีเกิดและวังคู่ครองของคุณชง เฮ้ง ไห่ หรือผั่วกับปีไหม</p>${T.map((x) => `<div class="rblock"><div class="mih"><h3>ปี ${x.year} ${x.zh} ปี${x.animal}${x.year === yearSel ? ' (ปีที่เลือก)' : ' (ปีหน้า)'}</h3><span class="tlv ${tcls(x.tone)}">${x.status}</span></div>${x.hits.length ? `<dl class="ritems">${x.hits.map((h) => `<dt>${escH(h.name)}</dt><dd>${escH(h.text)}<br><b>ควรระวัง:</b> ${escH(h.care)}<span class="src" style="display:block">ที่มา: ${escH(h.source)}</span></dd>`).join('')}</dl><p class="note">${escH(x.pray)}</p>` : '<p>ปีเกิดและวังคู่ครองไม่ชง เฮ้ง ไห่ หรือผั่วกับไท้ส่วยปีนี้ จึงไม่อยู่ในกลุ่มที่นิยมไหว้แก้ชง</p>'}</div>`).join('')}`;
+      $('mSum').innerHTML = `<div class="mcount"><span>ดีมาก <b class="r-good">${M.count.great}</b></span><span>ดี <b class="r-good">${M.count.good}</b></span><span>ผสม <b class="r-mix">${M.count.mix}</b></span><span>ควรระวัง <b class="r-bad">${M.count.bad}</b></span><span class="unit">เดือน</span></div>
+        <div class="panel mbest" id="mBest"><h3>เดือนที่ดีที่สุดของคุณในปี ${yearSel}</h3>${M.best.map((m) => `<div class="mb"><b>${m.label}</b> <span class="r-good">${m.level}</span><p>เหมาะกับ: ${m.good.length ? m.good.join(' · ') : 'งานประจำและการวางแผน'}</p></div>`).join('')}${M.top <= 0 ? '<p class="note">ปีนี้ไม่มีเดือนที่ธาตุส่งเสริมชัดเจน เดือนข้างบนคือเดือนที่ดีที่สุดเมื่อเทียบกันในปีนี้</p>' : ''}<p class="note">${M.rule}</p></div>`;
+    };
+    $('ysum').onclick = (ev) => { const b = ev.target.closest('[data-go]'); if (b) $(b.dataset.go).scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     // ---------- เดือนจร ----------
     const MTH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
     const drawMonths = (trans) => {
