@@ -98,5 +98,16 @@ eq('เดือนจรปี 2026 (เปลี่ยนปีที่ลิ
 const Cm = require('../js/compat.js');
 eq('ดวงคู่: 戊 กับ 癸 เป็นบนภาคี และดาวคู่ครองตรงกัน', (() => { const x = Cm.compare(calc(1985, 3, 10, 14, 0, 'M'), calc(1987, 11, 20, 22, 0, 'F')); return [x.items.find((i) => i.id === 'dm').pts, x.items.find((i) => i.id === 'star').pts, x.items.length, x.total >= 0 && x.total <= 100]; })(), [20, 15, 6, true]);
 
+// --- ดวงที่บันทึก (localStorage จำลอง) ---
+const mem = {}; const fakeLS = { getItem: (k) => (k in mem ? mem[k] : null), setItem: (k, v) => { mem[k] = String(v); } };
+const S = require('../js/store.js')(fakeLS);
+S.save({ name: 'ฉัน', date: '1990-01-15', time: '10:30', g: 'M' }, { mine: true });
+S.save({ name: 'แม่', date: '1965-04-12', time: '06:15', g: 'F' });
+const up = S.save({ name: 'คุณแม่', date: '1965-04-12', time: '06:15', g: 'F' });
+eq('บันทึกดวง: ซ้ำ = อัปเดต และมีดวงของฉันดวงเดียว', [S.list().length, up.created, S.list()[1].name, S.mine().name], [2, false, 'คุณแม่', 'ฉัน']);
+const ex = S.exportText(); S.remove(S.list()[1].id); const im = S.importText(ex);
+eq('สำรองแล้วนำเข้า: กู้ดวงที่ลบคืนได้ ไม่ซ้ำ', [im.added, im.updated, S.list().length, S.list().filter((o) => o.mine).length], [1, 1, 2, 1]);
+eq('นำเข้าไฟล์เสีย', S.importText('xx').ok, false);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

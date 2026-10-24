@@ -344,15 +344,26 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .mbar i { display: block; height: 100%; border-radius: 4px; }
 .madv { margin: 0; padding-left: 20px; line-height: 1.8; }
 @media (max-width: 760px) { .mpair { grid-template-columns: 1fr; } .mres { grid-template-columns: 1fr; justify-items: center; text-align: center; } .mrow { justify-content: center; } .mrow .mn { flex-basis: 100%; text-align: center; min-width: 0; } }
-.saved { margin-top: 10px; }
-.slist { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.slist li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; border: 1px solid var(--rule); border-radius: 8px; padding: 8px 12px; background: var(--paper); }
+.slist { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
+.slist li { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 12px; border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; background: var(--paper); }
+.slist li.cur { border-color: var(--jade); }
 .slist li.empty { color: var(--ink-soft); }
-.slist .sn { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; }
-.slist .sn span { color: var(--ink-soft); }
-.slist .sb { display: flex; gap: 6px; }
+.slist .sn { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.slist .sn > span:last-child { color: var(--ink-soft); flex-basis: 100%; }
+.slist .sb { display: flex; flex-wrap: wrap; gap: 6px; }
 .slist .sb button { padding: 6px 12px; }
 .slist .sb button.arm { color: var(--bad); border-color: var(--bad); }
+.slist li.editing form { width: 100%; align-items: flex-end; }
+.badge.mine { background: var(--jade-wash); color: var(--jade); }
+.viewing { flex-basis: 100%; font-size: .95rem; }
+.viewing:empty { display: none; }
+button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade); text-decoration: underline; font: inherit; min-height: 0; }
+.bmsg { flex-basis: 100%; color: var(--good); font-size: .9rem; margin: 0; }
+.bmsg:empty { display: none; }
+.pfoot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-top: 16px; }
+.pfoot .note { margin: 0; }
+.chk { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.btnlike { display: inline-flex; align-items: center; cursor: pointer; border: 1px solid var(--jade); color: var(--jade); border-radius: 6px; padding: 8px 18px; font-weight: 600; }
 .bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
 #printView { display: none; }
 @media print {
@@ -386,14 +397,10 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
   <div class="birthbar" id="bbar" hidden>
     <div class="bsum" id="bsum"></div>
-    <div class="bbtn"><button type="button" class="ghost" id="save">บันทึกดวงนี้</button><button type="button" class="ghost" id="savedBtn" aria-controls="savedPanel" aria-expanded="false">ดวงที่บันทึก</button><button type="button" class="ghost" id="print">พิมพ์ / บันทึก PDF</button><button type="button" class="ghost" id="edit" aria-controls="f" aria-expanded="false">แก้ไขข้อมูลเกิด</button></div>
+    <div class="bbtn"><button type="button" class="ghost" id="save">บันทึก</button><button type="button" class="ghost" id="edit" aria-controls="f" aria-expanded="false">แก้ไขข้อมูลเกิด</button></div>
+    <div class="viewing" id="viewing" hidden></div>
+    <div class="bmsg" id="bmsg" role="status" aria-live="polite"></div>
   </div>
-
-  <section class="panel saved" id="savedPanel" hidden aria-labelledby="h-saved">
-    <h2 id="h-saved">ดวงที่บันทึก</h2>
-    <ul class="slist" id="savedList"></ul>
-    <p class="note" style="margin:8px 0 0">เก็บไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ไม่ส่งไปที่ไหน ถ้าล้างข้อมูลเบราว์เซอร์หรือเปลี่ยนเครื่อง รายชื่อจะหายไป</p>
-  </section>
 
   <form id="f" autocomplete="off">
     <div class="row">
@@ -435,6 +442,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     <button type="button" role="tab" id="t-luck" data-page="luck" aria-controls="p-luck">วัยจร</button>
     <button type="button" role="tab" id="t-year" data-page="year" aria-controls="p-year">ปีจร</button>
     <button type="button" role="tab" id="t-match" data-page="match" aria-controls="p-match">ดวงคู่</button>
+    <button type="button" role="tab" id="t-manage" data-page="manage" aria-controls="p-manage">จัดการดวง</button>
   </nav>
 
   <div class="page" id="p-chart" role="tabpanel" aria-labelledby="t-chart">
@@ -464,6 +472,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
       <h2>ความสัมพันธ์ภายในดวง</h2>
       <div class="rels" id="natalRels"></div>
     </section>
+    <div class="pfoot"><button type="button" class="ghost" id="print">พิมพ์ / บันทึก PDF</button><span class="note">รวมผังดวง พื้นดวง คำทำนายทุกหัวข้อ วัยจรช่วงปัจจุบัน และปีจรปีนี้ไว้ในเอกสารเดียว</span></div>
   </div>
 
   <div class="page" id="p-analysis" role="tabpanel" aria-labelledby="t-analysis" hidden>
@@ -513,7 +522,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
       <h2>ดูดวงคู่ 合婚</h2>
       <p class="sub">เทียบดวงของคุณกับอีกคน ตามหลักตำราดูคู่ครองมาตรฐาน</p>
       <div class="mpair">
-        <div class="mp"><div class="cap">คนที่ 1</div><div id="m1sum"></div><p class="note" style="margin:4px 0 0">ใช้ข้อมูลเกิดที่กรอกไว้ด้านบน</p></div>
+        <div class="mp"><div class="cap">คนที่ 1</div><div id="m1sum"></div><p class="note" style="margin:4px 0 0">ดวงที่เปิดอยู่ในหน้าผังดวง</p></div>
         <form class="mp" id="f2" autocomplete="off">
           <div class="cap">คนที่ 2</div>
           <div class="f" id="pick2wrap" hidden><label class="label" for="pick2">เลือกจากดวงที่บันทึก</label><select id="pick2"></select></div>
@@ -526,12 +535,30 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
                 <label><input type="radio" name="g2" id="g2M" value="M">ชาย</label>
                 <label><input type="radio" name="g2" id="g2F" value="F" checked>หญิง</label>
               </div></div>
+          </div>
+          <div class="row" style="margin-top:8px">
+            <label class="chk"><input type="checkbox" id="save2"> บันทึกดวงนี้ไว้ด้วย</label>
             <button type="submit">ดูดวงคู่</button>
           </div>
+          <p class="bmsg" id="m2msg" role="status" aria-live="polite"></p>
         </form>
       </div>
     </section>
     <div id="matchOut" aria-live="polite"></div>
+  </div>
+
+  <div class="page" id="p-manage" role="tabpanel" aria-labelledby="t-manage" hidden>
+    <section class="panel">
+      <h2>จัดการดวง</h2>
+      <p class="sub">ดวงที่บันทึกไว้ทั้งหมด เลือกดู แก้ไข ดูคู่กับดวงของคุณ หรือลบ</p>
+      <ul class="slist" id="savedList"></ul>
+    </section>
+    <section class="panel">
+      <h2>สำรองและนำเข้า</h2>
+      <p class="note" style="margin-top:0">ดวงที่บันทึกเก็บไว้ในเบราว์เซอร์ของเครื่องนี้เท่านั้น ไม่ส่งไปที่ไหน ถ้าล้างข้อมูลเบราว์เซอร์หรือเปลี่ยนเครื่อง รายชื่อจะหายไป ควรสำรองเป็นไฟล์เก็บไว้ และใช้ไฟล์นี้นำเข้าในเครื่องอื่นได้</p>
+      <div class="bbtn"><button type="button" class="ghost" id="exportBtn">สำรองเป็นไฟล์</button><label class="ghost btnlike" for="importFile">นำเข้าจากไฟล์</label><input type="file" id="importFile" accept=".json,application/json" hidden></div>
+      <p class="bmsg" id="ioMsg" role="status" aria-live="polite"></p>
+    </section>
   </div>
 
   <footer>เวลาสารทคำนวณจากแบบจำลองดาราศาสตร์ VSOP87 ตรวจกับตารางสารทอ้างอิงแล้วคลาดไม่เกิน 1 นาที ช่วง ค.ศ. 1601–2069</footer>
@@ -2074,6 +2101,65 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 
 </script>
 <script>
+// store.js — เก็บดวงที่บันทึกไว้ใน localStorage ของเบราว์เซอร์ (ยังไม่มีฐานข้อมูลออนไลน์)
+// ถ้าวันหลังย้ายไปฐานข้อมูลจริง แก้เฉพาะไฟล์นี้ ส่วนอื่นเรียกผ่านฟังก์ชันเดิม
+// ระเบียน: { id, name, date: 'YYYY-MM-DD', time: 'HH:MM', g: 'M'|'F', place, mine: true|undefined }
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory;
+    else root.BaziStore = factory(root.localStorage);
+})(typeof self !== 'undefined' ? self : this, function (storage) {
+    'use strict';
+    const KEY = 'bazi.saved', CUR = 'bazi.cur';
+    const read = () => { try { const v = JSON.parse(storage.getItem(KEY) || '[]'); return Array.isArray(v) ? v.filter(valid) : []; } catch (e) { return []; } };
+    const write = (l) => { try { storage.setItem(KEY, JSON.stringify(l)); return true; } catch (e) { return false; } };
+    const valid = (o) => o && typeof o === 'object' && /^\d{4}-\d{2}-\d{2}$/.test(o.date || '') && /^\d{2}:\d{2}$/.test(o.time || '') && (o.g === 'M' || o.g === 'F');
+    const same = (a, b) => a.date === b.date && a.time === b.time && a.g === b.g;
+    const clean = (o) => ({ id: String(o.id || Date.now() + Math.random().toString(36).slice(2, 6)), name: String(o.name || '').trim().slice(0, 60), date: o.date, time: o.time, g: o.g, place: o.place != null ? String(o.place) : '100.5', mine: o.mine ? true : undefined });
+
+    const api = {
+        list: () => { const l = read(); return l.filter((o) => o.mine).concat(l.filter((o) => !o.mine)); },
+        get: (id) => read().find((o) => o.id === id) || null,
+        find: (rec) => read().find((o) => same(o, rec)) || null,
+        mine: () => read().find((o) => o.mine) || null,
+        // บันทึก: ถ้าวันเวลาเกิดและเพศตรงกับที่มีอยู่ = อัปเดต · mine: true ตั้งเป็นดวงของฉัน (มีได้ดวงเดียว)
+        save: (rec, opts) => {
+            if (!valid(rec)) return { ok: false };
+            const l = read(), mine = opts && opts.mine;
+            let o = (rec.id && l.find((x) => x.id === rec.id)) || l.find((x) => same(x, rec));
+            const created = !o;
+            if (o) Object.assign(o, clean(Object.assign({}, o, rec, { id: o.id, mine: o.mine })));
+            else { o = clean(rec); l.push(o); }
+            if (mine) { l.forEach((x) => { delete x.mine; }); o.mine = true; }
+            return { ok: write(l.map(clean)), created, rec: o };
+        },
+        setMine: (id) => { const l = read(); if (!l.some((x) => x.id === id)) return false; l.forEach((x) => { if (x.id === id) x.mine = true; else delete x.mine; }); return write(l.map(clean)); },
+        remove: (id) => write(read().filter((o) => o.id !== id)),
+        // สำรองเป็นไฟล์ / นำเข้าจากไฟล์ (รวมกับของเดิม ดวงที่ซ้ำจะอัปเดต)
+        exportText: () => JSON.stringify({ app: 'bazi-pro', version: 1, exported: new Date().toISOString(), charts: read() }, null, 2),
+        importText: (text) => {
+            let data; try { data = JSON.parse(text); } catch (e) { return { ok: false, error: 'ไฟล์ไม่ใช่ JSON' }; }
+            const arr = Array.isArray(data) ? data : data && Array.isArray(data.charts) ? data.charts : null;
+            if (!arr) return { ok: false, error: 'ไม่พบรายชื่อดวงในไฟล์' };
+            const l = read(); let added = 0, updated = 0, skipped = 0;
+            const hasMine = l.some((x) => x.mine);
+            for (const r of arr) {
+                if (!valid(r)) { skipped++; continue; }
+                const o = l.find((x) => same(x, r));
+                if (o) { o.name = String(r.name || o.name || '').trim(); if (r.place != null) o.place = String(r.place); updated++; }
+                else { const n = clean(Object.assign({}, r, { id: undefined, mine: !hasMine && r.mine })); l.push(n); added++; }
+            }
+            if (l.filter((x) => x.mine).length > 1) { let seen = false; l.forEach((x) => { if (x.mine) { if (seen) delete x.mine; seen = true; } }); }
+            return { ok: write(l.map(clean)), added, updated, skipped };
+        },
+        // ดวงที่เปิดดูล่าสุด
+        getCur: () => { try { return JSON.parse(storage.getItem(CUR) || 'null'); } catch (e) { return null; } },
+        setCur: (rec) => { try { storage.setItem(CUR, JSON.stringify(rec)); } catch (e) {} }
+    };
+    return api;
+});
+
+</script>
+<script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
   const $ = (id) => document.getElementById(id);
@@ -2096,10 +2182,8 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     $('f').hidden = !open; $('bbar').hidden = open;
     $('edit').setAttribute('aria-expanded', String(open));
   }
-  // ---------- ดวงที่บันทึก (เก็บในเบราว์เซอร์) ----------
-  const SKEY = 'bazi.saved';
-  const loadSaved = () => { try { const v = JSON.parse(localStorage.getItem(SKEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } };
-  const storeSaved = (l) => { try { localStorage.setItem(SKEY, JSON.stringify(l)); return true; } catch (e) { return false; } };
+  // ---------- ดวงที่บันทึก (BaziStore: localStorage) ----------
+  const St = BaziStore;
   const curInput = () => ({ name: $('name').value.trim(), date: $('date').value, time: $('time').value, g: document.querySelector('input[name="g"]:checked').value, place: $('place').value });
   const applyInput = (o) => {
     $('name').value = o.name || ''; if (o.date) $('date').value = o.date; if (o.time) $('time').value = o.time;
@@ -2107,40 +2191,97 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     if (o.place && [...$('place').options].some((x) => x.value === o.place)) $('place').value = o.place;
   };
   const fmtD = (o) => { const [yy, mm, dd] = (o.date || '').split('-').map(Number); return `${dd}/${mm}/${yy} ${o.time} น. · ${G_TH[o.g] || ''}`; };
-  let delArm = null;
-  function drawSaved() {
-    const l = loadSaved();
-    $('savedBtn').textContent = `ดวงที่บันทึก (${l.length})`;
-    $('savedList').innerHTML = l.length ? l.map((o) => `<li><div class="sn"><b>${escH(o.name || 'ไม่ระบุชื่อ')}</b><span>${fmtD(o)}</span></div><div class="sb"><button type="button" data-open="${o.id}">เปิด</button><button type="button" class="ghost${delArm === o.id ? ' arm' : ''}" data-del="${o.id}">${delArm === o.id ? 'กดอีกครั้งเพื่อลบ' : 'ลบ'}</button></div></li>`).join('')
-      : '<li class="empty">ยังไม่มีดวงที่บันทึก กด "บันทึกดวงนี้" เพื่อเก็บดวงที่เปิดอยู่</li>';
-    $('pick2wrap').hidden = !l.length;
-    $('pick2').innerHTML = '<option value="">— เลือก —</option>' + l.map((o) => `<option value="${o.id}">${escH(o.name || 'ไม่ระบุชื่อ')} · ${fmtD(o)}</option>`).join('');
+  const openChart = (o, page) => { $('bmsg').textContent = ''; applyInput(o); luckSel = null; yearSel = null; monthSel = null; render(); setForm(false); show(page || 'chart'); window.scrollTo({ top: 0 }); };
+  let msgT = null;
+  const flash = (id, t) => { $(id).textContent = t; clearTimeout(msgT); msgT = setTimeout(() => { $(id).textContent = ''; }, 4000); };
+  // แถบบอกว่ากำลังดูดวงใคร และป้ายปุ่มบันทึก
+  function updateBar() {
+    const c = curInput(), mine = St.mine(), rec = St.find(c), isMine = !!(rec && rec.mine);
+    $('save').textContent = !mine ? 'บันทึกเป็นดวงของฉัน' : isMine ? 'บันทึก' : 'บันทึกดวงนี้';
+    const other = mine && !isMine;
+    $('viewing').hidden = !other;
+    if (other) $('viewing').innerHTML = `กำลังดูดวงของ <b>${escH(c.name || 'ไม่ระบุชื่อ')}</b> <button type="button" class="link" id="backMine">กลับไปดวงของฉัน (${escH(mine.name || 'ไม่ระบุชื่อ')})</button>`;
+    else if (mine) $('viewing').innerHTML = '';
   }
+  $('viewing').addEventListener('click', (ev) => { if (ev.target.closest('#backMine')) { const m = St.mine(); if (m) openChart(m); } });
   $('save').addEventListener('click', () => {
-    const c = curInput(), l = loadSaved();
-    const same = l.find((o) => o.date === c.date && o.time === c.time && o.g === c.g);
-    if (same) Object.assign(same, c); else l.push(Object.assign({ id: String(Date.now()) }, c));
-    const ok = storeSaved(l);
-    $('save').textContent = ok ? (same ? 'อัปเดตแล้ว' : 'บันทึกแล้ว') : 'บันทึกไม่ได้';
-    setTimeout(() => { $('save').textContent = 'บันทึกดวงนี้'; }, 1600);
-    drawSaved();
+    const c = curInput(), mine = St.mine(), rec = St.find(c);
+    const r = !mine ? St.save(c, { mine: true }) : St.save(c);
+    if (!r.ok) flash('bmsg', 'บันทึกไม่ได้ (เบราว์เซอร์ไม่อนุญาตให้เก็บข้อมูล)');
+    else if (!mine) flash('bmsg', 'บันทึกเป็นดวงของฉันแล้ว');
+    else if (rec) flash('bmsg', 'อัปเดตแล้ว');
+    else flash('bmsg', `บันทึกแล้ว ดูได้ในเมนูจัดการดวง (ดวงของฉันยังเป็น ${mine.name || 'ไม่ระบุชื่อ'})`);
+    drawSaved(); updateBar();
   });
-  $('savedBtn').addEventListener('click', () => { const open = $('savedPanel').hidden; $('savedPanel').hidden = !open; $('savedBtn').setAttribute('aria-expanded', String(open)); delArm = null; drawSaved(); });
+  let delArm = null, editId = null;
+  function drawSaved() {
+    const l = St.list(), cur = St.find(curInput());
+    $('savedList').innerHTML = l.length ? l.map((o) => {
+      if (o.id === editId) return `<li class="editing"><form class="row" data-form="${o.id}">
+        <div class="f"><label class="label" for="en">ชื่อ</label><input id="en" value="${escH(o.name)}" size="12"></div>
+        <div class="f"><label class="label" for="ed">วันเกิด (ค.ศ.)</label><input id="ed" type="date" value="${o.date}" min="1601-01-01" max="2099-12-31"></div>
+        <div class="f"><label class="label" for="et">เวลาเกิด</label><input id="et" type="time" value="${o.time}"></div>
+        <div class="f"><span class="label">เพศ</span><div class="seg" role="radiogroup" aria-label="เพศ"><label><input type="radio" name="eg" value="M"${o.g === 'M' ? ' checked' : ''}>ชาย</label><label><input type="radio" name="eg" value="F"${o.g === 'F' ? ' checked' : ''}>หญิง</label></div></div>
+        <div class="sb"><button type="submit">บันทึก</button><button type="button" class="ghost" data-act="cancel">ยกเลิก</button></div></form></li>`;
+      return `<li${cur && cur.id === o.id ? ' class="cur"' : ''}><div class="sn"><b>${escH(o.name || 'ไม่ระบุชื่อ')}</b>${o.mine ? '<span class="badge mine">ดวงของฉัน</span>' : ''}${cur && cur.id === o.id ? '<span class="badge">เปิดอยู่</span>' : ''}<span>${fmtD(o)}</span></div>
+        <div class="sb"><button type="button" data-act="open" data-id="${o.id}">ดูดวง</button><button type="button" class="ghost" data-act="edit" data-id="${o.id}">แก้ไข</button>${o.mine ? '' : `<button type="button" class="ghost" data-act="pair" data-id="${o.id}">ดูคู่กับดวงของฉัน</button><button type="button" class="ghost" data-act="mine" data-id="${o.id}">ตั้งเป็นดวงของฉัน</button>`}<button type="button" class="ghost${delArm === o.id ? ' arm' : ''}" data-act="del" data-id="${o.id}">${delArm === o.id ? 'กดอีกครั้งเพื่อลบ' : 'ลบ'}</button></div></li>`;
+    }).join('') : '<li class="empty">ยังไม่มีดวงที่บันทึก กด "บันทึกเป็นดวงของฉัน" ที่หน้าผังดวง หรือติ๊ก "บันทึกดวงนี้ไว้ด้วย" ในเมนูดวงคู่</li>';
+    $('pick2wrap').hidden = !l.length;
+    $('pick2').innerHTML = '<option value="">— เลือก —</option>' + l.map((o) => `<option value="${o.id}">${escH(o.name || 'ไม่ระบุชื่อ')}${o.mine ? ' (ดวงของฉัน)' : ''} · ${fmtD(o)}</option>`).join('');
+  }
   $('savedList').addEventListener('click', (ev) => {
-    const op = ev.target.closest('[data-open]'), dl = ev.target.closest('[data-del]');
-    if (op) { const o = loadSaved().find((x) => x.id === op.dataset.open); if (!o) return; applyInput(o); luckSel = null; yearSel = null; monthSel = null; render(); setForm(false); $('savedPanel').hidden = true; $('savedBtn').setAttribute('aria-expanded', 'false'); show('chart'); window.scrollTo({ top: 0 }); }
-    else if (dl) { if (delArm === dl.dataset.del) { storeSaved(loadSaved().filter((x) => x.id !== delArm)); delArm = null; } else delArm = dl.dataset.del; drawSaved(); }
+    const b = ev.target.closest('[data-act]'); if (!b) return;
+    const act = b.dataset.act, o = b.dataset.id ? St.get(b.dataset.id) : null;
+    if (act !== 'del') delArm = null;
+    if (act === 'open' && o) openChart(o);
+    else if (act === 'edit' && o) { editId = o.id; drawSaved(); const f = $('en'); if (f) f.focus(); }
+    else if (act === 'cancel') { editId = null; drawSaved(); }
+    else if (act === 'mine' && o) { St.setMine(o.id); drawSaved(); updateBar(); }
+    else if (act === 'pair' && o) {
+      const m = St.mine(); if (m) openChart(m, 'match');
+      $('name2').value = o.name || ''; $('date2').value = o.date; $('time2').value = o.time; (o.g === 'M' ? $('g2M') : $('g2F')).checked = true; $('save2').checked = false;
+      if (drawMatch) drawMatch(); show('match'); window.scrollTo({ top: 0 });
+    } else if (act === 'del' && o) { if (delArm === o.id) { St.remove(o.id); delArm = null; updateBar(); } else delArm = o.id; drawSaved(); }
+  });
+  $('savedList').addEventListener('submit', (ev) => {
+    const f = ev.target.closest('[data-form]'); if (!f) return; ev.preventDefault();
+    const old = St.get(f.dataset.form); if (!old) return;
+    const wasCur = (() => { const c = St.find(curInput()); return c && c.id === old.id; })();
+    const rec = Object.assign({}, old, { name: $('en').value.trim(), date: $('ed').value, time: $('et').value, g: (f.querySelector('input[name="eg"]:checked') || {}).value || old.g });
+    const r = St.save(rec);
+    editId = null;
+    if (wasCur && r.ok) { applyInput(r.rec); render(); }
+    drawSaved(); updateBar();
   });
   $('pick2').addEventListener('change', () => {
-    const o = loadSaved().find((x) => x.id === $('pick2').value); if (!o) return;
+    const o = St.get($('pick2').value); if (!o) return;
     $('name2').value = o.name || ''; $('date2').value = o.date; $('time2').value = o.time; (o.g === 'M' ? $('g2M') : $('g2F')).checked = true;
+    $('save2').checked = false;
     if (drawMatch) drawMatch();
   });
+  $('exportBtn').addEventListener('click', () => {
+    const n = St.list().length; if (!n) { flash('ioMsg', 'ยังไม่มีดวงที่บันทึก'); return; }
+    const d = new Date(), a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([St.exportText()], { type: 'application/json' }));
+    a.download = `bazi-charts-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.json`;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    flash('ioMsg', `สำรอง ${n} ดวงแล้ว`);
+  });
+  $('importFile').addEventListener('change', () => {
+    const file = $('importFile').files[0]; if (!file) return;
+    file.text().then((t) => {
+      const r = St.importText(t);
+      flash('ioMsg', r.ok ? `นำเข้าแล้ว: เพิ่มใหม่ ${r.added} ดวง · อัปเดต ${r.updated} ดวง${r.skipped ? ` · ข้ามข้อมูลไม่ครบ ${r.skipped} รายการ` : ''}` : `นำเข้าไม่ได้: ${r.error || 'เบราว์เซอร์ไม่อนุญาตให้เก็บข้อมูล'}`);
+      $('importFile').value = ''; drawSaved(); updateBar();
+    });
+  });
   // เปิดดวงล่าสุดที่ดูไว้
-  try { const cur = JSON.parse(localStorage.getItem('bazi.cur') || 'null'); if (cur && cur.date) applyInput(cur); } catch (e) {}
+  { const cur = St.getCur(); if (cur && cur.date) applyInput(cur); }
   $('toRead').addEventListener('click', () => { readSel = 'self'; render(); show('read'); window.scrollTo({ top: 0 }); });
   try { const p2 = JSON.parse(localStorage.getItem('bazi.p2') || 'null'); if (p2) { $('name2').value = p2.n || ''; if (p2.d) $('date2').value = p2.d; if (p2.t) $('time2').value = p2.t; (p2.g === 'M' ? $('g2M') : $('g2F')).checked = true; } } catch (e) {}
-  $('f2').addEventListener('submit', (e) => { e.preventDefault(); if (drawMatch) drawMatch(); $('matchOut').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  $('f2').addEventListener('submit', (e) => {
+    e.preventDefault(); if (drawMatch) drawMatch();
+    if ($('save2').checked) { const g2 = document.querySelector('input[name="g2"]:checked').value; const r = St.save({ name: $('name2').value.trim(), date: $('date2').value, time: $('time2').value, g: g2, place: $('place').value }); $('save2').checked = false; drawSaved(); updateBar(); if (r.ok) flash('m2msg', r.created ? 'บันทึกดวงคู่แล้ว ดูได้ในเมนูจัดการดวง' : 'อัปเดตดวงคู่แล้ว'); } $('matchOut').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
   $('print').addEventListener('click', () => {
     if (!buildPrint) return;
     buildPrint();
@@ -2151,7 +2292,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     window.print();
   });
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
-  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'match'];
+  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'match', 'manage'];
   function show(pg) {
     if (!PAGES.includes(pg)) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
@@ -2172,7 +2313,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
     const r = BaziCore.calculate({ name: $('name').value.trim(), year: y, month: m, day: d, hour: h, minute: mi, gender: g, tz: 7, longitude: Number($('place').value),
       options: { yearChange: $('yearChange').value, ziHour: $('ziHour').value, luckMethod: $('luckMethod').value, monthSystem: $('monthSystem').value, trueSolarTime: $('solar').value === '1', pregnancyMonths: Number($('preg').value) || 9 } });
     const name = $('name').value.trim();
-    try { localStorage.setItem('bazi.cur', JSON.stringify(curInput())); } catch (e) {}
+    St.setCur(curInput()); updateBar();
     $('bsum').innerHTML = `<b>${name || 'ไม่ระบุชื่อ'}</b><span>${d}/${m}/${y} · ${pad(h)}:${pad(mi)} น. · ${G_TH[g]} · ${$('place').selectedOptions[0].text}</span>`;
     $('who').innerHTML = name ? `· ${name}${name === 'ตัวอย่าง' ? '<span class="example">ข้อมูลตัวอย่าง</span>' : ''}` : '';
 
@@ -2462,6 +2603,7 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
   ['date', 'time', 'place', 'yearChange', 'ziHour', 'luckMethod', 'monthSystem', 'solar', 'preg', 'gM', 'gF'].forEach((id) => $(id).addEventListener('change', render));
   render();
   drawSaved();
+  updateBar();
   setForm(false);
   let start = 'chart';
   try { start = (location.hash || '').slice(1) || localStorage.getItem('bazi.page') || 'chart'; } catch (e) {}
