@@ -118,6 +118,8 @@ eq('สรุปปี 2026 (ปีมะเมีย เกิดปีมะ�
 
 eq('ด้านที่สวนกับภาพรวมมีคำอธิบาย (เดือน 庚子 ปี 2026: ภาพรวมต้องระวัง แต่ความรักเด่นเพราะครึ่งภาคีกับวังคู่ครอง)', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r); const m = r.monthly(2026).find((x) => x.pillar.zh === '庚子'); const t = Yr.topics(r, an, m.pillar, 'month'); const love = t.find((x) => x.id === 'love'); return [love.level, /^ภาพรวมเดือนนี้ต้องระวัง/.test(love.note || ''), /ครึ่งภาคีกับวังคู่ครอง/.test(love.note || ''), t.filter((x) => x.note).every((x) => x.tone !== 0)]; })(), ['เด่น', true, true, true]);
 
+eq('ดวงรายวัน: 1 ม.ค. 2000 = 戊午 · ชงวังคู่ครองเมื่อราศีล่างของวันชงราศีล่างของดิถี · 7 วันต่อเนื่อง', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r); const d = Yr.day(r, an, 2000, 1, 1, false); const wk = Yr.week(r, an, 2026, 12, 29, null); const db = r.pillars.day.branch; const cl = wk.filter((x) => (x.pillar.branch + 6) % 12 === db).every((x) => x.clashDay && /ชงวังคู่ครอง/.test(x.avoid[0])); return [d.pillar.zh, d.dow, wk.length, wk.map((x) => x.date.day).join(','), wk[3].date.year, cl, wk.every((x) => x.topics.length === 4)]; })(), ['戊午', 'เสาร์', 7, '29,30,31,1,2,3,4', 2027, true, true]);
+
 const DPm = require('../js/daypillar.js');
 eq('เสาวัน 60 แบบครบ มีข้อความทุกช่อง และภาพ SVG', [DPm.list().length, DPm.list().every((k) => { const d = DPm.get(k); return d.img && d.tag && d.self && d.strong && d.care && d.tip && DPm.card(k).startsWith('<svg'); }), new Set(DPm.list().map((k) => DPm.get(k).img)).size], [60, true, 60]);
 

@@ -39,7 +39,7 @@
             ['ร่างกายและใจเหนื่อยง่าย ระวังความเครียด อุบัติเหตุ และโรคเดิมกำเริบ', 'พักผ่อนให้พอ ตรวจสุขภาพ และขับรถระมัดระวัง']] }
     };
     function topics(chart, an, q, kind) {
-        const W = { luck: ['ช่วงนี้', 'ช่วงถัดไป'], month: ['เดือนนี้', 'เดือนถัดไป'] }[kind] || ['ปีนี้', 'ปีถัดไป'];
+        const W = { luck: ['ช่วงนี้', 'ช่วงถัดไป'], month: ['เดือนนี้', 'เดือนถัดไป'], day: ['วันนี้', 'วันถัดไป'], dayx: ['วันนั้น', 'วันถัดไป'] }[kind] || ['ปีนี้', 'ปีถัดไป'];
         const w = (t) => t.replace(/ปีนี้/g, W[0]).replace(/ปีถัดไป/g, W[1]);
         const P = chart.pillars, dm = P.day.stem, male = (chart.input && chart.input.gender) !== 'F';
         const J = judgeFn(chart, an)(q);
@@ -106,6 +106,32 @@
             rule: 'เกณฑ์: ให้คะแนนแต่ละเดือนจากธาตุของราศีบนและราศีล่างของเดือน ธาตุที่ดวงต้องการ +1 ธาตุที่ดวงไม่ต้องการ −1 (เต็ม +2) ถ้าเดือนนั้นชงวังคู่ครอง (ราศีล่างดิถี) หัก 1 แล้วเลือกเดือนที่ได้คะแนนสูงสุด ถ้าเท่ากันแสดงทุกเดือน ส่วน "เหมาะกับ" ดูจากสิบเทพของเดือนนั้น' };
     }
 
+    // ---------- วันจร (ดวงรายวัน) ----------
+    const AVOID = ['ระวังการให้ยืมเงินหรือร่วมทุนกับเพื่อน', 'ระวังคำพูด ไม่โต้เถียงกับหัวหน้าหรือผู้ใหญ่', 'ไม่ลงทุนหรือซื้อของราคาแพงตามอารมณ์', 'ระวังความกดดันจากงานและเรื่องกฎระเบียบ', 'อย่าคิดมากจนไม่ลงมือ และตรวจเอกสารให้ครบ'];
+    const WD = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+    function day(chart, an, y, m, d, isToday) {
+        const P = chart.pillars, dm = P.day.stem, D = chart.daily(y, m, d), q = D.pillar, r = judgeFn(chart, an)(q);
+        const clashDay = (q.branch + 6) % 12 === P.day.branch, clashYear = (q.branch + 6) % 12 === P.year.branch;
+        const gS = GROUP_OF[B.tenGod(dm, q.stem).code], gB = GROUP_OF[B.tenGod(dm, q.hidden[0].stem).code];
+        const good = [...new Set([r.a >= 0 ? gS : null, r.b >= 0 ? gB : null].filter((x) => x != null))].map((g) => DO[g]);
+        const avoid = [...new Set([r.a < 0 ? gS : null, r.b < 0 ? gB : null].filter((x) => x != null))].map((g) => AVOID[g]);
+        if (clashDay) avoid.unshift('วันนี้ชงวังคู่ครอง (ราศีล่างของดิถี) เลี่ยงการตัดสินใจเรื่องใหญ่ เซ็นสัญญา และเดินทางไกล ระวังอารมณ์กับคนใกล้ตัว');
+        if (clashYear) avoid.push('วันนี้ชงปีเกิด ระวังเรื่องในครอบครัวและผู้ใหญ่');
+        const W = isToday ? 'วันนี้' : 'วันนั้น';
+        const dow = WD[new Date(y, m - 1, d).getDay()];
+        return { date: D.date, dow, pillar: q, score: r.sum, a: r.a, b: r.b, level: LEVEL(r.sum), clashDay, clashYear, rank: r.sum - (clashDay ? 1 : 0),
+            good: good.map((t) => t), avoid: avoid.map((t) => t.replace(/วันนี้/g, W)),
+            topics: topics(chart, an, q, isToday ? 'day' : 'dayx'),
+            label: `วัน${dow}ที่ ${d} ${MTH[m - 1]} ${y}` };
+    }
+    // 7 วันเริ่มจากวันที่ให้ (ใช้แถบวัน)
+    function week(chart, an, y, m, d, today) {
+        const out = [];
+        for (let k = 0; k < 7; k++) { const t = new Date(y, m - 1, d + k), Y = t.getFullYear(), M = t.getMonth() + 1, Dd = t.getDate();
+            out.push(day(chart, an, Y, M, Dd, today && Y === today.year && M === today.month && Dd === today.day)); }
+        return out;
+    }
+
     // ---------- 4. ไท้ส่วย ----------
     const TS = {
         same: { name: 'ปีนักษัตรตัวเอง (值太岁)', sev: 2, text: 'ปีนี้เป็นปีนักษัตรเดียวกับปีเกิด ตามความเชื่อถือว่าเป็นปีชง มักมีความเปลี่ยนแปลงในตัวเอง อารมณ์ขึ้นลง และมีเรื่องที่ต้องตัดสินใจด้วยตัวเอง', care: 'ทำเรื่องสำคัญอย่างรอบคอบ ไม่ใจร้อน และดูแลสุขภาพใจ' },
@@ -134,5 +160,5 @@
         const tp = topics(chart, an, a.pillar), mo = months(chart, an, year);
         return { year, pillar: a.pillar, topics: tp, good: tp.filter((t) => t.tone > 0), bad: tp.filter((t) => t.tone < 0), months: mo, taisui: [taisui(chart, year), taisui(chart, year + 1)] };
     }
-    return { summary, topics, months, taisui };
+    return { summary, topics, months, taisui, day, week };
 });

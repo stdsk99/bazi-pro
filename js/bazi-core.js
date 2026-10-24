@@ -244,6 +244,8 @@
                 }
                 return out.sort((x, y) => x.startMin - y.startMin);
             },
+            // วันจร: เสาวันของวันที่ตามปฏิทิน (y, m, d)
+            daily: (y, m, d) => { const i = mod(Math.floor(A.toJD(y, m, d) + 0.5) - 11, 60), p = makePillar(i % 10, i % 12); p.tenGod = tenGod(dayP.stem, p.stem); return { date: { year: y, month: m, day: d }, pillar: p }; },
             warnings
         };
     }

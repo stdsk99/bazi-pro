@@ -323,7 +323,10 @@ button.ghost { background: none; color: var(--jade); border: 1px solid var(--jad
 .badge { font-size: .72rem; font-weight: 500; background: var(--warn-wash); color: var(--warn); border-radius: 999px; padding: 1px 8px; vertical-align: middle; }
 .msec { margin-top: 22px; }
 .mluck ol { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+#days { grid-template-columns: repeat(7, minmax(0, 1fr)); }
 @media (max-width: 760px) { .mluck ol { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { #days { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 600px) { #days { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .mpair { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-top: 10px; }
 .mp { border: 1px solid var(--rule); border-radius: 10px; padding: 10px 12px; background: var(--paper); }
 .mp .cap { font-weight: 600; margin-bottom: 6px; }
@@ -399,6 +402,11 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 .mcount b { font-size: 1.3rem; margin-left: 4px; }
 .mcount .unit { color: var(--ink-soft); }
 .mbest { margin: 0 0 12px; }
+.dnav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 10px; }
+.dnav input[type=date] { min-width: 150px; }
+.tag.tbad { background: var(--bad); color: #fff; }
+.dgo { margin: 12px 0 4px; }
+.dgo .hli { margin: 0; }
 .mbest h3 { margin: 0 0 6px; color: var(--good); }
 .mb { padding: 6px 0; border-top: 1px dashed var(--rule); } .mb:first-of-type { border-top: 0; }
 .mb p { margin: 2px 0 0; }
@@ -580,6 +588,18 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       <div class="luck mluck"><ol id="months"></ol></div>
     </section>
     <section class="panel ldetail" id="monthDetail" aria-live="polite"></section>
+    <section aria-labelledby="h-day" class="msec">
+      <h2 id="h-day">ดวงรายวัน 流日</h2>
+      <p class="sub">เสาของแต่ละวันเทียบกับดวงของคุณ บอกว่าวันนั้นเหมาะกับอะไรและควรระวังอะไร · วันเปลี่ยนตอนเที่ยงคืน</p>
+      <div class="dnav" role="group" aria-label="เลือกช่วงวัน">
+        <button type="button" class="ghost" id="dPrev" aria-label="7 วันก่อนหน้า">‹ ก่อนหน้า</button>
+        <input type="date" id="dDate" aria-label="เลือกวันที่">
+        <button type="button" class="ghost" id="dToday">วันนี้</button>
+        <button type="button" class="ghost" id="dNext" aria-label="7 วันถัดไป">ถัดไป ›</button>
+      </div>
+      <div class="luck mluck"><ol id="days"></ol></div>
+    </section>
+    <section class="panel ldetail" id="dayDetail" aria-live="polite"></section>
   </div>
 
   <div class="page" id="p-match" role="tabpanel" aria-labelledby="t-match" hidden>
@@ -1006,6 +1026,8 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
                 }
                 return out.sort((x, y) => x.startMin - y.startMin);
             },
+            // วันจร: เสาวันของวันที่ตามปฏิทิน (y, m, d)
+            daily: (y, m, d) => { const i = mod(Math.floor(A.toJD(y, m, d) + 0.5) - 11, 60), p = makePillar(i % 10, i % 12); p.tenGod = tenGod(dayP.stem, p.stem); return { date: { year: y, month: m, day: d }, pillar: p }; },
             warnings
         };
     }
@@ -2356,7 +2378,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
             ['ร่างกายและใจเหนื่อยง่าย ระวังความเครียด อุบัติเหตุ และโรคเดิมกำเริบ', 'พักผ่อนให้พอ ตรวจสุขภาพ และขับรถระมัดระวัง']] }
     };
     function topics(chart, an, q, kind) {
-        const W = { luck: ['ช่วงนี้', 'ช่วงถัดไป'], month: ['เดือนนี้', 'เดือนถัดไป'] }[kind] || ['ปีนี้', 'ปีถัดไป'];
+        const W = { luck: ['ช่วงนี้', 'ช่วงถัดไป'], month: ['เดือนนี้', 'เดือนถัดไป'], day: ['วันนี้', 'วันถัดไป'], dayx: ['วันนั้น', 'วันถัดไป'] }[kind] || ['ปีนี้', 'ปีถัดไป'];
         const w = (t) => t.replace(/ปีนี้/g, W[0]).replace(/ปีถัดไป/g, W[1]);
         const P = chart.pillars, dm = P.day.stem, male = (chart.input && chart.input.gender) !== 'F';
         const J = judgeFn(chart, an)(q);
@@ -2423,6 +2445,32 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
             rule: 'เกณฑ์: ให้คะแนนแต่ละเดือนจากธาตุของราศีบนและราศีล่างของเดือน ธาตุที่ดวงต้องการ +1 ธาตุที่ดวงไม่ต้องการ −1 (เต็ม +2) ถ้าเดือนนั้นชงวังคู่ครอง (ราศีล่างดิถี) หัก 1 แล้วเลือกเดือนที่ได้คะแนนสูงสุด ถ้าเท่ากันแสดงทุกเดือน ส่วน "เหมาะกับ" ดูจากสิบเทพของเดือนนั้น' };
     }
 
+    // ---------- วันจร (ดวงรายวัน) ----------
+    const AVOID = ['ระวังการให้ยืมเงินหรือร่วมทุนกับเพื่อน', 'ระวังคำพูด ไม่โต้เถียงกับหัวหน้าหรือผู้ใหญ่', 'ไม่ลงทุนหรือซื้อของราคาแพงตามอารมณ์', 'ระวังความกดดันจากงานและเรื่องกฎระเบียบ', 'อย่าคิดมากจนไม่ลงมือ และตรวจเอกสารให้ครบ'];
+    const WD = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+    function day(chart, an, y, m, d, isToday) {
+        const P = chart.pillars, dm = P.day.stem, D = chart.daily(y, m, d), q = D.pillar, r = judgeFn(chart, an)(q);
+        const clashDay = (q.branch + 6) % 12 === P.day.branch, clashYear = (q.branch + 6) % 12 === P.year.branch;
+        const gS = GROUP_OF[B.tenGod(dm, q.stem).code], gB = GROUP_OF[B.tenGod(dm, q.hidden[0].stem).code];
+        const good = [...new Set([r.a >= 0 ? gS : null, r.b >= 0 ? gB : null].filter((x) => x != null))].map((g) => DO[g]);
+        const avoid = [...new Set([r.a < 0 ? gS : null, r.b < 0 ? gB : null].filter((x) => x != null))].map((g) => AVOID[g]);
+        if (clashDay) avoid.unshift('วันนี้ชงวังคู่ครอง (ราศีล่างของดิถี) เลี่ยงการตัดสินใจเรื่องใหญ่ เซ็นสัญญา และเดินทางไกล ระวังอารมณ์กับคนใกล้ตัว');
+        if (clashYear) avoid.push('วันนี้ชงปีเกิด ระวังเรื่องในครอบครัวและผู้ใหญ่');
+        const W = isToday ? 'วันนี้' : 'วันนั้น';
+        const dow = WD[new Date(y, m - 1, d).getDay()];
+        return { date: D.date, dow, pillar: q, score: r.sum, a: r.a, b: r.b, level: LEVEL(r.sum), clashDay, clashYear, rank: r.sum - (clashDay ? 1 : 0),
+            good: good.map((t) => t), avoid: avoid.map((t) => t.replace(/วันนี้/g, W)),
+            topics: topics(chart, an, q, isToday ? 'day' : 'dayx'),
+            label: `วัน${dow}ที่ ${d} ${MTH[m - 1]} ${y}` };
+    }
+    // 7 วันเริ่มจากวันที่ให้ (ใช้แถบวัน)
+    function week(chart, an, y, m, d, today) {
+        const out = [];
+        for (let k = 0; k < 7; k++) { const t = new Date(y, m - 1, d + k), Y = t.getFullYear(), M = t.getMonth() + 1, Dd = t.getDate();
+            out.push(day(chart, an, Y, M, Dd, today && Y === today.year && M === today.month && Dd === today.day)); }
+        return out;
+    }
+
     // ---------- 4. ไท้ส่วย ----------
     const TS = {
         same: { name: 'ปีนักษัตรตัวเอง (值太岁)', sev: 2, text: 'ปีนี้เป็นปีนักษัตรเดียวกับปีเกิด ตามความเชื่อถือว่าเป็นปีชง มักมีความเปลี่ยนแปลงในตัวเอง อารมณ์ขึ้นลง และมีเรื่องที่ต้องตัดสินใจด้วยตัวเอง', care: 'ทำเรื่องสำคัญอย่างรอบคอบ ไม่ใจร้อน และดูแลสุขภาพใจ' },
@@ -2451,7 +2499,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         const tp = topics(chart, an, a.pillar), mo = months(chart, an, year);
         return { year, pillar: a.pillar, topics: tp, good: tp.filter((t) => t.tone > 0), bad: tp.filter((t) => t.tone < 0), months: mo, taisui: [taisui(chart, year), taisui(chart, year + 1)] };
     }
-    return { summary, topics, months, taisui };
+    return { summary, topics, months, taisui, day, week };
 });
 
 </script>
@@ -2629,6 +2677,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
   }
 
+  let dayStart = null, daySel = 0;
   let luckSel = null, yearSel = null, monthSel = null, readSel = null, buildPrint = null, drawMatch = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${escH(b.sub)}</p>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
@@ -3030,6 +3079,55 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     };
     $('months').onclick = (ev) => { const b = ev.target.closest('button[data-m]'); if (!b) return; monthSel = Number(b.dataset.m); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('monthDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     drawYears();
+    // ---------- ดวงรายวัน ----------
+    const nowD = new Date(), TODAY = { year: nowD.getFullYear(), month: nowD.getMonth() + 1, day: nowD.getDate() };
+    const iso = (o) => `${o.year}-${String(o.month).padStart(2, '0')}-${String(o.day).padStart(2, '0')}`;
+    const isT = (o) => o.year === TODAY.year && o.month === TODAY.month && o.day === TODAY.day;
+    if (!dayStart) { dayStart = Object.assign({}, TODAY); daySel = 0; }
+    const DOW_S = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+    const drawDays = () => {
+      const wk = BaziYearly.week(r, an, dayStart.year, dayStart.month, dayStart.day, TODAY);
+      $('dDate').value = iso(wk[daySel].date);
+      $('days').innerHTML = wk.map((x, i) => {
+        const q = x.pillar, rt = RATE(x.score), dt = x.date;
+        return `<li class="${isT(dt) ? 'now' : ''}${i === daySel ? ' sel' : ''}"><button type="button" data-d="${i}" aria-pressed="${i === daySel}">
+          <span class="age">${DOW_S[new Date(dt.year, dt.month - 1, dt.day).getDay()]} ${dt.day} ${MTH[dt.month - 1]}</span>
+          <span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>
+          <span class="date">วัน${q.animal}</span>
+          <span class="rate ${rt[0]}">${rt[1]}</span>
+          ${x.clashDay ? '<span class="tag tbad">ชงวังคู่ครอง</span>' : isT(dt) ? '<span class="tag">วันนี้</span>' : ''}</button></li>`;
+      }).join('');
+      const x = wk[daySel], q = x.pillar, rt = RATE(x.score), bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
+      const rels = BaziInteractions.withTransit(r, [{ key: 'dy', label: 'วันจร', stem: q.stem, branch: q.branch }], 'dy');
+      const W = isT(x.date) ? 'วันนี้' : 'วันนั้น';
+      const tcls = (t) => t > 0 ? 'r-good' : t < 0 ? 'r-bad' : 'r-mix';
+      $('dayDetail').innerHTML = `
+        <h2>${x.label} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>วัน${q.animal}${isT(x.date) ? ' · วันนี้' : ''}</small></h2>
+        <div class="lgrid">
+          <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
+          <div class="lrows">
+            <div class="lrow"><span class="k">ราศีบน</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(x.a)}</span></div>
+            <div class="lrow"><span class="k">ราศีล่าง</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(x.b)}</span></div>
+          </div>
+        </div>
+        <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
+        <div class="hl dgo">
+          <div class="hlcol good"><h3>${W}เหมาะกับ</h3>${x.good.length ? x.good.map((t) => `<p class="hli">${escH(t)}</p>`).join('') : '<p class="hli">งานประจำ เก็บรายละเอียด และวางแผน</p>'}</div>
+          <div class="hlcol bad"><h3>${W}ควรระวัง</h3>${x.avoid.length ? x.avoid.map((t) => `<p class="hli">${escH(t)}</p>`).join('') : '<p class="hli">ไม่มีเรื่องที่ต้องระวังเป็นพิเศษ</p>'}</div>
+        </div>
+        <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
+        <div class="rels">${relHTML(rels)}</div>
+        <h3 class="rh">ผลต่อ 4 ด้าน</h3>
+        ${x.topics.map((t) => `<div class="rblock ytopic"><div class="mih"><h3>${t.name}</h3><span class="tlv ${tcls(t.tone)}">${t.level}</span></div><p>${escH(t.text)}</p><p class="mpred"><b>ควรทำ</b> ${escH(t.todo)}</p>${t.note ? `<p class="tnote"><b>ทำไมไม่ตรงกับภาพรวม</b> ${escH(t.note)}</p>` : ''}<p class="src">ที่มา: ${escH(t.why)}</p></div>`).join('')}
+        <p class="note">เกณฑ์: ธาตุของราศีบนและราศีล่างของวันที่ดวงต้องการ +1 ที่ดวงไม่ต้องการ −1 · "เหมาะกับ" ดูจากสิบเทพของวันนั้น · ดวงรายวันมีน้ำหนักน้อยกว่าวัยจร ปีจร และเดือนจร ใช้ประกอบการวางแผนเท่านั้น</p>`;
+    };
+    const shiftDays = (n) => { const t = new Date(dayStart.year, dayStart.month - 1, dayStart.day + n); dayStart = { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() }; };
+    drawDays();
+    $('days').onclick = (ev) => { const b = ev.target.closest('button[data-d]'); if (!b) return; daySel = Number(b.dataset.d); drawDays(); if (window.matchMedia('(max-width: 600px)').matches) $('dayDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    $('dPrev').onclick = () => { shiftDays(-7); drawDays(); };
+    $('dNext').onclick = () => { shiftDays(7); drawDays(); };
+    $('dToday').onclick = () => { dayStart = Object.assign({}, TODAY); daySel = 0; drawDays(); };
+    $('dDate').onchange = (ev) => { const v = ev.target.value; if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return; const [Y, M, D] = v.split('-').map(Number); dayStart = { year: Y, month: M, day: D }; daySel = 0; drawDays(); };
     $('years').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); monthSel = null; drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('yearDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); monthSel = null; drawYears(); };
 
