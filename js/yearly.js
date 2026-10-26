@@ -124,6 +124,21 @@
             topics: topics(chart, an, q, isToday ? 'day' : 'dayx'),
             label: `วัน${dow}ที่ ${d} ${MTH[m - 1]} ${y}` };
     }
+    // ยามจร: 12 ยามของวัน (ระบบมาตรฐานแยกยามชวดต้น/ปลาย เป็น 13 ช่วง)
+    function hours(chart, an, y, m, d) {
+        const P = chart.pillars, dm = P.day.stem, R = judgeFn(chart, an);
+        const pad = (h) => String(h).padStart(2, '0') + '.00';
+        return chart.hourly(y, m, d).map((h) => {
+            const q = h.pillar, r = R(q), clashDay = (q.branch + 6) % 12 === P.day.branch;
+            const gS = GROUP_OF[B.tenGod(dm, q.stem).code], gB = GROUP_OF[B.tenGod(dm, q.hidden[0].stem).code];
+            const good = [...new Set([r.a >= 0 ? gS : null, r.b >= 0 ? gB : null].filter((x) => x != null))].map((g) => DO[g]);
+            const avoid = [...new Set([r.a < 0 ? gS : null, r.b < 0 ? gB : null].filter((x) => x != null))].map((g) => AVOID[g]);
+            if (clashDay) avoid.unshift('ยามนี้ชงวังคู่ครอง (ราศีล่างของดิถี) ไม่เหมาะกับการตัดสินใจเรื่องใหญ่หรือเริ่มเรื่องสำคัญ');
+            return Object.assign({}, h, { score: r.sum, a: r.a, b: r.b, level: LEVEL(r.sum), clashDay, rank: r.sum - (clashDay ? 1 : 0), good, avoid,
+                time: `${pad(h.from)}–${pad(h.to)}`, label: `ยาม${q.animal}${h.tag}` });
+        });
+    }
+    const hourIndex = (hs, hour) => hs.findIndex((h) => hour >= h.from && hour < h.to);
     // 7 วันเริ่มจากวันที่ให้ (ใช้แถบวัน)
     function week(chart, an, y, m, d, today) {
         const out = [];
@@ -160,5 +175,5 @@
         const tp = topics(chart, an, a.pillar), mo = months(chart, an, year);
         return { year, pillar: a.pillar, topics: tp, good: tp.filter((t) => t.tone > 0), bad: tp.filter((t) => t.tone < 0), months: mo, taisui: [taisui(chart, year), taisui(chart, year + 1)] };
     }
-    return { summary, topics, months, taisui, day, week };
+    return { summary, topics, months, taisui, day, week, hours, hourIndex, DO, AVOID, GROUP_OF, judgeFn, LEVEL };
 });

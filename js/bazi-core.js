@@ -246,6 +246,18 @@
             },
             // วันจร: เสาวันของวันที่ตามปฏิทิน (y, m, d)
             daily: (y, m, d) => { const i = mod(Math.floor(A.toJD(y, m, d) + 0.5) - 11, 60), p = makePillar(i % 10, i % 12); p.tenGod = tenGod(dayP.stem, p.stem); return { date: { year: y, month: m, day: d }, pillar: p }; },
+            // ยามจร: เสายามของวันที่ตามปฏิทิน (เวลานาฬิกา) ตามระบบยามของผังนี้
+            // ระบบมาตรฐาน: 00–01 ยามชวดต้น ... 21–23 ยามกุน และ 23–24 ยามชวดปลาย (ราศีบนต่อจากวันถัดไป)
+            hourly: (y, m, d) => {
+                const i = mod(Math.floor(A.toJD(y, m, d) + 0.5) - 11, 60), ds = i % 10, out = [];
+                const mk = (br, k, from, to, tag) => { const p = makePillar(mod(ds * 2 + br + k, 10), br); p.tenGod = tenGod(dayP.stem, p.stem); out.push({ branch: br, from, to, tag, pillar: p }); };
+                if (o.monthSystem === 'standard') {
+                    mk(0, 0, 0, 1, 'ต้น');
+                    for (let b = 1; b < 12; b++) mk(b, 0, b * 2 - 1, b * 2 + 1, '');
+                    mk(0, 2, 23, 24, 'ปลาย');
+                } else for (let b = 0; b < 12; b++) mk(b, 0, b * 2, b * 2 + 2, '');
+                return out;
+            },
             warnings
         };
     }

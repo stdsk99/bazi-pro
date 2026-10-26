@@ -407,6 +407,29 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 .tag.tbad { background: var(--bad); color: #fff; }
 .dgo { margin: 12px 0 4px; }
 .dgo .hli { margin: 0; }
+.tseg { display: inline-flex; border: 1px solid var(--jade); border-radius: 999px; padding: 3px; margin: 14px 0 6px; gap: 2px; }
+.tsegb { background: none; color: var(--jade); border-radius: 999px; padding: 7px 18px; }
+.tsegb[aria-pressed="true"] { background: var(--jade); color: var(--sheet); }
+.nowcard { border-top: 3px solid var(--jade); }
+.nowhead { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; margin-bottom: 10px; }
+.nowhead b { font-size: 1.15rem; color: var(--jade); }
+.nowhead span { color: var(--ink-soft); }
+.nowgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nowbox { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 1px solid var(--rule); border-radius: 10px; padding: 10px; background: var(--sheet); text-align: center; }
+.nowbox .k { font-size: .82rem; color: var(--ink-soft); }
+.nowbox .han { font-family: var(--f-han); font-size: 1.9rem; line-height: 1.2; }
+.nowgood { margin: 8px 0; font-size: .92rem; }
+.hdet { margin-top: 10px; }
+.ausf { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 14px; align-items: end; margin: 8px 0; }
+.ausf .fbtn button { width: 100%; }
+.ausf [hidden] { display: none; }
+.arank .mih h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.anum { display: inline-grid; place-items: center; width: 1.6em; height: 1.6em; border-radius: 50%; background: var(--jade); color: var(--sheet); font-size: .9rem; }
+.ahrs { margin: 6px 0; }
+.chip { display: inline-block; border: 1px solid var(--jade); color: var(--jade); border-radius: 999px; padding: 1px 10px; margin: 2px 2px 2px 0; font-size: .88rem; }
+#hours { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+@media (max-width: 760px) { #hours { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 600px) { #hours { grid-template-columns: repeat(3, minmax(0, 1fr)); } #hours .han { font-size: 1.3rem; } }
 .mbest h3 { margin: 0 0 6px; color: var(--good); }
 .mb { padding: 6px 0; border-top: 1px dashed var(--rule); } .mb:first-of-type { border-top: 0; }
 .mb p { margin: 2px 0 0; }
@@ -501,6 +524,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     <button type="button" role="tab" id="t-read" data-page="read" aria-controls="p-read">คำทำนาย</button>
     <button type="button" role="tab" id="t-luck" data-page="luck" aria-controls="p-luck">วัยจร</button>
     <button type="button" role="tab" id="t-year" data-page="year" aria-controls="p-year">ปีจร</button>
+    <button type="button" role="tab" id="t-today" data-page="today" aria-controls="p-today">วันนี้ & ฤกษ์</button>
     <button type="button" role="tab" id="t-match" data-page="match" aria-controls="p-match">ดวงคู่</button>
     <button type="button" role="tab" id="t-manage" data-page="manage" aria-controls="p-manage">จัดการดวง</button>
   </nav>
@@ -588,18 +612,29 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       <div class="luck mluck"><ol id="months"></ol></div>
     </section>
     <section class="panel ldetail" id="monthDetail" aria-live="polite"></section>
-    <section aria-labelledby="h-day" class="msec">
-      <h2 id="h-day">ดวงรายวัน 流日</h2>
-      <p class="sub">เสาของแต่ละวันเทียบกับดวงของคุณ บอกว่าวันนั้นเหมาะกับอะไรและควรระวังอะไร · วันเปลี่ยนตอนเที่ยงคืน</p>
-      <div class="dnav" role="group" aria-label="เลือกช่วงวัน">
-        <button type="button" class="ghost" id="dPrev" aria-label="7 วันก่อนหน้า">‹ ก่อนหน้า</button>
-        <input type="date" id="dDate" aria-label="เลือกวันที่">
-        <button type="button" class="ghost" id="dToday">วันนี้</button>
-        <button type="button" class="ghost" id="dNext" aria-label="7 วันถัดไป">ถัดไป ›</button>
-      </div>
-      <div class="luck mluck"><ol id="days"></ol></div>
-    </section>
-    <section class="panel ldetail" id="dayDetail" aria-live="polite"></section>
+  </div>
+
+  <div class="page" id="p-today" role="tabpanel" aria-labelledby="t-today" hidden>
+    <div class="tseg" role="group" aria-label="เลือกหัวข้อ">
+      <button type="button" class="tsegb" data-seg="day" aria-pressed="true">ดวงวันนี้</button>
+      <button type="button" class="tsegb" data-seg="ausp" aria-pressed="false">หาฤกษ์</button>
+    </div>
+    <div id="segDay">
+      <section class="panel nowcard" id="nowCard" aria-live="polite"></section>
+      <section aria-labelledby="h-day" class="msec">
+        <h2 id="h-day">ดวงรายวัน 流日</h2>
+        <p class="sub">เสาของแต่ละวันเทียบกับดวงของคุณ กดวันเพื่อดูรายละเอียดและ 12 ยามของวันนั้น</p>
+        <div class="dnav" role="group" aria-label="เลือกช่วงวัน">
+          <button type="button" class="ghost" id="dPrev" aria-label="7 วันก่อนหน้า">‹ ก่อนหน้า</button>
+          <input type="date" id="dDate" aria-label="เลือกวันที่">
+          <button type="button" class="ghost" id="dToday">วันนี้</button>
+          <button type="button" class="ghost" id="dNext" aria-label="7 วันถัดไป">ถัดไป ›</button>
+        </div>
+        <div class="luck mluck"><ol id="days"></ol></div>
+      </section>
+      <section class="panel ldetail" id="dayDetail" aria-live="polite"></section>
+    </div>
+    <div id="segAusp" hidden></div>
   </div>
 
   <div class="page" id="p-match" role="tabpanel" aria-labelledby="t-match" hidden>
@@ -661,6 +696,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 <script src="js/store.js"></script>
 <script src="js/yearly.js"></script>
 <script src="js/daypillar.js"></script>
+<script src="js/auspicious.js"></script>
 <script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
@@ -675,7 +711,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     return `<div class="glyph"><span class="han e${E(el)}">${ch}</span><span class="th">${th} · ${el}${yang ? '+' : '−'}</span></div>`;
   }
 
-  let dayStart = null, daySel = 0;
+  let dayStart = null, daySel = 0, hourSel = null, auspState = null;
   let luckSel = null, yearSel = null, monthSel = null, readSel = null, buildPrint = null, drawMatch = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${escH(b.sub)}</p>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
@@ -810,7 +846,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     window.print();
   });
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
-  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'match', 'manage'];
+  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'today', 'match', 'manage'];
   function show(pg) {
     if (!PAGES.includes(pg)) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
@@ -823,6 +859,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     const cur = PAGES.findIndex((k) => !$('p-' + k).hidden), nx = PAGES[(cur + (ev.key === 'ArrowRight' ? 1 : PAGES.length - 1)) % PAGES.length];
     show(nx); $('t-' + nx).focus();
   });
+  document.querySelector('.tseg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-seg]'); if (!b) return; document.querySelectorAll('.tsegb').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); $('segDay').hidden = b.dataset.seg !== 'day'; $('segAusp').hidden = b.dataset.seg !== 'ausp'; });
   function render() {
     const [y, m, d] = $('date').value.split('-').map(Number);
     const [h, mi] = $('time').value.split(':').map(Number);
@@ -1077,12 +1114,30 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     };
     $('months').onclick = (ev) => { const b = ev.target.closest('button[data-m]'); if (!b) return; monthSel = Number(b.dataset.m); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('monthDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     drawYears();
-    // ---------- ดวงรายวัน ----------
-    const nowD = new Date(), TODAY = { year: nowD.getFullYear(), month: nowD.getMonth() + 1, day: nowD.getDate() };
+    // ---------- ดวงวันนี้ · รายวัน · รายยาม ----------
+    const nowD = new Date(), TODAY = { year: nowD.getFullYear(), month: nowD.getMonth() + 1, day: nowD.getDate() }, NOW_H = nowD.getHours();
     const iso = (o) => `${o.year}-${String(o.month).padStart(2, '0')}-${String(o.day).padStart(2, '0')}`;
     const isT = (o) => o.year === TODAY.year && o.month === TODAY.month && o.day === TODAY.day;
-    if (!dayStart) { dayStart = Object.assign({}, TODAY); daySel = 0; }
+    if (!dayStart) { dayStart = Object.assign({}, TODAY); daySel = 0; hourSel = null; }
     const DOW_S = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+    const tcls = (t) => t > 0 ? 'r-good' : t < 0 ? 'r-bad' : 'r-mix';
+    const hanPair = (q) => `<span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>`;
+    const listCol = (title, cls, arr, empty) => `<div class="hlcol ${cls}"><h3>${title}</h3>${arr.length ? arr.map((t) => `<p class="hli">${escH(t)}</p>`).join('') : `<p class="hli">${empty}</p>`}</div>`;
+    const goodHours = (hs) => hs.filter((h) => h.score >= 1 && !h.clashDay);
+    // ตอนนี้: วันนี้ + ยามปัจจุบัน
+    const drawNow = () => {
+      const d = BaziYearly.day(r, an, TODAY.year, TODAY.month, TODAY.day, true), hs = BaziYearly.hours(r, an, TODAY.year, TODAY.month, TODAY.day);
+      const hi = BaziYearly.hourIndex(hs, NOW_H), h = hs[hi], drt = RATE(d.score), hrt = RATE(h.score);
+      const left = goodHours(hs).filter((x) => x.to > NOW_H);
+      $('nowCard').innerHTML = `
+        <div class="nowhead"><b>ตอนนี้</b> <span>${d.label} · ${String(NOW_H).padStart(2, '0')}.${String(nowD.getMinutes()).padStart(2, '0')} น.</span></div>
+        <div class="nowgrid">
+          <div class="nowbox"><span class="k">วันนี้</span>${hanPair(d.pillar)}<span>วัน${d.pillar.animal}</span><b class="${drt[0]}">${drt[1]}</b>${d.clashDay ? '<span class="tag tbad">ชงวังคู่ครอง</span>' : ''}</div>
+          <div class="nowbox"><span class="k">ยามนี้ ${h.time}</span>${hanPair(h.pillar)}<span>${h.label}</span><b class="${hrt[0]}">${hrt[1]}</b>${h.clashDay ? '<span class="tag tbad">ชงวังคู่ครอง</span>' : ''}</div>
+        </div>
+        <div class="hl dgo">${listCol('ยามนี้เหมาะกับ', 'good', h.good, 'งานประจำ เก็บรายละเอียด')}${listCol('ยามนี้ควรระวัง', 'bad', h.avoid, 'ไม่มีเรื่องที่ต้องระวังเป็นพิเศษ')}</div>
+        <p class="nowgood"><b>ยามดีที่เหลือของวันนี้:</b> ${left.length ? left.map((x) => `${x.label} ${x.time}`).join(' · ') : 'ไม่มียามที่ธาตุส่งเสริมชัดเจนเหลือแล้ว'}</p>`;
+    };
     const drawDays = () => {
       const wk = BaziYearly.week(r, an, dayStart.year, dayStart.month, dayStart.day, TODAY);
       $('dDate').value = iso(wk[daySel].date);
@@ -1090,17 +1145,19 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         const q = x.pillar, rt = RATE(x.score), dt = x.date;
         return `<li class="${isT(dt) ? 'now' : ''}${i === daySel ? ' sel' : ''}"><button type="button" data-d="${i}" aria-pressed="${i === daySel}">
           <span class="age">${DOW_S[new Date(dt.year, dt.month - 1, dt.day).getDay()]} ${dt.day} ${MTH[dt.month - 1]}</span>
-          <span class="han"><span class="e${E(q.stemElement)}">${BaziCore.STEMS[q.stem]}</span><span class="e${E(q.branchElement)}">${BaziCore.BRANCHES[q.branch]}</span></span>
+          ${hanPair(q)}
           <span class="date">วัน${q.animal}</span>
           <span class="rate ${rt[0]}">${rt[1]}</span>
           ${x.clashDay ? '<span class="tag tbad">ชงวังคู่ครอง</span>' : isT(dt) ? '<span class="tag">วันนี้</span>' : ''}</button></li>`;
       }).join('');
-      const x = wk[daySel], q = x.pillar, rt = RATE(x.score), bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
+      const x = wk[daySel], q = x.pillar, rt = RATE(x.score), bg = BaziCore.tenGod(dmStem, q.hidden[0].stem), today = isT(x.date);
+      const hs = BaziYearly.hours(r, an, x.date.year, x.date.month, x.date.day);
+      if (hourSel == null || hourSel >= hs.length) hourSel = today ? BaziYearly.hourIndex(hs, NOW_H) : hs.reduce((bi, h, i) => h.rank > hs[bi].rank ? i : bi, 0);
       const rels = BaziInteractions.withTransit(r, [{ key: 'dy', label: 'วันจร', stem: q.stem, branch: q.branch }], 'dy');
-      const W = isT(x.date) ? 'วันนี้' : 'วันนั้น';
-      const tcls = (t) => t > 0 ? 'r-good' : t < 0 ? 'r-bad' : 'r-mix';
+      const W = today ? 'วันนี้' : 'วันนั้น', gh = goodHours(hs);
+      const h = hs[hourSel], hrt = RATE(h.score), hbg = BaziCore.tenGod(dmStem, h.pillar.hidden[0].stem);
       $('dayDetail').innerHTML = `
-        <h2>${x.label} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>วัน${q.animal}${isT(x.date) ? ' · วันนี้' : ''}</small></h2>
+        <h2>${x.label} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>วัน${q.animal}${today ? ' · วันนี้' : ''}</small></h2>
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
@@ -1109,23 +1166,83 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
           </div>
         </div>
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
-        <div class="hl dgo">
-          <div class="hlcol good"><h3>${W}เหมาะกับ</h3>${x.good.length ? x.good.map((t) => `<p class="hli">${escH(t)}</p>`).join('') : '<p class="hli">งานประจำ เก็บรายละเอียด และวางแผน</p>'}</div>
-          <div class="hlcol bad"><h3>${W}ควรระวัง</h3>${x.avoid.length ? x.avoid.map((t) => `<p class="hli">${escH(t)}</p>`).join('') : '<p class="hli">ไม่มีเรื่องที่ต้องระวังเป็นพิเศษ</p>'}</div>
+        <div class="hl dgo">${listCol(W + 'เหมาะกับ', 'good', x.good, 'งานประจำ เก็บรายละเอียด และวางแผน')}${listCol(W + 'ควรระวัง', 'bad', x.avoid, 'ไม่มีเรื่องที่ต้องระวังเป็นพิเศษ')}</div>
+        <h3 class="rh" id="h-hours">12 ยามของ${W}</h3>
+        <p class="nowgood"><b>ยามดีของ${W}:</b> ${gh.length ? gh.map((y) => `${y.label} ${y.time}`).join(' · ') : 'ไม่มียามที่ธาตุส่งเสริมชัดเจน'}</p>
+        <div class="luck mluck"><ol id="hours">${hs.map((y, i) => { const t = RATE(y.score), cur = today && i === BaziYearly.hourIndex(hs, NOW_H);
+          return `<li class="${cur ? 'now' : ''}${i === hourSel ? ' sel' : ''}"><button type="button" data-h="${i}" aria-pressed="${i === hourSel}">
+            <span class="age">${y.time}</span>${hanPair(y.pillar)}<span class="date">${y.label}</span><span class="rate ${t[0]}">${t[1]}</span>
+            ${y.clashDay ? '<span class="tag tbad">ชงวังคู่ครอง</span>' : cur ? '<span class="tag">ตอนนี้</span>' : ''}</button></li>`; }).join('')}</ol></div>
+        <div class="rblock hdet">
+          <div class="mih"><h3>${h.label} ${h.time} <span class="han" style="font-family:var(--f-han)">${h.pillar.zh}</span></h3><span class="tlv ${hrt[0]}">${hrt[1]}</span></div>
+          <p class="src" style="margin-top:0">ราศีบน ${BaziCore.STEMS[h.pillar.stem]} ${h.pillar.tenGod.th} · ${ST(h.a)} · ราศีล่าง ${BaziCore.BRANCHES[h.pillar.branch]} ${hbg.th} · ${ST(h.b)}</p>
+          <div class="hl dgo">${listCol(h.label + 'เหมาะกับ', 'good', h.good, 'งานประจำ เก็บรายละเอียด')}${listCol(h.label + 'ควรระวัง', 'bad', h.avoid.map((t) => t.replace('ยามนี้', h.label)), 'ไม่มีเรื่องที่ต้องระวังเป็นพิเศษ')}</div>
         </div>
-        <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
+        <h3 class="rh">ความสัมพันธ์ของ${W}กับดวงเดิม</h3>
         <div class="rels">${relHTML(rels)}</div>
         <h3 class="rh">ผลต่อ 4 ด้าน</h3>
         ${x.topics.map((t) => `<div class="rblock ytopic"><div class="mih"><h3>${t.name}</h3><span class="tlv ${tcls(t.tone)}">${t.level}</span></div><p>${escH(t.text)}</p><p class="mpred"><b>ควรทำ</b> ${escH(t.todo)}</p>${t.note ? `<p class="tnote"><b>ทำไมไม่ตรงกับภาพรวม</b> ${escH(t.note)}</p>` : ''}<p class="src">ที่มา: ${escH(t.why)}</p></div>`).join('')}
-        <p class="note">เกณฑ์: ธาตุของราศีบนและราศีล่างของวันที่ดวงต้องการ +1 ที่ดวงไม่ต้องการ −1 · "เหมาะกับ" ดูจากสิบเทพของวันนั้น · ดวงรายวันมีน้ำหนักน้อยกว่าวัยจร ปีจร และเดือนจร ใช้ประกอบการวางแผนเท่านั้น</p>`;
+        <p class="note">เกณฑ์: ธาตุของราศีบนและราศีล่างของวันหรือยามที่ดวงต้องการ +1 ที่ดวงไม่ต้องการ −1 · "ยามดี" คือยามที่ได้ +1 ขึ้นไปและไม่ชงวังคู่ครอง · "เหมาะกับ" ดูจากสิบเทพ · ใช้เวลานาฬิกา วันเปลี่ยนตอนเที่ยงคืน${r.options.monthSystem === 'standard' ? ' · ยามชวดแบ่งเป็นยามชวดต้น (00.00–01.00) กับยามชวดปลาย (23.00–24.00) ซึ่งราศีบนนับต่อไปเป็นของวันถัดไป' : ''} · ดวงรายวันและรายยามมีน้ำหนักน้อยกว่าวัยจร ปีจร และเดือนจร ใช้ประกอบการวางแผนเท่านั้น</p>`;
     };
     const shiftDays = (n) => { const t = new Date(dayStart.year, dayStart.month - 1, dayStart.day + n); dayStart = { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() }; };
-    drawDays();
-    $('days').onclick = (ev) => { const b = ev.target.closest('button[data-d]'); if (!b) return; daySel = Number(b.dataset.d); drawDays(); if (window.matchMedia('(max-width: 600px)').matches) $('dayDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
-    $('dPrev').onclick = () => { shiftDays(-7); drawDays(); };
-    $('dNext').onclick = () => { shiftDays(7); drawDays(); };
-    $('dToday').onclick = () => { dayStart = Object.assign({}, TODAY); daySel = 0; drawDays(); };
-    $('dDate').onchange = (ev) => { const v = ev.target.value; if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return; const [Y, M, D] = v.split('-').map(Number); dayStart = { year: Y, month: M, day: D }; daySel = 0; drawDays(); };
+    drawNow(); drawDays();
+    $('days').onclick = (ev) => { const b = ev.target.closest('button[data-d]'); if (!b) return; daySel = Number(b.dataset.d); hourSel = null; drawDays(); if (window.matchMedia('(max-width: 600px)').matches) $('dayDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    $('dayDetail').onclick = (ev) => { const b = ev.target.closest('button[data-h]'); if (!b) return; hourSel = Number(b.dataset.h); const y = window.scrollY; drawDays(); window.scrollTo({ top: y }); };
+    $('dPrev').onclick = () => { shiftDays(-7); hourSel = null; drawDays(); };
+    $('dNext').onclick = () => { shiftDays(7); hourSel = null; drawDays(); };
+    $('dToday').onclick = () => { dayStart = Object.assign({}, TODAY); daySel = 0; hourSel = null; drawDays(); };
+    $('dDate').onchange = (ev) => { const v = ev.target.value; if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return; const [Y, M, D] = v.split('-').map(Number); dayStart = { year: Y, month: M, day: D }; daySel = 0; hourSel = null; drawDays(); };
+    // ---------- หาฤกษ์ ----------
+    const drawAuspForm = () => {
+      const plus = (n) => { const t = new Date(TODAY.year, TODAY.month - 1, TODAY.day + n); return iso({ year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() }); };
+      const cur = St.find(curInput()), others = St.list().filter((o) => !cur || o.id !== cur.id);
+      const keep = auspState || { purpose: 'contract', from: iso(TODAY), to: plus(30), partner: '' };
+      $('segAusp').innerHTML = `
+        <section class="panel">
+          <h2>หาฤกษ์ตามดวงส่วนตัว</h2>
+          <p class="sub" style="margin-top:0">เลือกเรื่องที่จะทำและช่วงวันที่ (ไม่เกิน 3 เดือน) แอปจะหาวันและยามที่ส่งเสริมดวงของ <b>${escH(name || 'ดวงนี้')}</b> มากที่สุด 5 อันดับ</p>
+          <form id="auspForm" class="ausf">
+            <div class="f"><label class="label" for="aPur">เรื่องที่จะทำ</label><select id="aPur">${BaziAuspicious.PURPOSES.map((p) => `<option value="${p.id}"${p.id === keep.purpose ? ' selected' : ''}>${p.name}</option>`).join('')}</select></div>
+            <div class="f"><label class="label" for="aFrom">ตั้งแต่วันที่</label><input type="date" id="aFrom" value="${keep.from}"></div>
+            <div class="f"><label class="label" for="aTo">ถึงวันที่</label><input type="date" id="aTo" value="${keep.to}"></div>
+            <div class="f" id="aPartW"${keep.purpose === 'wedding' ? '' : ' hidden'}><label class="label" for="aPart">ดวงของคู่ (จากดวงที่บันทึก)</label>${others.length ? `<select id="aPart"><option value="">— เลือกดวงคู่ —</option>${others.map((o) => `<option value="${o.id}"${o.id === keep.partner ? ' selected' : ''}>${escH(o.name || 'ไม่ระบุชื่อ')} · ${fmtD(o)}</option>`).join('')}</select>` : '<p class="note" style="margin:4px 0 0">ยังไม่มีดวงอื่นที่บันทึกไว้ บันทึกดวงคู่ได้ที่เมนูดวงคู่ (ติ๊ก "บันทึกดวงนี้ไว้ด้วย") หรือหาฤกษ์จากดวงของคุณคนเดียวก่อนก็ได้</p>'}</div>
+            <div class="f fbtn"><button type="submit">หาฤกษ์</button></div>
+          </form>
+          <p class="note">นี่คือฤกษ์ที่ดูจากดวงของคุณเท่านั้น (วันและยามที่ธาตุส่งเสริมดวง และไม่ชงดวงเดิม) ไม่ได้รวมระบบของปฏิทินจีน (通书) เช่น 12 เทพประจำวัน (建除) หรือวันมงคล/อัปมงคล (黄道/黑道) ถ้าเป็นงานใหญ่ควรดูประกอบกับปฏิทินจีนหรือผู้ให้ฤกษ์</p>
+        </section>
+        <section class="panel" id="auspOut" aria-live="polite"></section>`;
+      $('aPur').onchange = () => { $('aPartW').hidden = $('aPur').value !== 'wedding'; };
+      $('auspForm').onsubmit = (ev) => { ev.preventDefault(); runAusp(); };
+      if (auspState && auspState.ran) runAusp();
+    };
+    const runAusp = () => {
+      const pid = $('aPur').value, f = $('aFrom').value, t = $('aTo').value, part = $('aPart') ? $('aPart').value : '';
+      auspState = { purpose: pid, from: f, to: t, partner: part, ran: true };
+      const out = $('auspOut');
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(f) || !/^\d{4}-\d{2}-\d{2}$/.test(t)) { out.innerHTML = '<p>กรุณาเลือกวันที่ให้ครบ</p>'; return; }
+      const [fy, fm, fd] = f.split('-').map(Number), [ty, tm, td] = t.split('-').map(Number);
+      if (new Date(ty, tm - 1, td) < new Date(fy, fm - 1, fd)) { out.innerHTML = '<p>วันที่สิ้นสุดต้องอยู่หลังวันที่เริ่ม</p>'; return; }
+      const people = [{ chart: r, an, name: name || 'ดวงนี้' }];
+      let partNote = '';
+      if (pid === 'wedding' && part) {
+        const o = St.get(part);
+        if (o) { const [py, pm, pd] = o.date.split('-').map(Number), [ph, pmi] = o.time.split(':').map(Number);
+          const c2 = BaziCore.calculate({ name: o.name, year: py, month: pm, day: pd, hour: ph, minute: pmi, gender: o.g, tz: 7, longitude: Number($('place').value), options: r.options });
+          people.push({ chart: c2, an: BaziAnalysis.analyze(c2), name: o.name || 'คู่' }); }
+      } else if (pid === 'wedding') partNote = '<p class="tnote">ยังไม่ได้เลือกดวงของคู่ ผลนี้ดูจากดวงของคุณคนเดียว วันที่ได้อาจชงดวงของอีกฝ่าย ควรเลือกดวงคู่เพื่อเช็กทั้งสองคน</p>';
+      const res = BaziAuspicious.find(people, pid, { year: fy, month: fm, day: fd }, { year: ty, month: tm, day: td });
+      const who = people.length > 1 ? `${escH(people[0].name)} และ ${escH(people[1].name)}` : escH(people[0].name);
+      out.innerHTML = `<h2>ฤกษ์${res.purpose.name}</h2>
+        <p class="sub" style="margin-top:0">ของ ${who} · ดู ${res.days} วัน${res.capped ? ' (จำกัดไว้ 3 เดือนแรกของช่วงที่เลือก)' : ''} · ตัดออก ${res.excluded} วันเพราะชงดวง</p>
+        ${partNote}
+        ${res.ranked.length ? res.ranked.map((x, i) => `<div class="rblock arank">
+          <div class="mih"><h3><span class="anum">${i + 1}</span> ${x.label} <span class="han" style="font-family:var(--f-han)">${hanPair(x.pillar)}</span> <small>วัน${x.pillar.animal}</small></h3><span class="tlv ${x.level === 'พอใช้' ? 'r-mix' : 'r-good'}">${x.level} · ${x.score} คะแนน</span></div>
+          <p class="ahrs"><b>ยามที่แนะนำ:</b> ${x.hours.length ? x.hours.map((h) => `<span class="chip">${h.label} ${h.time}</span>`).join(' ') : 'ไม่มียามที่เด่นชัดในช่วง 05.00–21.00 ใช้ช่วงเวลาใดก็ได้ที่สะดวก ยกเว้นยามที่ชงวังคู่ครอง'}</p>
+          ${x.per.map((p) => `<p class="src" style="margin:4px 0 0">${x.per.length > 1 ? `<b>${escH(p.name)}:</b> ` : ''}<span class="r-good">ดี:</span> ${escH(p.plus.join(' · ') || '—')}${p.minus.length ? ` · <span class="r-bad">ข้อด้อย:</span> ${escH(p.minus.join(' · '))}` : ''}</p>`).join('')}
+        </div>`).join('') : '<p>ในช่วงวันที่นี้ไม่มีวันที่ธาตุส่งเสริมพอจะแนะนำ ลองขยายช่วงวันที่ หรือเลือกช่วงอื่น</p>'}
+        <p class="note">${escH(res.rule)}</p>`;
+    };
+    drawAuspForm();
     $('years').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); monthSel = null; drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('yearDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     $('decades').onclick = (ev) => { const b = ev.target.closest('button[data-y]'); if (!b) return; yearSel = Number(b.dataset.y); monthSel = null; drawYears(); };
 

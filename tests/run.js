@@ -120,6 +120,14 @@ eq('ด้านที่สวนกับภาพรวมมีคำอธ�
 
 eq('ดวงรายวัน: 1 ม.ค. 2000 = 戊午 · ชงวังคู่ครองเมื่อราศีล่างของวันชงราศีล่างของดิถี · 7 วันต่อเนื่อง', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r); const d = Yr.day(r, an, 2000, 1, 1, false); const wk = Yr.week(r, an, 2026, 12, 29, null); const db = r.pillars.day.branch; const cl = wk.filter((x) => (x.pillar.branch + 6) % 12 === db).every((x) => x.clashDay && /ชงวังคู่ครอง/.test(x.avoid[0])); return [d.pillar.zh, d.dow, wk.length, wk.map((x) => x.date.day).join(','), wk[3].date.year, cl, wk.every((x) => x.topics.length === 4)]; })(), ['戊午', 'เสาร์', 7, '29,30,31,1,2,3,4', 2027, true, true]);
 
+eq('ยามจร: เสายามของแต่ละชั่วโมงตรงกับเสายามของผังที่คำนวณเวลานั้น ทุกระบบยาม', (() => { let bad = 0; for (const o of [{}, { ziHour: 'at23' }, { monthSystem: 'zhongqi' }]) for (let h = 0; h < 24; h++) { const c = calc(2026, 10, 26, h, 30, 'M', Object.assign({ trueSolarTime: false }, o)); const hs = c.hourly(2026, 10, 26); const x = hs.find((z) => h >= z.from && h < z.to); if (x.pillar.zh !== c.pillars.hour.zh) bad++; } const r = calc(1990, 1, 15, 10, 30); return [bad, r.hourly(2026, 10, 26).length, Yr.hours(r, An.analyze(r), 2026, 10, 26)[12].label]; })(), [0, 13, 'ยามชวดปลาย']);
+const Au = require('../js/auspicious.js');
+eq('หาฤกษ์: ไม่เกิน 5 อันดับ เรียงคะแนน ไม่มีวันชงวังคู่ครอง ยามแนะนำอยู่ในช่วง 05–21 และฤกษ์แต่งงานตัดวันที่ชงดวงคู่', (() => { const r = calc(1990, 1, 15, 10, 30), p2 = calc(1992, 6, 3, 8, 0, 'F'); const me = { chart: r, an: An.analyze(r), name: 'ก' }, her = { chart: p2, an: An.analyze(p2), name: 'ข' };
+  const a = Au.find([me], 'contract', { year: 2026, month: 11, day: 1 }, { year: 2027, month: 3, day: 31 });
+  const w = Au.find([me, her], 'wedding', { year: 2026, month: 11, day: 1 }, { year: 2027, month: 1, day: 31 });
+  const noClash = (x, c) => (x.pillar.branch + 6) % 12 !== c.pillars.day.branch;
+  return [a.days, a.capped, a.ranked.length, a.ranked.every((x, i, L) => !i || L[i - 1].score >= x.score), a.ranked.every((x) => noClash(x, r)), a.ranked.every((x) => x.hours.every((h) => h.from >= 5 && h.to <= 21)), w.ranked.every((x) => x.per.length === 2 && noClash(x, r) && noClash(x, p2) && (x.pillar.branch + 6) % 12 !== p2.pillars.year.branch)]; })(), [92, true, 5, true, true, true, true]);
+
 const DPm = require('../js/daypillar.js');
 eq('เสาวัน 60 แบบครบ มีข้อความทุกช่อง และภาพ SVG', [DPm.list().length, DPm.list().every((k) => { const d = DPm.get(k); return d.img && d.tag && d.self && d.strong && d.care && d.tip && DPm.card(k).startsWith('<svg'); }), new Set(DPm.list().map((k) => DPm.get(k).img)).size], [60, true, 60]);
 
