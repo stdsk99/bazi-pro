@@ -54,7 +54,7 @@
         const jt2 = (d) => d > 0 ? 'ให้คุณ' : 'ให้โทษ';
         const add = (id, score, why, drv) => {
             const lvl = score >= 1 ? 0 : score <= -1 ? 2 : 1, T = TOPIC[id], tone = [1, 0, -1][lvl];
-            const o = { id, name: T.name, level: ['เด่น', 'ปกติ', 'ต้องระวัง'][lvl], tone, text: w(T.lv[lvl][0]), todo: w(T.lv[lvl][1]), why: why.join(' · ') || w('ปีนี้ไม่มีธาตุที่เกี่ยวกับด้านนี้โดยตรง') };
+            const o = { id, name: T.name, score, drv, level: ['เด่น', 'ปกติ', 'ต้องระวัง'][lvl], tone, text: w(T.lv[lvl][0]), todo: w(T.lv[lvl][1]), why: why.join(' · ') || w('ปีนี้ไม่มีธาตุที่เกี่ยวกับด้านนี้โดยตรง') };
             if (overall && tone === -overall) {
                 const key = drv.filter((x) => Math.sign(x[1]) === tone).sort((a, b) => Math.abs(b[1]) - Math.abs(a[1])).map((x) => x[0]);
                 const because = key.length ? ` เพราะ${key.slice(0, 2).join(' และ')}` : '';
@@ -91,7 +91,7 @@
 
     // ---------- 2–3. 12 เดือน และเดือนที่ดีที่สุด ----------
     const DO = ['สร้างเครือข่าย หาหุ้นส่วน ทำงานเป็นทีม', 'เริ่มงานใหม่ เปิดตัวผลงาน นำเสนอ เจรจาขาย', 'เจรจาธุรกิจ ลงทุน ซื้อขายทรัพย์สิน', 'สมัครงาน ขอเลื่อนตำแหน่ง ติดต่อราชการ สอบ', 'เรียน สอบ เซ็นสัญญา ทำเอกสาร ซื้อบ้าน'];
-    const LEVEL = (v) => v >= 2 ? 'ดีมาก' : v === 1 ? 'ดี' : v === 0 ? 'ผสม' : v === -1 ? 'ค่อนข้างติดขัด' : 'ต้องระวัง';
+    const LEVEL = (v) => v >= 2 ? 'ดีมาก' : v === 1 ? 'ดี' : v === 0 ? 'กลาง' : v === -1 ? 'ติดขัด' : 'ต้องระวัง';
     function months(chart, an, year) {
         const P = chart.pillars, dm = P.day.stem, R = judgeFn(chart, an);
         const ms = chart.monthly(year).map((m) => {

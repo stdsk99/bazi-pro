@@ -423,6 +423,53 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 .ausf { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 14px; align-items: end; margin: 8px 0; }
 .ausf .fbtn button { width: 100%; }
 .ausf [hidden] { display: none; }
+/* ---------- โหมด ---------- */
+.modesw { display: inline-flex; border: 1px solid var(--jade); border-radius: 999px; padding: 2px; gap: 2px; }
+.modesw button { background: none; color: var(--jade); border-radius: 999px; padding: 5px 14px; font-size: .88rem; }
+.modesw button[aria-pressed="true"] { background: var(--jade); color: var(--sheet); }
+body.gen .pro-only { display: none !important; }
+body.pro .gen-only { display: none !important; }
+body.gen .src { display: none; }
+body.gen .why .src { display: block; }
+.why { border: 1px solid var(--rule); border-radius: 12px; padding: 10px 14px; margin: 14px 0 0; background: var(--paper); }
+.why > summary { cursor: pointer; font-weight: 600; color: var(--jade); }
+.why[open] > summary { margin-bottom: 10px; }
+.phero { border-top: 4px solid var(--jade); background: var(--sheet); border-radius: 12px; padding: 14px 16px; margin: 10px 0 12px; border-left: 1px solid var(--rule); border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.phero p { margin: 0; }
+.ptitle { font-size: 1.3rem; line-height: 1.35; margin: 8px 0 6px; }
+.pchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pchip { font-size: .82rem; border-radius: 999px; padding: 1px 10px; font-weight: 600; }
+.pchip.ok { background: var(--jade-wash); color: var(--good); } .pchip.warn { background: #f7e4e1; color: var(--bad); } .pchip.mid { background: var(--paper); color: var(--ink-soft); border: 1px solid var(--rule); }
+.pdo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; }
+.pdo h4, .pasp h4, .phours h4 { margin: 0 0 6px; font-size: 1rem; }
+.pdo .g h4 { color: var(--good); } .pdo .b h4 { color: var(--bad); }
+.pdo ul { list-style: none; margin: 0; padding: 0; } .pdo li { padding-left: 22px; position: relative; margin-bottom: 6px; line-height: 1.45; }
+.pdo .g li::before { content: "✓"; position: absolute; left: 0; color: var(--good); font-weight: 700; }
+.pdo .b li::before { content: "✕"; position: absolute; left: 0; color: var(--bad); font-weight: 700; }
+.pasp, .phours { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; }
+.asp { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; padding: 9px 0; border-top: 1px solid var(--rule); } .pasp h4 + .asp { border-top: 0; padding-top: 2px; }
+.asp .ic { grid-row: 1 / 3; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--jade-wash); font-size: 1.1rem; }
+.asp .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.asp p { margin: 0; color: var(--ink-soft); line-height: 1.45; }
+.pbar { display: inline-flex; gap: 3px; } .pbar i { width: 18px; height: 6px; border-radius: 3px; background: var(--rule); } .pbar i.on { background: var(--jade); } .pbar.lo i.on { background: var(--bad); }
+.phours .best { background: var(--jade-wash); border-radius: 10px; padding: 7px 12px; margin-bottom: 8px; }
+.hr { display: grid; grid-template-columns: 4px 1fr; gap: 0 12px; padding: 9px 0; border-top: 1px solid var(--rule); }
+.hr .ln { border-radius: 2px; } .hr.g .ln { background: var(--good); } .hr.m .ln { background: var(--rule); } .hr.b .ln { background: var(--bad); }
+.hr.now { background: var(--jade-wash); border-radius: 10px; }
+.hr .t { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .hr .t small { color: var(--ink-soft); }
+.hr p { margin: 2px 0 0; }
+.htg { font-size: .75rem; border-radius: 999px; padding: 0 8px; border: 1px solid; white-space: nowrap; }
+.htg.g { color: var(--good); } .htg.m { color: var(--ink-soft); } .htg.b { color: var(--bad); }
+.htg.nw { background: var(--jade); color: var(--sheet); border-color: var(--jade); }
+.night { margin-top: 6px; } .night > summary { cursor: pointer; color: var(--jade); font-size: .92rem; }
+.nowline { display: flex; flex-direction: column; gap: 4px; } .nowline .htg { align-self: flex-start; font-size: .85rem; padding: 1px 10px; } .nowline p { margin: 0; font-size: 1.05rem; }
+.nstars { margin: 6px 0 12px; } .nstars h3 { margin: 0 0 6px; }
+.nstar { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 6px 0; }
+.nstar .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--jade-wash); }
+.nstar p { margin: 0; color: var(--ink-soft); } .nstar .han { font-family: var(--f-han); }
+.areason { margin: 4px 0 0; font-size: .86rem; color: var(--ink-soft); }
+@media (max-width: 600px) { .pdo { grid-template-columns: 1fr; } }
+
 .arank .mih h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
 .anum { display: inline-grid; place-items: center; width: 1.6em; height: 1.6em; border-radius: 50%; background: var(--jade); color: var(--sheet); font-size: .9rem; }
 .ahrs { margin: 6px 0; }
@@ -480,6 +527,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 
   <div class="birthbar" id="bbar" hidden>
     <div class="bsum" id="bsum"></div>
+    <div class="modesw" role="group" aria-label="โหมดการแสดงผล"><button type="button" data-mode="gen">คนทั่วไป</button><button type="button" data-mode="pro">มืออาชีพ</button></div>
     <div class="bbtn"><button type="button" class="ghost" id="save">บันทึก</button><button type="button" class="ghost" id="edit" aria-controls="f" aria-expanded="false">แก้ไขข้อมูลเกิด</button></div>
     <div class="viewing" id="viewing" hidden></div>
     <div class="bmsg" id="bmsg" role="status" aria-live="polite"></div>
@@ -540,10 +588,11 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     <section class="panel basis" aria-labelledby="h-basis">
       <h2 id="h-basis">พื้นดวงของคุณ</h2>
       <div id="dpHero"></div>
+      <div id="natStars"></div>
       <dl class="bsl" id="basis"></dl>
       <button type="button" class="ghost" id="toRead">อ่านคำทำนายละเอียด</button>
     </section>
-    <section class="summary">
+    <section class="summary pro-only">
       <div class="panel">
         <h2>ข้อมูลการคำนวณ</h2>
         <dl id="facts"></dl>
@@ -553,7 +602,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <div class="warns" id="warns"></div>
       </div>
     </section>
-    <section class="panel">
+    <section class="panel pro-only">
       <h2>ความสัมพันธ์ภายในดวง</h2>
       <div class="rels" id="natalRels"></div>
     </section>
@@ -587,7 +636,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 
   <div class="page" id="p-luck" role="tabpanel" aria-labelledby="t-luck" hidden>
     <section aria-labelledby="h-luck">
-      <h2 id="h-luck">วัยจร 大运</h2>
+      <h2 id="h-luck"><span class="pro-only">วัยจร 大运</span><span class="gen-only">ดวง 10 ปี</span></h2>
       <p class="sub" id="luckInfo"></p>
       <div class="luck"><ol id="luck"></ol></div>
     </section>
@@ -596,8 +645,8 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 
   <div class="page" id="p-year" role="tabpanel" aria-labelledby="t-year" hidden>
     <section aria-labelledby="h-year">
-      <h2 id="h-year">ปีจร 流年</h2>
-      <p class="sub">เลือกช่วงวัยจร แล้วกดปีที่ต้องการดู · ปีจรเริ่มที่<span id="ycName"></span></p>
+      <h2 id="h-year"><span class="pro-only">ปีจร 流年</span><span class="gen-only">ดวงรายปี</span></h2>
+      <p class="sub"><span class="pro-only">เลือกช่วงวัยจร แล้วกดปีที่ต้องการดู</span><span class="gen-only">เลือกช่วง 10 ปี แล้วกดปีที่ต้องการดู</span> · ปีจรเริ่มที่<span id="ycName"></span></p>
       <div class="decades" id="decades" role="group" aria-label="ช่วงวัยจร"></div>
       <div class="luck"><ol id="years"></ol></div>
     </section>
@@ -606,7 +655,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     <section class="panel" id="ytopics" aria-live="polite"></section>
     <section class="panel" id="taisui" aria-live="polite"></section>
     <section aria-labelledby="h-month" class="msec">
-      <h2 id="h-month">เดือนจร 流月 <span id="mYear"></span></h2>
+      <h2 id="h-month"><span class="pro-only">เดือนจร 流月</span><span class="gen-only">ดวงรายเดือน</span> <span id="mYear"></span></h2>
       <p class="sub">เดือนจรเริ่มที่สารทเปลี่ยนเดือน กดเดือนที่ต้องการดู</p>
       <div id="mSum"></div>
       <div class="luck mluck"><ol id="months"></ol></div>
@@ -622,7 +671,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     <div id="segDay">
       <section class="panel nowcard" id="nowCard" aria-live="polite"></section>
       <section aria-labelledby="h-day" class="msec">
-        <h2 id="h-day">ดวงรายวัน 流日</h2>
+        <h2 id="h-day">ดวงรายวัน<span class="pro-only"> 流日</span></h2>
         <p class="sub">เสาของแต่ละวันเทียบกับดวงของคุณ กดวันเพื่อดูรายละเอียดและ 12 ยามของวันนั้น</p>
         <div class="dnav" role="group" aria-label="เลือกช่วงวัน">
           <button type="button" class="ghost" id="dPrev" aria-label="7 วันก่อนหน้า">‹ ก่อนหน้า</button>
@@ -697,6 +746,8 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 <script src="js/yearly.js"></script>
 <script src="js/daypillar.js"></script>
 <script src="js/auspicious.js"></script>
+<script src="js/shensha.js"></script>
+<script src="js/plain.js"></script>
 <script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
@@ -712,13 +763,27 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
   }
 
   let dayStart = null, daySel = 0, hourSel = null, auspState = null;
+  let PRO = false; try { PRO = localStorage.getItem('bazi.mode') === 'pro'; } catch (e) {}
+  // โหมด: คนทั่วไป (คำตอบก่อน เหตุผลพับไว้) · มืออาชีพ (แสดงเสา สิบเทพ ธาตุ และที่มาเต็ม)
+  const applyMode = () => {
+    document.body.classList.toggle('gen', !PRO); document.body.classList.toggle('pro', PRO);
+    document.querySelectorAll('.modesw [data-mode]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.mode === 'pro') === PRO)));
+    $('t-luck').textContent = PRO ? 'วัยจร' : 'ดวง 10 ปี'; $('t-year').textContent = PRO ? 'ปีจร' : 'ดวงรายปี'; $('t-today').textContent = PRO ? 'วันนี้ & ฤกษ์' : 'วันนี้';
+    $('t-analysis').hidden = !PRO;
+  };
+  const LV5 = ['ต้องระวัง', 'ติดขัด', 'กลาง', 'ดี', 'ดีมาก'];
+  const plainHTML = (R) => `<div class="phero"><div class="pchips">${R.chips.map((c) => `<span class="pchip ${c.tone > 0 ? 'ok' : c.tone < 0 ? 'warn' : 'mid'}">${escH(c.t)}</span>`).join('')}</div><h3 class="ptitle">${escH(R.title)}</h3><p>${escH(R.lead)}</p></div>
+    <div class="pdo"><div class="g"><h4>เหมาะทำ</h4><ul>${R.do.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div><div class="b"><h4>ควรเลี่ยง</h4><ul>${R.avoid.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div></div>
+    <div class="pasp"><h4>แต่ละด้าน</h4>${R.aspects.map((a) => `<div class="asp"><span class="ic" aria-hidden="true">${a.icon}</span><div class="top"><b>${a.name}</b><span class="pbar${a.bars <= 2 ? ' lo' : ''}" role="img" aria-label="${a.bars} จาก 5">${[1, 2, 3, 4, 5].map((k) => `<i${k <= a.bars ? ' class="on"' : ''}></i>`).join('')}</span></div><p>${escH(a.text)}</p></div>`).join('')}</div>`;
+  const techOpen = () => PRO ? '' : '<details class="why"><summary>ดูเหตุผลทางดวง</summary>';
+  const techClose = () => PRO ? '' : '</details>';
   let luckSel = null, yearSel = null, monthSel = null, readSel = null, buildPrint = null, drawMatch = null;
   const escH = (t) => String(t).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
   const blocksHTML = (blocks) => blocks.map((b) => `<div class="rblock">${b.title ? `<h3>${escH(b.title)}</h3>` : ''}${b.sub ? `<p class="sub2">${escH(b.sub)}</p>` : ''}${b.items && b.items.length ? `<dl class="ritems">${b.items.map(([k, v]) => `<dt>${escH(k)}</dt><dd>${escH(v)}</dd>`).join('')}</dl>` : ''}${b.text ? `<p>${escH(b.text)}</p>` : ''}${b.source ? `<p class="src">ที่มา: ${escH(b.source)}</p>` : ''}</div>`).join('');
   // แทรกบล็อก "ผลต่อ 4 ด้าน" (งาน เงิน ความรัก สุขภาพ) ต่อจากภาพรวม
   const withFour = (blocks, chart, an, q, kind) => {
     const tp = BaziYearly.topics(chart, an, q, kind);
-    const fb = { title: 'ผลต่อ 4 ด้าน', text: '', items: tp.map((t) => [`${t.name} · ${t.level}`, `${t.text} · ควรทำ: ${t.todo}${t.note ? `\nทำไมไม่ตรงกับภาพรวม: ${t.note}` : ''}`]), source: tp.map((t) => `${t.name}: ${t.why}`).join(' / ') };
+    const fb = { title: 'ผลต่อ 4 ด้าน', text: '', items: tp.map((t) => [`${t.name} · ${LV5[BaziPlain.bars(t.score) - 1]} (${t.score > 0 ? '+' : ''}${t.score})`, `${t.text} · ควรทำ: ${t.todo}${t.note ? `\nทำไมไม่ตรงกับภาพรวม: ${t.note}` : ''}`]), source: tp.map((t) => `${t.name}: ${t.why}`).join(' / ') };
     return [blocks[0], fb].concat(blocks.slice(1));
   };
   const relHTML = (list) => list.length ? list.map((x) => `<div class="rel ${x.kind === '+' ? 'k-plus' : 'k-minus'}"><span class="rt">${x.th} <span class="han">${x.zh}</span></span><span class="rm">${x.members.map((m) => m.label).join(' · ')}</span><span class="rn">${x.note}</span></div>`).join('') : '<p class="note" style="margin:0">ไม่พบภาคี ชง เฮ้ง ไห่ หรือผั่ว</p>';
@@ -848,7 +913,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
   const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'today', 'match', 'manage'];
   function show(pg) {
-    if (!PAGES.includes(pg)) pg = 'chart';
+    if (!PAGES.includes(pg) || (!PRO && pg === 'analysis')) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
     try { localStorage.setItem('bazi.page', pg); } catch (e) {}
     try { history.replaceState(null, '', '#' + pg); } catch (e) {}
@@ -859,6 +924,9 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     const cur = PAGES.findIndex((k) => !$('p-' + k).hidden), nx = PAGES[(cur + (ev.key === 'ArrowRight' ? 1 : PAGES.length - 1)) % PAGES.length];
     show(nx); $('t-' + nx).focus();
   });
+  document.querySelector('.modesw').addEventListener('click', (ev) => { const b = ev.target.closest('[data-mode]'); if (!b) return; PRO = b.dataset.mode === 'pro'; try { localStorage.setItem('bazi.mode', PRO ? 'pro' : 'gen'); } catch (e) {}
+    applyMode(); const cur = PAGES.find((k) => !$('p-' + k).hidden) || 'chart'; render(); show(!PRO && cur === 'analysis' ? 'chart' : cur); });
+  applyMode();
   document.querySelector('.tseg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-seg]'); if (!b) return; document.querySelectorAll('.tsegb').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); $('segDay').hidden = b.dataset.seg !== 'day'; $('segAusp').hidden = b.dataset.seg !== 'ausp'; });
   function render() {
     const [y, m, d] = $('date').value.split('-').map(Number);
@@ -980,7 +1048,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       const a = judge(q.stemElement, q.stem, 'stem'), b = judge(q.branchElement, q.hidden[0].stem, 'branch');
       return { a, b, sum: a + b };
     };
-    const RATE = (v) => v >= 2 ? ['r-good', 'ส่งเสริม'] : v === 1 ? ['r-good', 'ค่อนข้างดี'] : v === 0 ? ['r-mix', 'ผสม'] : v === -1 ? ['r-bad', 'ค่อนข้างติดขัด'] : ['r-bad', 'ต้องระวัง'];
+    const RATE = (v) => { const c = v > 0 ? 'r-good' : v < 0 ? 'r-bad' : 'r-mix'; return PRO ? [c, `${LV5[Math.max(-2, Math.min(2, v)) + 2]} (${v > 0 ? '+' : ''}${v})`] : [c, BaziPlain.level3(v)[0]]; };
     const ST = (v) => v > 0 ? '<span class="r-good">ธาตุให้คุณ</span>' : v < 0 ? '<span class="r-bad">ธาตุให้โทษ</span>' : '<span class="r-mix">กลางๆ</span>';
     const curIdx = L.periods.findIndex((p) => key(p.start) <= nowKey && nowKey < key(p.end));
     if (luckSel == null || luckSel >= L.periods.length) luckSel = curIdx >= 0 ? curIdx : 0;
@@ -999,7 +1067,8 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       const endAge = nx ? `${nx.ageAtStart.years} ปี${nx.ageAtStart.months ? ` ${nx.ageAtStart.months} เดือน` : ''}` : '';
       const bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
       $('luckDetail').innerHTML = `
-        <h2>วัยจรช่วงที่ ${luckSel + 1} <small>อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} เดือน` : ''}${endAge ? ` – ${endAge}` : ''} · ${p.start.day}/${p.start.month}/${p.start.year} – ${p.end.day}/${p.end.month}/${p.end.year}</small></h2>
+        <h2>${PRO ? 'วัยจรช่วงที่' : 'ดวง 10 ปี ช่วงที่'} ${luckSel + 1} <small>อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} เดือน` : ''}${endAge ? ` – ${endAge}` : ''} · ${p.start.day}/${p.start.month}/${p.start.year} – ${p.end.day}/${p.end.month}/${p.end.year}</small></h2>
+        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'luck'))}${techOpen()}
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
@@ -1012,7 +1081,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'))}</div>
         <h3 class="rh">คำทำนายช่วงนี้</h3>
-        <div class="pred">${blocksHTML(withFour(BaziNarrative.transit(r, an, q, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'), 'luck'), r, an, q, 'luck'))}</div>`;
+        <div class="pred">${blocksHTML(withFour(BaziNarrative.transit(r, an, q, 'luck', BaziInteractions.withTransit(r, [{ key: 'luck', label: 'วัยจร', stem: q.stem, branch: q.branch }], 'luck'), 'luck'), r, an, q, 'luck'))}</div>${techClose()}`;
     };
     drawLuck();
     $('luck').onclick = (ev) => { const b = ev.target.closest('button[data-i]'); if (!b) return; luckSel = Number(b.dataset.i); drawLuck(); if (window.matchMedia('(max-width: 600px)').matches) $('luckDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
@@ -1044,7 +1113,8 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       const trans = [{ key: 'yr', label: 'ปีจร', stem: q.stem, branch: q.branch }];
       if (lp) trans.unshift({ key: 'luck', label: 'วัยจร', stem: lp.stem, branch: lp.branch });
       $('yearDetail').innerHTML = `
-        <h2>ปี ${a.year} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>ปี${q.animal} · อายุ ${a.age} ปี · ${a.start.day}/${a.start.month}/${a.start.year} – ${a.end.day}/${a.end.month}/${a.end.year}${lp ? ` · อยู่ในวัยจร ${lp.zh}` : ' · ยังไม่เข้าวัยจร'}</small></h2>
+        <h2>ปี ${a.year} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>ปี${q.animal} · อายุ ${a.age} ปี · ${a.start.day}/${a.start.month}/${a.start.year} – ${a.end.day}/${a.end.month}/${a.end.year}${lp ? ` · อยู่ใน${PRO ? 'วัยจร' : 'ช่วง 10 ปีของ'} ${lp.zh}` : (PRO ? ' · ยังไม่เข้าวัยจร' : '')}</small></h2>
+        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'year'))}${techOpen()}
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
@@ -1056,7 +1126,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม${lp ? 'และวัยจร' : ''}</h3>
         <div class="rels">${relHTML(BaziInteractions.withTransit(r, trans, 'yr'))}</div>
         <h3 class="rh">คำทำนายปีนี้</h3>
-        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'year', BaziInteractions.withTransit(r, trans, 'yr'), 'yr'))}</div>`;
+        <div class="pred">${blocksHTML(BaziNarrative.transit(r, an, q, 'year', BaziInteractions.withTransit(r, trans, 'yr'), 'yr'))}</div>${techClose()}`;
       drawMonths(trans);
       drawYearSum();
     };
@@ -1067,13 +1137,13 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       const bestTxt = M.best.map((m) => `เดือน${m.pillar.animal}`).join(' · ');
       $('ysum').innerHTML = `<h2>สรุปปี ${yearSel} <span class="han" style="font-family:var(--f-han)">${S.pillar.zh}</span></h2><div class="ycards">
         <button type="button" class="ycard" data-go="ytopics"><b>อ่านทีละด้าน</b><span>เด่น <strong class="r-good">${S.good.length}</strong> ด้าน · ระวัง <strong class="r-bad">${S.bad.length}</strong> ด้าน</span><small>${S.topics.map((t) => `<span class="${tcls(t.tone)}">${t.name}</span>`).join(' · ')}</small></button>
-        <button type="button" class="ycard" data-go="h-month"><b>12 เดือนของปี ${yearSel}</b><span>ดีมาก <strong class="r-good">${M.count.great}</strong> · ดี <strong class="r-good">${M.count.good}</strong> · ระวัง <strong class="r-bad">${M.count.bad}</strong> เดือน</span><small>ผสม ${M.count.mix} เดือน</small></button>
+        <button type="button" class="ycard" data-go="h-month"><b>12 เดือนของปี ${yearSel}</b>${PRO ? `<span>ดีมาก <strong class="r-good">${M.count.great}</strong> · ดี <strong class="r-good">${M.count.good}</strong> · ติดขัด/ระวัง <strong class="r-bad">${M.count.bad}</strong> เดือน</span><small>กลาง ${M.count.mix} เดือน</small>` : `<span>ดี <strong class="r-good">${M.count.great + M.count.good}</strong> · กลาง <strong class="r-mix">${M.count.mix}</strong> · ควรระวัง <strong class="r-bad">${M.count.bad}</strong> เดือน</span><small>กดเพื่อดูทีละเดือน</small>`}</button>
         <button type="button" class="ycard" data-go="mBest"><b>เดือนที่ดีที่สุดของคุณ</b><span>${bestTxt}</span><small>${M.best.length === 1 ? M.best[0].good[0] || '' : `${M.best.length} เดือนคะแนนเท่ากัน`}</small></button>
         <button type="button" class="ycard" data-go="taisui"><b>ไท้ส่วยปีนี้ · ปีหน้า</b><span><span class="${tcls(T[0].tone)}">${T[0].year} ${T[0].status}</span> · <span class="${tcls(T[1].tone)}">${T[1].year} ${T[1].status}</span></span><small>สถานะกับไท้ส่วย ช่วงที่ควรระวัง และแนวทางไหว้</small></button>
       </div>`;
-      $('ytopics').innerHTML = `<h2>อ่านทีละด้าน ปี ${yearSel}</h2>${S.topics.map((t) => `<div class="rblock ytopic"><div class="mih"><h3>${t.name}</h3><span class="tlv ${tcls(t.tone)}">${t.level}</span></div><p>${escH(t.text)}</p><p class="mpred"><b>ควรทำ</b> ${escH(t.todo)}</p>${t.note ? `<p class="tnote"><b>ทำไมไม่ตรงกับภาพรวม</b> ${escH(t.note)}</p>` : ''}<p class="src">ที่มา: ${escH(t.why)}</p></div>`).join('')}`;
+      $('ytopics').innerHTML = `<h2>อ่านทีละด้าน ปี ${yearSel}</h2>${S.topics.map((t) => `<div class="rblock ytopic"><div class="mih"><h3>${t.name}</h3>${PRO ? `<span class="tlv ${tcls(t.tone)}">${LV5[BaziPlain.bars(t.score) - 1]} (${t.score > 0 ? '+' : ''}${t.score})</span>` : `<span class="pbar${BaziPlain.bars(t.score) <= 2 ? ' lo' : ''}">${[1, 2, 3, 4, 5].map((k) => `<i${k <= BaziPlain.bars(t.score) ? ' class="on"' : ''}></i>`).join('')}</span>`}</div><p>${escH(t.text)}</p><p class="mpred"><b>ควรทำ</b> ${escH(t.todo)}</p>${t.note ? `<p class="tnote"><b>ทำไมไม่ตรงกับภาพรวม</b> ${escH(t.note)}</p>` : ''}<p class="src">ที่มา: ${escH(t.why)}</p></div>`).join('')}`;
       $('taisui').innerHTML = `<h2>ไท้ส่วย 太岁</h2><p class="sub" style="margin-top:0">ไท้ส่วยคือเทพประจำปีตามนักษัตรของปีนั้น ดูว่าปีเกิดและวังคู่ครองของคุณชง เฮ้ง ไห่ หรือผั่วกับปีไหม</p>${T.map((x) => `<div class="rblock"><div class="mih"><h3>ปี ${x.year} ${x.zh} ปี${x.animal}${x.year === yearSel ? ' (ปีที่เลือก)' : ' (ปีหน้า)'}</h3><span class="tlv ${tcls(x.tone)}">${x.status}</span></div>${x.hits.length ? `<dl class="ritems">${x.hits.map((h) => `<dt>${escH(h.name)}</dt><dd>${escH(h.text)}<br><b>ควรระวัง:</b> ${escH(h.care)}<span class="src" style="display:block">ที่มา: ${escH(h.source)}</span></dd>`).join('')}</dl><p class="note">${escH(x.pray)}</p>` : '<p>ปีเกิดและวังคู่ครองไม่ชง เฮ้ง ไห่ หรือผั่วกับไท้ส่วยปีนี้ จึงไม่อยู่ในกลุ่มที่นิยมไหว้แก้ชง</p>'}</div>`).join('')}`;
-      $('mSum').innerHTML = `<div class="mcount"><span>ดีมาก <b class="r-good">${M.count.great}</b></span><span>ดี <b class="r-good">${M.count.good}</b></span><span>ผสม <b class="r-mix">${M.count.mix}</b></span><span>ควรระวัง <b class="r-bad">${M.count.bad}</b></span><span class="unit">เดือน</span></div>
+      $('mSum').innerHTML = `<div class="mcount">${PRO ? `<span>ดีมาก <b class="r-good">${M.count.great}</b></span><span>ดี <b class="r-good">${M.count.good}</b></span><span>กลาง <b class="r-mix">${M.count.mix}</b></span><span>ติดขัด/ต้องระวัง <b class="r-bad">${M.count.bad}</b></span>` : `<span>ดี <b class="r-good">${M.count.great + M.count.good}</b></span><span>กลาง <b class="r-mix">${M.count.mix}</b></span><span>ควรระวัง <b class="r-bad">${M.count.bad}</b></span>`}<span class="unit">เดือน</span></div>
         <div class="panel mbest" id="mBest"><h3>เดือนที่ดีที่สุดของคุณในปี ${yearSel}</h3>${M.best.map((m) => `<div class="mb"><b>${m.label}</b> <span class="r-good">${m.level}</span><p>เหมาะกับ: ${m.good.length ? m.good.join(' · ') : 'งานประจำและการวางแผน'}</p></div>`).join('')}${M.top <= 0 ? '<p class="note">ปีนี้ไม่มีเดือนที่ธาตุส่งเสริมชัดเจน เดือนข้างบนคือเดือนที่ดีที่สุดเมื่อเทียบกันในปีนี้</p>' : ''}<p class="note">${M.rule}</p></div>`;
     };
     $('ysum').onclick = (ev) => { const b = ev.target.closest('[data-go]'); if (b) $(b.dataset.go).scrollIntoView({ behavior: 'smooth', block: 'start' }); };
@@ -1099,6 +1169,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       const rels = BaziInteractions.withTransit(r, tm, 'mo');
       $('monthDetail').innerHTML = `
         <h2>เดือน${q.animal} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>${x.term.th} ${x.term.zh} · ${x.start.day}/${x.start.month}/${x.start.year} – ${x.end.day}/${x.end.month}/${x.end.year}</small></h2>
+        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'month'))}${techOpen()}
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
@@ -1110,7 +1181,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         <h3 class="rh">ความสัมพันธ์กับดวงเดิม วัยจร และปีจร</h3>
         <div class="rels">${relHTML(rels)}</div>
         <h3 class="rh">คำทำนายเดือนนี้</h3>
-        <div class="pred">${blocksHTML(withFour(BaziNarrative.transit(r, an, q, 'month', rels, 'mo'), r, an, q, 'month'))}</div>`;
+        <div class="pred">${blocksHTML(withFour(BaziNarrative.transit(r, an, q, 'month', rels, 'mo'), r, an, q, 'month'))}</div>${techClose()}`;
     };
     $('months').onclick = (ev) => { const b = ev.target.closest('button[data-m]'); if (!b) return; monthSel = Number(b.dataset.m); drawYears(); if (window.matchMedia('(max-width: 600px)').matches) $('monthDetail').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     drawYears();
@@ -1129,6 +1200,13 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       const d = BaziYearly.day(r, an, TODAY.year, TODAY.month, TODAY.day, true), hs = BaziYearly.hours(r, an, TODAY.year, TODAY.month, TODAY.day);
       const hi = BaziYearly.hourIndex(hs, NOW_H), h = hs[hi], drt = RATE(d.score), hrt = RATE(h.score);
       const left = goodHours(hs).filter((x) => x.to > NOW_H);
+      if (!PRO) {
+        const t = BaziPlain.level3(h.clashDay ? Math.min(h.score, -1) : h.score);
+        $('nowCard').innerHTML = `<div class="nowhead"><b>ตอนนี้</b> <span>${d.label} · ${String(NOW_H).padStart(2, '0')}.${String(nowD.getMinutes()).padStart(2, '0')} น.</span></div>
+          <div class="nowline"><span class="htg ${t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm'}">${h.label} · ${t[0]}</span><p>${escH(BaziPlain.hourLine(r, an, h))}</p></div>
+          <p class="nowgood"><b>ยามดีที่เหลือของวันนี้:</b> ${left.length ? left.map((x) => x.time).join(' · ') : 'ไม่มียามที่ส่งเสริมชัดเจนเหลือแล้ว'}</p>`;
+        return;
+      }
       $('nowCard').innerHTML = `
         <div class="nowhead"><b>ตอนนี้</b> <span>${d.label} · ${String(NOW_H).padStart(2, '0')}.${String(nowD.getMinutes()).padStart(2, '0')} น.</span></div>
         <div class="nowgrid">
@@ -1156,6 +1234,33 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
       const rels = BaziInteractions.withTransit(r, [{ key: 'dy', label: 'วันจร', stem: q.stem, branch: q.branch }], 'dy');
       const W = today ? 'วันนี้' : 'วันนั้น', gh = goodHours(hs);
       const h = hs[hourSel], hrt = RATE(h.score), hbg = BaziCore.tenGod(dmStem, h.pillar.hidden[0].stem);
+      if (!PRO) {
+        const R = BaziPlain.reading(r, an, q, today ? 'day' : 'dayx'), nowI = today ? BaziYearly.hourIndex(hs, NOW_H) : -1;
+        const row = (y, i) => { const t = BaziPlain.level3(y.clashDay ? Math.min(y.score, -1) : y.score), c = t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm';
+          return `<div class="hr ${c}${i === nowI ? ' now' : ''}"><span class="ln"></span><div><div class="t"><b>${y.time}</b><span class="htg ${c}">${t[1] > 0 ? 'ยามดี' : t[1] < 0 ? 'ควรเลี่ยง' : 'ยามกลาง'}</span>${i === nowI ? '<span class="htg nw">ตอนนี้</span>' : ''}<small>${y.label}</small></div><p>${escH(BaziPlain.hourLine(r, an, y))}</p></div></div>`; };
+        const day = hs.map((y, i) => [y, i]).filter(([y]) => y.from >= 5 && y.to <= 23), night = hs.map((y, i) => [y, i]).filter(([y]) => !(y.from >= 5 && y.to <= 23));
+        $('dayDetail').innerHTML = `
+          <h2>${x.label} <small>วัน${q.animal}${today ? ' · วันนี้' : ''}</small></h2>
+          ${plainHTML(R)}
+          <div class="phours"><h4>ยามของ${W}</h4>
+            <div class="best"><b>ยามดีที่สุด:</b> ${gh.length ? gh.filter((y) => y.from >= 5 && y.to <= 23).sort((a, b) => b.score - a.score).slice(0, 3).sort((a, b) => a.from - b.from).map((y) => y.time).join(' · ') || 'ช่วงกลางคืน' : 'ไม่มียามที่ส่งเสริมชัดเจน'}</div>
+            ${day.map(([y, i]) => row(y, i)).join('')}
+            <details class="night"><summary>ช่วงกลางคืน 23.00–05.00</summary>${night.map(([y, i]) => row(y, i)).join('')}</details>
+          </div>
+          <details class="why"><summary>ดูเหตุผลทางดวง</summary>
+            <div class="lgrid">
+              <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
+              <div class="lrows">
+                <div class="lrow"><span class="k">ราศีบน</span><span>${BaziCore.STEMS[q.stem]} ${BaziCore.STEMS_TH[q.stem]} · ${q.stemElement}${sign(q.stemYang)} · <b>${q.tenGod.code}</b> ${q.tenGod.th} · ${ST(x.a)}</span></div>
+                <div class="lrow"><span class="k">ราศีล่าง</span><span>${BaziCore.BRANCHES[q.branch]} ${BaziCore.BRANCHES_TH[q.branch]} · ${q.branchElement}${sign(q.branchYang)} · <b>${bg.code}</b> ${bg.th} · ${ST(x.b)}</span></div>
+              </div>
+            </div>
+            <h3 class="rh">ความสัมพันธ์ของ${W}กับดวงเดิม</h3>
+            <div class="rels">${relHTML(rels)}</div>
+            <p class="note">ยามแต่ละยามดูจากธาตุของราศีบนและราศีล่างของยามเทียบกับดวง · ใช้เวลานาฬิกา วันเปลี่ยนตอนเที่ยงคืน · ดวงรายวันและรายยามมีน้ำหนักน้อยกว่าดวงรายปีและดวง 10 ปี ใช้ประกอบการวางแผน</p>
+          </details>`;
+        return;
+      }
       $('dayDetail').innerHTML = `
         <h2>${x.label} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>วัน${q.animal}${today ? ' · วันนี้' : ''}</small></h2>
         <div class="lgrid">
@@ -1238,7 +1343,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
         ${res.ranked.length ? res.ranked.map((x, i) => `<div class="rblock arank">
           <div class="mih"><h3><span class="anum">${i + 1}</span> ${x.label} <span class="han" style="font-family:var(--f-han)">${hanPair(x.pillar)}</span> <small>วัน${x.pillar.animal}</small></h3><span class="tlv ${x.level === 'พอใช้' ? 'r-mix' : 'r-good'}">${x.level} · ${x.score} คะแนน</span></div>
           <p class="ahrs"><b>ยามที่แนะนำ:</b> ${x.hours.length ? x.hours.map((h) => `<span class="chip">${h.label} ${h.time}</span>`).join(' ') : 'ไม่มียามที่เด่นชัดในช่วง 05.00–21.00 ใช้ช่วงเวลาใดก็ได้ที่สะดวก ยกเว้นยามที่ชงวังคู่ครอง'}</p>
-          ${x.per.map((p) => `<p class="src" style="margin:4px 0 0">${x.per.length > 1 ? `<b>${escH(p.name)}:</b> ` : ''}<span class="r-good">ดี:</span> ${escH(p.plus.join(' · ') || '—')}${p.minus.length ? ` · <span class="r-bad">ข้อด้อย:</span> ${escH(p.minus.join(' · '))}` : ''}</p>`).join('')}
+          ${x.per.map((p) => `<p class="areason">${x.per.length > 1 ? `<b>${escH(p.name)}:</b> ` : ''}<span class="r-good">ดี:</span> ${escH(p.plus.join(' · ') || '—')}${p.minus.length ? ` · <span class="r-bad">ข้อด้อย:</span> ${escH(p.minus.join(' · '))}` : ''}</p>`).join('')}
         </div>`).join('') : '<p>ในช่วงวันที่นี้ไม่มีวันที่ธาตุส่งเสริมพอจะแนะนำ ลองขยายช่วงวันที่ หรือเลือกช่วงอื่น</p>'}
         <p class="note">${escH(res.rule)}</p>`;
     };
@@ -1258,6 +1363,7 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
     const favE = [...new Set(an.favorable.filter((x) => !x.position).map((x) => x.element))];
     const tipFull = DP ? `${DP.tip}${favE.length ? ` · ธาตุที่ช่วยเสริมดวงคุณคือ${favE.map((e) => BaziCore.ELEMENTS[e]).join(' ')} ใช้สี${favE.map((e) => BaziNarrative.ELEMENT_LIFE[e].colors.split(' ')[0]).join(' ')} และหันไปทาง${favE.map((e) => BaziNarrative.ELEMENT_LIFE[e].dir).join(' ')}` : ''}` : '';
     $('dpHero').innerHTML = DP ? `<button type="button" class="dphero" id="dpGo"><span class="dpimg">${BaziDayPillar.card(dpZh)}</span><span class="dptx"><small>บุคลิกตามเสาวัน ${dpZh}</small><b>${DP.img}</b><span>${DP.tag}</span><em>อ่านบุคลิกเต็ม ›</em></span></button>` : '';
+    { const ns = BaziShensha.natal(r); $('natStars').innerHTML = ns.length ? `<div class="nstars"><h3>ดาวพิเศษในดวงของคุณ</h3>${ns.map((x) => `<div class="nstar"><span class="ic" aria-hidden="true">${x.icon}</span><div><b>${x.th}</b>${PRO ? ` <span class="han">${x.zh}</span> <small>อยู่ที่${x.at.join(' ')}</small>` : ''}<p>${x.natal}</p></div></div>`).join('')}</div>` : ''; }
     const dpHTML = DP ? `<section class="panel dpcard"><div class="dpbig">${BaziDayPillar.card(dpZh)}</div><div class="dphead"><h2>${DP.img}</h2><p>${DP.tag} · เสาวัน ${dpZh}</p></div>
       ${[['ตัวตนของคุณ', DP.self], ['จุดแข็ง', DP.strong], ['สิ่งที่ควรระวัง', DP.care], ['การงาน', secTxt('career', 3)], ['การเงิน', secTxt('money', 3)], ['ความรักและความสัมพันธ์', secTxt('love', 2)]].map(([k, v]) => v ? `<h3>${k}</h3><p>${esc(v)}</p>` : '').join('')}
       <div class="dptip"><b>เคล็ดลับเสริมดวง</b><p>${esc(tipFull)}</p></div>

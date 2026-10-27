@@ -128,6 +128,12 @@ eq('หาฤกษ์: ไม่เกิน 5 อันดับ เรีย�
   const noClash = (x, c) => (x.pillar.branch + 6) % 12 !== c.pillars.day.branch;
   return [a.days, a.capped, a.ranked.length, a.ranked.every((x, i, L) => !i || L[i - 1].score >= x.score), a.ranked.every((x) => noClash(x, r)), a.ranked.every((x) => x.hours.every((h) => h.from >= 5 && h.to <= 21)), w.ranked.every((x) => x.per.length === 2 && noClash(x, r) && noClash(x, p2) && (x.pillar.branch + 6) % 12 !== p2.pillars.year.branch)]; })(), [92, true, 5, true, true, true, true]);
 
+const Ss = require('../js/shensha.js'), Pl = require('../js/plain.js');
+eq('ดาวพิเศษ: 庚 ดิถี ผู้อุปถัมภ์ที่ 丑未 · ปีเกิด 午 ดอกท้อที่ 卯 ม้าที่ 申 · ดวง 1990 มีผู้อุปถัมภ์ที่เสาเดือน 丑', (() => { const r = calc(1990, 1, 15, 10, 30); return [Ss.hits(r, 1).map((x) => x.id).includes('guiren'), Ss.hits(r, 3).some((x) => x.id === 'taohua' && x.by.includes('ปีเกิด')), Ss.hits(r, 8).some((x) => x.id === 'yima'), Ss.natal(r).map((x) => x.id + '@' + x.at.join()).join()]; })(), [true, true, true, 'guiren@เสาเดือน']);
+eq('โหมดทั่วไป: วัน 甲戌 (27 ต.ค. 2026) หัวเรื่องเงินจร ชงวังคู่ครองขึ้นป้ายและเลี่ยงเซ็นสัญญา · ทุกเสาจร 60 แบบมีหัวเรื่อง 3/3 ข้อและ 4 ด้าน', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r); const R = Pl.reading(r, an, r.daily(2026, 10, 27).pillar, 'day');
+  let ok = true; for (let i = 0; i < 60; i++) for (const k of ['luck', 'year', 'month', 'day']) { const q = r.daily(2026, 1, 1 + i).pillar; const x = Pl.reading(r, an, q, k); if (!x.title || x.do.length < 2 || x.avoid.length < 1 || x.aspects.length !== 4 || x.aspects.some((a) => a.bars < 1 || a.bars > 5 || !a.text)) ok = false; }
+  return [R.title, R.chips.some((c) => c.t.includes('ชงวังคู่ครอง')), R.avoid[0], Pl.level3(2)[0], Pl.level3(0)[0], Pl.level3(-1)[0], ok]; })(), ['วันเงินจรเข้า โอกาสใหม่มาไว', true, 'เซ็นสัญญาหรือตัดสินใจเรื่องใหญ่', 'ดี', 'กลาง', 'ควรระวัง', true]);
+
 const DPm = require('../js/daypillar.js');
 eq('เสาวัน 60 แบบครบ มีข้อความทุกช่อง และภาพ SVG', [DPm.list().length, DPm.list().every((k) => { const d = DPm.get(k); return d.img && d.tag && d.self && d.strong && d.care && d.tip && DPm.card(k).startsWith('<svg'); }), new Set(DPm.list().map((k) => DPm.get(k).img)).size], [60, true, 60]);
 
