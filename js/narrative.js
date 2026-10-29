@@ -495,8 +495,10 @@
         const dm = chart.pillars.day.stem, dmEl = B.STEM_ELEMENT[dm], male = (chart.input && chart.input.gender) !== 'F';
         const E = (e) => B.ELEMENTS[e];
         const fav = an.favorable, unf = an.unfavorable;
-        const favE = (e, st) => fav.some((x) => x.element === e && (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && (!x.position || x.position === (st === tp.stem ? 'stem' : 'branch')));
-        const unfE = (e, st) => unf.some((x) => x.element === e && (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && (!x.position || x.position === (st === tp.stem ? 'stem' : 'branch')));
+        const cond = (x, pos) => (!x.position || x.position === pos) && (!x.branches || (pos === 'branch' && x.branches.includes(tp.branch))) &&
+            (!x.stems || (pos === 'stem' && x.stems.includes(tp.stem))) && (x.when == null || [B.STEM_ELEMENT[tp.stem], B.BRANCH_ELEMENT[tp.branch]].includes(x.when));
+        const favE = (e, st) => fav.some((x) => x.element === e && (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && cond(x, st === tp.stem ? 'stem' : 'branch'));
+        const unfE = (e, st) => unf.some((x) => x.element === e && (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && cond(x, st === tp.stem ? 'stem' : 'branch'));
         const judge = (e, st) => favE(e, st) && !unfE(e, st) ? 1 : unfE(e, st) && !favE(e, st) ? -1 : 0;
         const sEl = B.STEM_ELEMENT[tp.stem], bEl = B.BRANCH_ELEMENT[tp.branch], bMain = tp.hidden[0].stem;
         const a = judge(sEl, tp.stem), b = judge(bEl, bMain), sum = a + b;

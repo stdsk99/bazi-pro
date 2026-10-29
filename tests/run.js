@@ -146,5 +146,15 @@ eq('โครงสร้างดวง: 1990-01-15 เดือน 丁丑 ด�
 const DPm = require('../js/daypillar.js');
 eq('เสาวัน 60 แบบครบ มีข้อความทุกช่อง และภาพ SVG', [DPm.list().length, DPm.list().every((k) => { const d = DPm.get(k); return d.img && d.tag && d.self && d.strong && d.care && d.tip && DPm.card(k).startsWith('<svg'); }), new Set(DPm.list().map((k) => DPm.get(k).img)).size], [60, true, 60]);
 
+
+// --- ตรวจเทียบชั้นวิเคราะห์กับผลของระบบอ้างอิงที่บันทึกไว้ (สุ่มทุก 5 แถว) ---
+const RC = require('../tools/refcheck/check.js');
+eq('ตรงกับระบบอ้างอิง: ทุกผังที่ผูกได้ และวันเกิดจริง (สุ่มตรวจ 1 ใน 5)', (() => { const r = RC.run(5, null); return [r.all.ok === r.all.n, r.dates.ok === r.dates.n, r.all.n > 100000]; })(), [true, true, true]);
+const fnChart = (s) => { const v = s.split(' ').map(Number), P = {}; [['hour', 0], ['day', 2], ['month', 4], ['year', 6]].forEach(([k, i]) => { P[k] = { stem: v[i] - 1, branch: v[i + 1] - 1 }; }); return { pillars: P }; };
+eq('ธาตุมีเงื่อนไข: ดวงกระแสทอง (辛未 เดือน 庚辰) ไม้ให้โทษเมื่อมากับไฟ · ดวงอ่อน 壬申 เดือน 丙寅 ดินดีเฉพาะฉลู มะโรง · การแปรธาตุ 庚寅 ยาม ทองบนก้านไม่นับ', (() => {
+  const a = An.analyze(fnChart('6 2 8 8 7 5 2 2')), b = An.analyze(fnChart('2 6 9 9 3 3 1 1')), c = An.analyze(fnChart('7 3 3 3 3 3 1 1'));
+  return [a.pattern, a.unfavorable.map((x) => x.th + An.itemNote(x)).join(' '), b.strength, b.favorable.map((x) => x.th + An.itemNote(x)).join(' '), c.transformed.map((t) => `${t.pillar}/${t.part}/${t.to}`).join()]; })(),
+  [3, 'ไฟ ไม้ถ้ามากับไฟ', 3, 'ทอง น้ำ ดินเฉพาะฉลู มะโรง', 'hour/stem/null']);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

@@ -1,0 +1,67 @@
+import __REFPKG__.*;
+import java.io.*;
+import java.util.*;
+public class H {
+  static int[] ET, EL;
+  static void setup(PopClass p) throws Exception {
+    ExMain.frmExMain[26] = p;
+    java.lang.reflect.Field f = ExMain.class.getDeclaredField("ExClassFormID"); f.setAccessible(true);
+    ((Object[]) f.get(null))[26] = ExMain.FormID.PopClass;
+    java.lang.reflect.Field fc = ExMain.class.getDeclaredField("ExClassCount"); fc.setAccessible(true); fc.setInt(null, 27);
+    ExMain.AstroClass = new AstronomyClass();
+    for (int i = 0; i < 6; i++) ExMain.MainFS[i] = p.new fsdata(i);
+    java.lang.reflect.Field fet = ExMain.class.getDeclaredField("EleTop"); fet.setAccessible(true);
+    java.lang.reflect.Field fel = ExMain.class.getDeclaredField("EleLow"); fel.setAccessible(true);
+    ET = (int[]) fet.get(null); EL = (int[]) fel.get(null);
+  }
+  static ExMain.fsdata make(PopClass p, String[] t) {
+    int[] v = new int[8]; for (int i = 0; i < 8; i++) v[i] = Integer.parseInt(t[i]);
+    ExMain.fsdata d = p.new fsdata(0); ExMain.MainFS[0] = d;
+    if (t.length >= 13) { d.Byy = Integer.parseInt(t[8]); d.Bmm = Integer.parseInt(t[9]); d.Bdd = Integer.parseInt(t[10]); d.Bhr = Integer.parseInt(t[11]); d.Bmn = Integer.parseInt(t[12]); } else { d.Byy = 2000; d.Bmm = 4; d.Bdd = 12; d.Bhr = 12; d.Bmn = 0; }
+    d.LocByy = d.Byy; d.LocBmm = d.Bmm; d.LocBdd = d.Bdd; d.LocBhr = d.Bhr; d.LocBmn = d.Bmn;
+    for (int k = 2; k < 6; k++) { d.Fn[k][0] = v[(k - 2) * 2]; d.Fn[k][1] = v[(k - 2) * 2 + 1]; d.Ele[k][0] = ET[d.Fn[k][0] - 1]; d.Ele[k][1] = EL[d.Fn[k][1] - 1]; }
+    return d;
+  }
+  static String arr(int[] a, int n) { StringBuilder s = new StringBuilder(); for (int i = 0; i < n; i++) { if (i > 0) s.append('+'); s.append(a[i]); } return s.toString(); }
+  public static void main(String[] args) throws Exception {
+    PopClass p = new HP();
+    ExMain.frmExMain[26] = p;
+    java.lang.reflect.Field f = ExMain.class.getDeclaredField("ExClassFormID"); f.setAccessible(true);
+    Object[] ids = (Object[]) f.get(null);
+    ids[26] = ExMain.FormID.PopClass;
+    java.lang.reflect.Field fc = ExMain.class.getDeclaredField("ExClassCount"); fc.setAccessible(true); fc.setInt(null, 27);
+    ExMain.AstroClass = new AstronomyClass();
+    for (int i = 0; i < 6; i++) ExMain.MainFS[i] = p.new fsdata(i);
+    java.lang.reflect.Field fet = ExMain.class.getDeclaredField("EleTop"); fet.setAccessible(true);
+    java.lang.reflect.Field fel = ExMain.class.getDeclaredField("EleLow"); fel.setAccessible(true);
+    int[] ET = (int[]) fet.get(null), EL = (int[]) fel.get(null);
+    if (args.length > 0) { System.out.println("ET " + Arrays.toString(ET) + " EL " + Arrays.toString(EL)); }
+    BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+    PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(FileDescriptor.out)), false);
+    PrintStream nul = new PrintStream(OutputStream.nullOutputStream());
+    System.setOut(nul); System.setErr(nul);
+    String line;
+    while ((line = r.readLine()) != null) {
+      line = line.trim(); if (line.isEmpty()) continue;
+      String[] t = line.split("\\s+"); int[] v = new int[8];
+      for (int i = 0; i < 8; i++) v[i] = Integer.parseInt(t[i]);
+      try {
+        ExMain.fsdata d = p.new fsdata(0);
+        ExMain.MainFS[0] = d;
+        if (t.length >= 13) { d.Byy = Integer.parseInt(t[8]); d.Bmm = Integer.parseInt(t[9]); d.Bdd = Integer.parseInt(t[10]); d.Bhr = Integer.parseInt(t[11]); d.Bmn = Integer.parseInt(t[12]); } else { d.Byy = 2000; d.Bmm = 4; d.Bdd = 12; d.Bhr = 12; d.Bmn = 0; }
+        d.LocByy = d.Byy; d.LocBmm = d.Bmm; d.LocBdd = d.Bdd; d.LocBhr = d.Bhr; d.LocBmn = d.Bmn;
+        for (int k = 2; k < 6; k++) { d.Fn[k][0] = v[(k - 2) * 2]; d.Fn[k][1] = v[(k - 2) * 2 + 1]; d.Ele[k][0] = ET[d.Fn[k][0] - 1]; d.Ele[k][1] = EL[d.Fn[k][1] - 1]; }
+        p.CalActualEle1(0); p.CalElement(0, 0); p.CalActualEle2(0); p.CalElePower(0);
+        p.CalMainPop(0);
+        ExMain.fsdata e = ExMain.MainFS[0];
+        StringBuilder ae = new StringBuilder();
+        for (int k = 2; k < 6; k++) ae.append(e.ActualEle[k][0]).append(e.ActualEle[k][1]);
+        out.println(line + "\t" + e.PopType + "\t" + e.sPop.Type + "\t" + e.TotalScore + "\t" + arr(e.sPop.AID, e.sPop.Anum) + "\t" + arr(e.sPop.BID, e.sPop.Bnum) + "\t" + arr(e.sPop.CID, e.sPop.Cnum) + "\t" + ae);
+      } catch (Throwable ex) {
+        out.println(line + "\tERR\t" + ex);
+        if (args.length > 0) { ex.printStackTrace(out); }
+      }
+    }
+    out.flush();
+  }
+}

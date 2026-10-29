@@ -12,7 +12,7 @@
 
     // ธาตุที่ดวงต้องการ / ไม่ต้องการ (ไม่นับธาตุที่เป็นทั้งสองฝั่ง)
     function needs(an) {
-        const f = new Set(an.favorable.map((x) => x.element)), u = new Set(an.unfavorable.filter((x) => !x.polarity && !x.position).map((x) => x.element));
+        const f = new Set(an.favorable.map((x) => x.element)), u = new Set(an.unfavorable.filter((x) => !x.polarity && !x.position && !x.branches && !x.stems && x.when == null).map((x) => x.element));
         return { fav: [...f].filter((e) => !u.has(e)), unf: [...u].filter((e) => !f.has(e)) };
     }
     // ความสัมพันธ์ของกิ่งสองตัว

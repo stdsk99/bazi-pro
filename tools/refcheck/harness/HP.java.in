@@ -1,0 +1,5 @@
+import __REFPKG__.*;
+public class HP extends PopClass {
+  public String GS(int i) { return "#" + i; }
+  public String GS(String s) { return s; }
+}

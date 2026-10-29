@@ -1,0 +1,14 @@
+import __REFPKG__.*;
+import java.util.*;
+public class D {
+  public static void main(String[] a) throws Exception {
+    PopClass p = new PopClass();
+    for (String n : a) {
+      java.lang.reflect.Field f = null;
+      for (Class<?> c = PopClass.class; c != null && f == null; c = c.getSuperclass()) { try { f = c.getDeclaredField(n); } catch (NoSuchFieldException e) {} }
+      f.setAccessible(true);
+      Object v = java.lang.reflect.Modifier.isStatic(f.getModifiers()) ? f.get(null) : f.get(p);
+      System.out.println(n + " = " + Arrays.deepToString(new Object[]{v}));
+    }
+  }
+}

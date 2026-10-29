@@ -13,9 +13,12 @@
     // ให้คุณ/ให้โทษของธาตุในเสาจร — เกณฑ์เดียวกับป้ายบนการ์ดวัยจร ปีจร เดือนจร
     function judgeFn(chart, an) {
         const dm = chart.pillars.day.stem;
-        const ok = (x, st, pos) => (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && (!x.position || x.position === pos);
-        const j = (e, st, pos) => { const f = an.favorable.some((x) => x.element === e && ok(x, st, pos)), u = an.unfavorable.some((x) => x.element === e && ok(x, st, pos)); return f && !u ? 1 : u && !f ? -1 : 0; };
-        return (q) => { const a = j(B.STEM_ELEMENT[q.stem], q.stem, 'stem'), b = j(B.BRANCH_ELEMENT[q.branch], q.hidden[0].stem, 'branch'); return { a, b, sum: a + b }; };
+        // ธาตุบางรายการมีเงื่อนไข: เฉพาะราศีบน/ล่าง เฉพาะกิ่ง/ก้านบางตัว หรือเฉพาะเมื่อมากับธาตุอื่นในเสาเดียวกัน
+        const ok = (x, st, pos, q) => (!x.polarity || (x.polarity === 'same') === ((st % 2) === (dm % 2))) && (!x.position || x.position === pos) &&
+            (!x.branches || (pos === 'branch' && x.branches.includes(q.branch))) && (!x.stems || (pos === 'stem' && x.stems.includes(q.stem))) &&
+            (x.when == null || [B.STEM_ELEMENT[q.stem], B.BRANCH_ELEMENT[q.branch]].includes(x.when));
+        const j = (e, st, pos, q) => { const f = an.favorable.some((x) => x.element === e && ok(x, st, pos, q)), u = an.unfavorable.some((x) => x.element === e && ok(x, st, pos, q)); return f && !u ? 1 : u && !f ? -1 : 0; };
+        return (q) => { const a = j(B.STEM_ELEMENT[q.stem], q.stem, 'stem', q), b = j(B.BRANCH_ELEMENT[q.branch], q.hidden[0].stem, 'branch', q); return { a, b, sum: a + b }; };
     }
     const rel2 = (x, y) => { const r = I.find([{ key: 'a', label: 'a', stem: 0, branch: x }, { key: 'b', label: 'b', stem: 1, branch: y }], null).filter((t) => !t.type.startsWith('stem')); const o = ['clash', 'punish', 'selfPunish', 'harm', 'break', 'pair', 'halfTrio']; return o.map((t) => r.find((z) => z.type === t)).find(Boolean) || null; };
 

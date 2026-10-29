@@ -1,0 +1,59 @@
+import __REFPKG__.*;
+import java.io.*;
+import java.util.*;
+// dump intermediate values of the reference analysis for each chart
+public class H2 {
+  static String a1(int[] a) { StringBuilder s = new StringBuilder(); for (int i = 0; i < a.length; i++) { if (i > 0) s.append(','); s.append(a[i]); } return s.toString(); }
+  static String d1(double[] a) { StringBuilder s = new StringBuilder(); for (int i = 0; i < a.length; i++) { if (i > 0) s.append(','); s.append(a[i]); } return s.toString(); }
+  static String a2(int[][] a, int from) { StringBuilder s = new StringBuilder(); for (int i = from; i < a.length; i++) { if (i > from) s.append(';'); s.append(a1(a[i])); } return s.toString(); }
+  public static void main(String[] args) throws Exception {
+    PopClass p = new HP();
+    H.setup(p);
+    int[] ET = H.ET, EL = H.EL;
+    BufferedReader r = new BufferedReader(new InputStreamReader(System.in));
+    PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream(FileDescriptor.out)), false);
+    PrintStream nul = new PrintStream(OutputStream.nullOutputStream());
+    System.setOut(nul); System.setErr(nul);
+    String line;
+    while ((line = r.readLine()) != null) {
+      line = line.trim(); if (line.isEmpty()) continue;
+      String[] t = line.split("\\s+");
+      try {
+        ExMain.fsdata d = H.make(p, t);
+        p.CalActualEle1(0); p.CalElement(0, 0); p.CalActualEle2(0); p.CalElePower(0);
+        StringBuilder o = new StringBuilder(line);
+        o.append("\tact=").append(a2(d.ActualEle, 2));
+        o.append("\tasum=").append(a1(d.ASumEle)).append("\taseq=").append(a1(d.ASeqEle));
+        o.append("\tbsum=").append(a1(d.BSumEle));
+        o.append("\tep0=").append(d1(d.ElePower[0])).append("\tep1=").append(d1(d.ElePower[1]));
+        o.append("\tsep=").append(d1(d.SumElePower[0])).append(";").append(d1(d.SumElePower[1]));
+        o.append("\thi=").append(a1(d.HighElePowerIndex));
+        int tai = p.ChkTaiPar(0, d.Fn[3][1]), sea = p.ChkSeason(0, d.Fn[3][1]), smax = p.ChkMaxSumEle(0);
+        ExMain.chktai = tai; ExMain.chkseason = sea; ExMain.summax = smax;
+        for (int i = 0; i < 5; i++) { if (d.ASeqEle[i] >= 0 && d.ASeqEle[i] < 5) ExMain.TEle[d.ASeqEle[i]] = i; }
+        int kc = p.ChkChongLow(0); ExMain.kChong = kc;
+        int kce = p.ChkChongEkm1(0); ExMain.kChongEkm1 = kce;
+        p.CountEle(0);
+        int ks1 = p.ChkSpecialEkm1(0); ExMain.kSpecialEkm1 = ks1;
+        int ks2 = p.ChkSpecialEkm2(0); ExMain.kSpecialEkm2 = ks2;
+        p.PopCalType2(0);
+        o.append("\tcele=").append(a2(ExMain.CEle, 0));
+        o.append("\ttai=").append(tai).append("\tsea=").append(sea).append("\tsmax=").append(smax);
+        o.append("\tkc=").append(kc).append("\tkce=").append(kce).append("\tks1=").append(ks1).append("\tks2=").append(ks2);
+        o.append("\tts=").append(d.TotalScore);
+        o.append("\tbasic=").append(p.ChkBasicSpacial(0)).append("\tnosp=").append(p.ChkNoSpecial(0)).append("\tself=").append(p.ChkAboutSelf(0)).append("\tf6=").append(p.ChkFollower6Up(0));
+        // full run on a fresh record
+        ExMain.fsdata e = H.make(p, t);
+        p.CalActualEle1(0); p.CalElement(0, 0); p.CalActualEle2(0); p.CalElePower(0);
+        p.CalMainPop(0);
+        e = ExMain.MainFS[0];
+        o.append("\tpop=").append(e.PopType).append("\ttype=").append(e.sPop.Type).append("\tdt=").append(e.sPop.DTType).append("\tadd=").append(e.sPop.AddTemp);
+        o.append("\tA=").append(a1(Arrays.copyOf(e.sPop.AID, e.sPop.Anum))).append("\tB=").append(a1(Arrays.copyOf(e.sPop.BID, e.sPop.Bnum))).append("\tC=").append(a1(Arrays.copyOf(e.sPop.CID, e.sPop.Cnum)));
+        out.println(o);
+      } catch (Throwable ex) {
+        out.println(line + "\tERR\t" + ex);
+      }
+    }
+    out.flush();
+  }
+}

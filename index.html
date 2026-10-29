@@ -744,7 +744,6 @@ body.gen .why .src { display: block; }
 
 <script src="js/astro.js"></script>
 <script src="js/bazi-core.js"></script>
-<script src="js/analysis-tables.js"></script>
 <script src="js/analysis.js"></script>
 <script src="js/interactions.js"></script>
 <script src="js/narrative.js"></script>
@@ -983,8 +982,7 @@ body.gen .why .src { display: block; }
     const an = BaziAnalysis.analyze(r); window.__chart = r;
     const dmEl = BaziCore.STEM_ELEMENT[dmStem];
     const polStem = (pol) => BaziCore.STEMS[pol === 'same' ? dmStem : dmStem ^ 1];
-    const posTh = { stem: 'เฉพาะราศีบน', branch: 'เฉพาะราศีล่าง' };
-    const pill = (x) => `<span class="pill w${x.element}"><span class="dot">${x.polarity ? polStem(x.polarity) : '木火土金水'[x.element]}</span>${x.th}${x.polarity ? `<small>${x.polarity === 'same' ? 'ขั้วเดียวกับดิถี' : 'ขั้วตรงข้าม'}</small>` : ''}${x.position ? `<small>${posTh[x.position]}</small>` : ''}</span>`;
+    const pill = (x) => { const n = BaziAnalysis.itemNote(x); return `<span class="pill w${x.element}"><span class="dot">${x.polarity ? polStem(x.polarity) : '木火土金水'[x.element]}</span>${x.th}${x.polarity ? `<small>${x.polarity === 'same' ? 'ขั้วเดียวกับดิถี' : 'ขั้วตรงข้าม'}</small>` : ''}${n ? `<small>${n}</small>` : ''}</span>`; };
     const Z = [[0, 3.125, 'อ่อน', 'var(--w4)'], [3.125, 4.375, 'ค่อนอ่อน', 'var(--w0)'], [4.375, 4.875, 'สมดุล', 'var(--jade-wash)'], [4.875, 8, 'แข็งแรง', 'var(--w1)']];
     const pct = (v) => Math.max(0, Math.min(100, v / 8 * 100));
     const sc = an.score;
@@ -1001,11 +999,13 @@ body.gen .why .src { display: block; }
       <div class="fu">
         <span class="lab good">ธาตุให้คุณ</span><div class="pills">${an.favorable.map(pill).join('') || '—'}</div>
         <span class="lab bad">ธาตุให้โทษ</span><div class="pills">${an.unfavorable.map(pill).join('') || '—'}</div>
+        ${an.neutral.length ? `<span class="lab">ธาตุกลาง</span><div class="pills">${an.neutral.map(pill).join('')}</div>` : ''}
       </div>
+      ${an.transformed.length ? `<p class="note">การแปรธาตุ: ${an.transformed.map((t) => `${{ hour: 'ยาม', day: 'วัน', month: 'เดือน', year: 'ปี' }[t.pillar]}${t.part === 'stem' ? 'บน' : 'ล่าง'} ${BaziCore.ELEMENTS[t.from]}${t.to == null ? ' ไม่นับ' : ' → ' + BaziCore.ELEMENTS[t.to]} (${t.why})`).join(' · ')}</p>` : ''}
       ${(() => { const G = BaziStructure.structure(r); return `<div class="gestruct"><b>โครงสร้างดวง: <span class="han">${G.zh}</span> ${G.th}</b><p>${G.mean}</p><p class="note">ดูจาก${G.how} · ${G.from} เป็น ${G.code} ${G.codeTh} · ข้อมูลประกอบตามตำรามาตรฐาน ไม่เปลี่ยนธาตุให้คุณ/ให้โทษ</p></div>`; })()}
       <h2 style="margin-top:18px">กำลังธาตุตามฤดูเกิด</h2>
       <div class="bars">${(() => { const mx = Math.max(...an.seasonal.map((x) => x.value), 1); return [0, 1, 2, 3, 4].map((e) => { const v = an.seasonal.find((x) => x.element === e).value; return `<div class="bar e${e}"><span>${BaziCore.ELEMENTS[e]}</span><span class="track"><span class="fill" style="display:block;width:${v / mx * 100}%"></span></span><span class="mono" style="color:var(--ink)">${v}</span></div>`; }).join(''); })()}</div>
-      <p class="note">จำนวนตัวในดวง ถ่วงน้ำหนักตามธาตุของเดือนเกิด · ยังไม่รวมการแปรธาตุจากภาคี/ชงของราศีล่าง</p>`;
+      <p class="note">จำนวนตัวในดวง ถ่วงน้ำหนักตามธาตุของเดือนเกิด · นับตามธาตุหลังการแปรธาตุ</p>`;
     if (PRO) $('verdict').innerHTML = verdictPro;
     else {
       // โหมดคนทั่วไป: ดวงแข็งหรืออ่อนแปลว่าอะไร · ธาตุที่ช่วยและวิธีใช้ · ส่วนคะแนนพับไว้
@@ -1065,17 +1065,7 @@ body.gen .why .src { display: block; }
     const now = new Date(); const nowKey = now.getFullYear() * 1e4 + (now.getMonth() + 1) * 100 + now.getDate();
     const key = (d) => d.year * 1e4 + d.month * 100 + d.day;
     // ประเมินธาตุของวัยจรเทียบธาตุให้คุณ/ให้โทษ
-    const sameRule = (x, stemIdx, pos) => (!x.polarity || (x.polarity === 'same') === ((stemIdx % 2) === (dmStem % 2))) && (!x.position || x.position === pos);
-    const judge = (elName, stemIdx, pos) => {
-      const e = E(elName);
-      const f = an.favorable.some((x) => x.element === e && sameRule(x, stemIdx, pos));
-      const u = an.unfavorable.some((x) => x.element === e && sameRule(x, stemIdx, pos));
-      return f && !u ? 1 : u && !f ? -1 : 0;
-    };
-    const rateOf = (q) => {
-      const a = judge(q.stemElement, q.stem, 'stem'), b = judge(q.branchElement, q.hidden[0].stem, 'branch');
-      return { a, b, sum: a + b };
-    };
+    const rateOf = BaziYearly.judgeFn(r, an);
     const RATE = (v) => { const c = v > 0 ? 'r-good' : v < 0 ? 'r-bad' : 'r-mix'; return PRO ? [c, `${LV5[Math.max(-2, Math.min(2, v)) + 2]} (${v > 0 ? '+' : ''}${v})`] : [c, BaziPlain.level3(v)[0]]; };
     const ST = (v) => v > 0 ? '<span class="r-good">ธาตุให้คุณ</span>' : v < 0 ? '<span class="r-bad">ธาตุให้โทษ</span>' : '<span class="r-mix">กลางๆ</span>';
     const curIdx = L.periods.findIndex((p) => key(p.start) <= nowKey && nowKey < key(p.end));
