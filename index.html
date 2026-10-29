@@ -470,6 +470,8 @@ body.gen .why .src { display: block; }
 .nstar .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--jade-wash); }
 .nstar p { margin: 0; color: var(--ink-soft); } .nstar .han { font-family: var(--f-han); }
 .eluse { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px dashed var(--rule); font-size: .92rem; }
+.gestruct { border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; margin-top: 14px; background: var(--sheet); }
+.gestruct p { margin: 4px 0 0; }
 .offbox { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 16px; margin-bottom: 12px; }
 .offbox p { margin: 4px 0 0; color: var(--ink-soft); }
 .areason { margin: 4px 0 0; font-size: .86rem; color: var(--ink-soft); }
@@ -753,6 +755,7 @@ body.gen .why .src { display: block; }
 <script src="js/almanac.js"></script>
 <script src="js/auspicious.js"></script>
 <script src="js/shensha.js"></script>
+<script src="js/structure.js"></script>
 <script src="js/plain.js"></script>
 <script>
 (function () {
@@ -999,6 +1002,7 @@ body.gen .why .src { display: block; }
         <span class="lab good">ธาตุให้คุณ</span><div class="pills">${an.favorable.map(pill).join('') || '—'}</div>
         <span class="lab bad">ธาตุให้โทษ</span><div class="pills">${an.unfavorable.map(pill).join('') || '—'}</div>
       </div>
+      ${(() => { const G = BaziStructure.structure(r); return `<div class="gestruct"><b>โครงสร้างดวง: <span class="han">${G.zh}</span> ${G.th}</b><p>${G.mean}</p><p class="note">ดูจาก${G.how} · ${G.from} เป็น ${G.code} ${G.codeTh} · ข้อมูลประกอบตามตำรามาตรฐาน ไม่เปลี่ยนธาตุให้คุณ/ให้โทษ</p></div>`; })()}
       <h2 style="margin-top:18px">กำลังธาตุตามฤดูเกิด</h2>
       <div class="bars">${(() => { const mx = Math.max(...an.seasonal.map((x) => x.value), 1); return [0, 1, 2, 3, 4].map((e) => { const v = an.seasonal.find((x) => x.element === e).value; return `<div class="bar e${e}"><span>${BaziCore.ELEMENTS[e]}</span><span class="track"><span class="fill" style="display:block;width:${v / mx * 100}%"></span></span><span class="mono" style="color:var(--ink)">${v}</span></div>`; }).join(''); })()}</div>
       <p class="note">จำนวนตัวในดวง ถ่วงน้ำหนักตามธาตุของเดือนเกิด · ยังไม่รวมการแปรธาตุจากภาคี/ชงของราศีล่าง</p>`;
@@ -1092,7 +1096,7 @@ body.gen .why .src { display: block; }
       const bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
       $('luckDetail').innerHTML = `
         <h2>${PRO ? 'วัยจรช่วงที่' : 'ดวง 10 ปี ช่วงที่'} ${luckSel + 1} <small>อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} เดือน` : ''}${endAge ? ` – ${endAge}` : ''} · ${p.start.day}/${p.start.month}/${p.start.year} – ${p.end.day}/${p.end.month}/${p.end.year}</small></h2>
-        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'luck'))}${techOpen()}${kongNote(q)}
+        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'luck'))}${(() => { const LS = BaziStructure.luckStrength(r, an, q); return `<div class="lsum"><b>กำลังดวงช่วงนี้:</b> ${LS.text}${LS.note ? ` (${LS.note})` : ''}</div>`; })()}${techOpen()}${kongNote(q)}
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">

@@ -470,6 +470,8 @@ body.gen .why .src { display: block; }
 .nstar .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--jade-wash); }
 .nstar p { margin: 0; color: var(--ink-soft); } .nstar .han { font-family: var(--f-han); }
 .eluse { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px dashed var(--rule); font-size: .92rem; }
+.gestruct { border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; margin-top: 14px; background: var(--sheet); }
+.gestruct p { margin: 4px 0 0; }
 .offbox { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 16px; margin-bottom: 12px; }
 .offbox p { margin: 4px 0 0; color: var(--ink-soft); }
 .areason { margin: 4px 0 0; font-size: .86rem; color: var(--ink-soft); }
@@ -2997,6 +2999,62 @@ body.gen .why .src { display: block; }
 
 </script>
 <script>
+// structure.js — ข้อมูลประกอบสำหรับโหมดมืออาชีพ
+// 1) โครงสร้างดวง (月令格局) ตามตำรามาตรฐาน: ดูก้านแฝงของราศีล่างเดือนที่ขึ้นมาบนราศีบน (透干) ถ้าไม่มี ใช้ก้านแฝงหลัก
+//    เป็นข้อมูลประกอบเท่านั้น ไม่เปลี่ยนธาตุให้คุณ/ให้โทษ ซึ่งยังใช้เกณฑ์ของระบบอ้างอิง
+// 2) ผลของวัยจรต่อกำลังดวง: ธาตุของเสาวัยจรหนุนหรือดึงพลังดิถี เทียบกับกำลังดวงเดิม
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'));
+    else root.BaziStructure = factory(root.BaziCore);
+})(typeof self !== 'undefined' ? self : this, function (B) {
+    'use strict';
+    const GE = {
+        '正官': { zh: '正官格', th: 'โครงสร้างอำนาจ', mean: 'ชีวิตเดินตามระบบและหน้าที่ เหมาะกับองค์กร ราชการ หรืองานที่มีลำดับขั้น เติบโตจากความน่าเชื่อถือ' },
+        '七杀': { zh: '七杀格', th: 'โครงสร้างพิฆาต', mean: 'ชีวิตเจอแรงกดดันและความท้าทายเป็นแรงขับ เหมาะกับงานที่ต้องตัดสินใจเด็ดขาด แก้วิกฤต หรือคุมคน' },
+        '正财': { zh: '正财格', th: 'โครงสร้างโชคลาภ', mean: 'ชีวิตสร้างฐานะจากงานประจำและความขยัน เหมาะกับงานที่ผลตอบแทนชัดเจน การบริหารเงิน และทรัพย์สิน' },
+        '偏财': { zh: '偏财格', th: 'โครงสร้างโชคลอย', mean: 'ชีวิตหาเงินจากโอกาสและเครือข่าย เหมาะกับการค้า การขาย การลงทุน และงานที่เคลื่อนไหว' },
+        '食神': { zh: '食神格', th: 'โครงสร้างถ่ายเท', mean: 'ชีวิตเติบโตจากฝีมือ ความคิดสร้างสรรค์ และการบริการ เหมาะกับงานผลิต งานสอน อาหาร และศิลปะ' },
+        '伤官': { zh: '伤官格', th: 'โครงสร้างกลยุทธ์', mean: 'ชีวิตเด่นด้วยความคิดนอกกรอบและการแสดงออก เหมาะกับงานอิสระ การนำเสนอ เทคโนโลยี หรือที่ปรึกษา' },
+        '正印': { zh: '正印格', th: 'โครงสร้างเสริมหลัก', mean: 'ชีวิตเติบโตจากความรู้ ผู้ใหญ่ และชื่อเสียงที่ดี เหมาะกับการศึกษา วิชาการ และงานที่ต้องการความน่าเชื่อถือ' },
+        '偏印': { zh: '偏印格', th: 'โครงสร้างเสริมรอง', mean: 'ชีวิตเด่นด้านความรู้เฉพาะทางและความคิดลึก เหมาะกับงานวิจัย ศาสตร์เฉพาะ เทคนิค หรืองานเบื้องหลัง' },
+        '比肩': { zh: '建禄格', th: 'โครงสร้างคู่ธาตุ (เจี้ยนลก)', mean: 'ชีวิตพึ่งตัวเองตั้งแต่ต้น สร้างฐานด้วยมือตัวเอง ต้องหาธาตุอื่นในดวงเป็นทางใช้พลัง เช่น งาน เงิน หรือฝีมือ' },
+        '劫财': { zh: '月刃格', th: 'โครงสร้างคู่แข่ง (เอวี๋ยะยิ่ม)', mean: 'ชีวิตมีพลังและความกล้าสูง แข่งขันเก่ง ต้องมีกรอบหรือเป้าหมายมาคุมพลัง ไม่อย่างนั้นจะใช้พลังเกินตัว' }
+    };
+    // โครงสร้างดวงจากราศีล่างเดือน
+    function structure(chart) {
+        const P = chart.pillars, dm = P.day.stem, hid = P.month.hidden.map((h) => h.stem);
+        const tops = ['year', 'month', 'hour'].map((k) => P[k].stem);
+        let pick = hid[0], how = 'ก้านแฝงหลักของราศีล่างเดือน';
+        const shown = hid.find((s) => tops.includes(s));
+        if (shown != null) { pick = shown; how = `ก้านแฝง ${B.STEMS[shown]} ของราศีล่างเดือนขึ้นมาบนราศีบน (透干)`; }
+        const tg = B.tenGod(dm, pick), g = tg.code;
+        // ดิถีหยิน กับก้านคู่แข่งในเดือน ถือเป็นเจี้ยนลกตามตำราส่วนใหญ่
+        const key = g === '劫财' && dm % 2 === 1 ? '比肩' : g;
+        return Object.assign({ code: g, codeTh: tg.th, from: B.STEMS[pick], how }, GE[key]);
+    }
+    // ผลของวัยจรต่อกำลังดวง · strength: 1 แข็ง 6 สมดุล 2 อ่อนปานกลาง 3 อ่อน 4 อ่อนมีโรค · pattern: ดวงพิเศษ
+    function luckStrength(chart, an, q) {
+        const dmEl = B.STEM_ELEMENT[chart.pillars.day.stem];
+        const sup = (e) => e === dmEl || e === (dmEl + 4) % 5;
+        const v = [B.STEM_ELEMENT[q.stem], B.STEM_ELEMENT[q.hidden[0].stem]].reduce((t, e) => t + (sup(e) ? 1 : -1), 0);
+        const dir = v > 0 ? 1 : v < 0 ? -1 : 0;
+        if (an.pattern) return { dir, text: dir > 0 ? 'ช่วงนี้มีธาตุที่หนุนดิถีเข้ามา' : dir < 0 ? 'ช่วงนี้มีธาตุที่ดึงพลังดิถีเข้ามา' : 'ช่วงนี้ธาตุที่หนุนและดึงพลังดิถีพอๆ กัน', note: 'ดวงพิเศษให้ดูธาตุให้คุณ/ให้โทษเป็นหลัก ไม่ใช่ความแข็งอ่อน' };
+        const strong = an.strength === 1, weak = an.strength === 2 || an.strength === 3 || an.strength === 4;
+        let text;
+        if (dir > 0) text = strong ? 'ช่วงนี้ดิถีได้แรงหนุนเพิ่มจนแข็งเกินไป ยิ่งต้องหาทางใช้พลังกับงานหรือเป้าหมายที่ชัด ไม่อย่างนั้นจะดื้อหรือขัดแย้งง่าย'
+            : weak ? 'ช่วงนี้ดิถีได้แรงหนุนเพิ่ม ดวงที่อ่อนจะแข็งแรงขึ้น มีกำลังรับงานและโอกาสได้มากกว่าเดิม'
+                : 'ช่วงนี้ดิถีได้แรงหนุนเพิ่ม ดวงเอียงไปทางแข็ง ควรหาทางใช้พลังให้เกิดผล';
+        else if (dir < 0) text = strong ? 'ช่วงนี้มีธาตุที่ดึงพลังดิถีออกไปใช้ ดวงที่แข็งจะสมดุลขึ้น เป็นช่วงที่พลังได้ถูกใช้เกิดผล'
+            : weak ? 'ช่วงนี้มีธาตุที่ดึงพลังดิถีออกไปมาก ดวงที่อ่อนจะเหนื่อยหนักขึ้น ควรหาผู้ช่วย ความรู้ หรือทีมมาหนุน'
+                : 'ช่วงนี้มีธาตุที่ดึงพลังดิถี ดวงเอียงไปทางอ่อน ควรรักษาแรงและไม่รับงานเกินตัว';
+        else text = 'ช่วงนี้ธาตุที่หนุนและดึงพลังดิถีพอๆ กัน กำลังดวงใกล้เคียงดวงเดิม';
+        return { dir, text };
+    }
+    return { structure, luckStrength, GE };
+});
+
+</script>
+<script>
 // plain.js — คำทำนายสำหรับโหมดคนทั่วไป: เล่าแบบ "คำตอบก่อน เหตุผลทีหลัง"
 // หัวเรื่อง → เหมาะทำ/ควรเลี่ยง → แต่ละด้าน (แถบ 5 ขีด) · ใช้กับวัยจร ปีจร เดือนจร วัน และยาม
 // คำนวณจากเกณฑ์เดียวกับโหมดมืออาชีพ (ธาตุให้คุณ/ให้โทษ สิบเทพ ความสัมพันธ์กับดวงเดิม ดาวพิเศษ) แล้วแปลเป็นภาษาชีวิตประจำวัน
@@ -3432,6 +3490,7 @@ body.gen .why .src { display: block; }
         <span class="lab good">ธาตุให้คุณ</span><div class="pills">${an.favorable.map(pill).join('') || '—'}</div>
         <span class="lab bad">ธาตุให้โทษ</span><div class="pills">${an.unfavorable.map(pill).join('') || '—'}</div>
       </div>
+      ${(() => { const G = BaziStructure.structure(r); return `<div class="gestruct"><b>โครงสร้างดวง: <span class="han">${G.zh}</span> ${G.th}</b><p>${G.mean}</p><p class="note">ดูจาก${G.how} · ${G.from} เป็น ${G.code} ${G.codeTh} · ข้อมูลประกอบตามตำรามาตรฐาน ไม่เปลี่ยนธาตุให้คุณ/ให้โทษ</p></div>`; })()}
       <h2 style="margin-top:18px">กำลังธาตุตามฤดูเกิด</h2>
       <div class="bars">${(() => { const mx = Math.max(...an.seasonal.map((x) => x.value), 1); return [0, 1, 2, 3, 4].map((e) => { const v = an.seasonal.find((x) => x.element === e).value; return `<div class="bar e${e}"><span>${BaziCore.ELEMENTS[e]}</span><span class="track"><span class="fill" style="display:block;width:${v / mx * 100}%"></span></span><span class="mono" style="color:var(--ink)">${v}</span></div>`; }).join(''); })()}</div>
       <p class="note">จำนวนตัวในดวง ถ่วงน้ำหนักตามธาตุของเดือนเกิด · ยังไม่รวมการแปรธาตุจากภาคี/ชงของราศีล่าง</p>`;
@@ -3525,7 +3584,7 @@ body.gen .why .src { display: block; }
       const bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
       $('luckDetail').innerHTML = `
         <h2>${PRO ? 'วัยจรช่วงที่' : 'ดวง 10 ปี ช่วงที่'} ${luckSel + 1} <small>อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} เดือน` : ''}${endAge ? ` – ${endAge}` : ''} · ${p.start.day}/${p.start.month}/${p.start.year} – ${p.end.day}/${p.end.month}/${p.end.year}</small></h2>
-        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'luck'))}${techOpen()}${kongNote(q)}
+        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'luck'))}${(() => { const LS = BaziStructure.luckStrength(r, an, q); return `<div class="lsum"><b>กำลังดวงช่วงนี้:</b> ${LS.text}${LS.note ? ` (${LS.note})` : ''}</div>`; })()}${techOpen()}${kongNote(q)}
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">

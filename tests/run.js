@@ -140,6 +140,9 @@ eq('ปฏิทิน: กงหวั่ง 甲子→戌亥 庚辰→申酉 ·
   const a = Au.find([{ chart: r, an, name: 'ก' }], 'business', { year: 2026, month: 11, day: 1 }, { year: 2027, month: 1, day: 31 });
   return [k(0, 0), k(6, 4), Al.officer(r, 2026, 10, 27).zh, Al.officer(r, 2026, 10, 28).zh, a.ranked.every((x) => !['破', '闭'].includes(x.officer.zh)), a.excludedOfficer > 0, Al.natalKong(r).branches.map((b) => B.BRANCHES[b]).join('')]; })(), ['戌亥', '申酉', '建', '除', true, true, '申酉']);
 
+const St2 = require('../js/structure.js');
+eq('โครงสร้างดวง: 1990-01-15 เดือน 丁丑 ดิถี 庚 · ก้านแฝง 己癸辛 ไม่ขึ้นราศีบนยกเว้น 辛 (เสายาม) → 劫财 ของดิถีหยาง = 月刃格 · วัยจรมีข้อความกำลังดวง', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r); const G = St2.structure(r); return [G.zh, r.luck.periods.every((p) => St2.luckStrength(r, an, p.pillar).text.length > 10)]; })(), ['月刃格', true]);
+
 const DPm = require('../js/daypillar.js');
 eq('เสาวัน 60 แบบครบ มีข้อความทุกช่อง และภาพ SVG', [DPm.list().length, DPm.list().every((k) => { const d = DPm.get(k); return d.img && d.tag && d.self && d.strong && d.care && d.tip && DPm.card(k).startsWith('<svg'); }), new Set(DPm.list().map((k) => DPm.get(k).img)).size], [60, true, 60]);
 
