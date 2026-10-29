@@ -134,6 +134,12 @@ eq('โหมดทั่วไป: วัน 甲戌 (27 ต.ค. 2026) หั�
   let ok = true; for (let i = 0; i < 60; i++) for (const k of ['luck', 'year', 'month', 'day']) { const q = r.daily(2026, 1, 1 + i).pillar; const x = Pl.reading(r, an, q, k); if (!x.title || x.do.length < 2 || x.avoid.length < 1 || x.aspects.length !== 4 || x.aspects.some((a) => a.bars < 1 || a.bars > 5 || !a.text)) ok = false; }
   return [R.title, R.chips.some((c) => c.t.includes('ชงวังคู่ครอง')), R.avoid[0], Pl.level3(2)[0], Pl.level3(0)[0], Pl.level3(-1)[0], ok]; })(), ['วันเงินจรเข้า โอกาสใหม่มาไว', true, 'เซ็นสัญญาหรือตัดสินใจเรื่องใหญ่', 'ดี', 'กลาง', 'ควรระวัง', true]);
 
+const Al = require('../js/almanac.js');
+eq('ปฏิทิน: กงหวั่ง 甲子→戌亥 庚辰→申酉 · เทพประจำวัน 27 ต.ค. 2026 (甲戌 ในเดือน 戌) = 建 และ 28 ต.ค. = 除 · หาฤกษ์ไม่มีวันต้องห้าม', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r);
+  const k = (st, br) => Al.kong({ stem: st, branch: br }).map((b) => B.BRANCHES[b]).join('');
+  const a = Au.find([{ chart: r, an, name: 'ก' }], 'business', { year: 2026, month: 11, day: 1 }, { year: 2027, month: 1, day: 31 });
+  return [k(0, 0), k(6, 4), Al.officer(r, 2026, 10, 27).zh, Al.officer(r, 2026, 10, 28).zh, a.ranked.every((x) => !['破', '闭'].includes(x.officer.zh)), a.excludedOfficer > 0, Al.natalKong(r).branches.map((b) => B.BRANCHES[b]).join('')]; })(), ['戌亥', '申酉', '建', '除', true, true, '申酉']);
+
 const DPm = require('../js/daypillar.js');
 eq('เสาวัน 60 แบบครบ มีข้อความทุกช่อง และภาพ SVG', [DPm.list().length, DPm.list().every((k) => { const d = DPm.get(k); return d.img && d.tag && d.self && d.strong && d.care && d.tip && DPm.card(k).startsWith('<svg'); }), new Set(DPm.list().map((k) => DPm.get(k).img)).size], [60, true, 60]);
 

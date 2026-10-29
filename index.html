@@ -428,6 +428,8 @@ button.link { background: none; border: 0; padding: 0 0 0 6px; color: var(--jade
 .modesw button { background: none; color: var(--jade); border-radius: 999px; padding: 5px 14px; font-size: .88rem; }
 .modesw button[aria-pressed="true"] { background: var(--jade); color: var(--sheet); }
 body.gen .pro-only { display: none !important; }
+body.gen #pillars .tg, body.gen #pillars .hsbox { display: none; }
+body.gen .board { grid-template-columns: 1fr; }
 body.pro .gen-only { display: none !important; }
 body.gen .src { display: none; }
 body.gen .why .src { display: block; }
@@ -467,6 +469,9 @@ body.gen .why .src { display: block; }
 .nstar { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 6px 0; }
 .nstar .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--jade-wash); }
 .nstar p { margin: 0; color: var(--ink-soft); } .nstar .han { font-family: var(--f-han); }
+.eluse { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px dashed var(--rule); font-size: .92rem; }
+.offbox { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 16px; margin-bottom: 12px; }
+.offbox p { margin: 4px 0 0; color: var(--ink-soft); }
 .areason { margin: 4px 0 0; font-size: .86rem; color: var(--ink-soft); }
 @media (max-width: 600px) { .pdo { grid-template-columns: 1fr; } }
 
@@ -582,7 +587,7 @@ body.gen .why .src { display: block; }
       <h2 id="h-chart">ผังดวง <span id="who"></span></h2>
       <div class="board">
         <div class="main4" id="pillars"></div>
-        <aside class="extra2" id="extras" aria-label="หลักเสริม"></aside>
+        <aside class="extra2 pro-only" id="extras" aria-label="หลักเสริม"></aside>
       </div>
     </section>
     <section class="panel basis" aria-labelledby="h-basis">
@@ -745,6 +750,7 @@ body.gen .why .src { display: block; }
 <script src="js/store.js"></script>
 <script src="js/yearly.js"></script>
 <script src="js/daypillar.js"></script>
+<script src="js/almanac.js"></script>
 <script src="js/auspicious.js"></script>
 <script src="js/shensha.js"></script>
 <script src="js/plain.js"></script>
@@ -769,12 +775,12 @@ body.gen .why .src { display: block; }
     document.body.classList.toggle('gen', !PRO); document.body.classList.toggle('pro', PRO);
     document.querySelectorAll('.modesw [data-mode]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.mode === 'pro') === PRO)));
     $('t-luck').textContent = PRO ? 'วัยจร' : 'ดวง 10 ปี'; $('t-year').textContent = PRO ? 'ปีจร' : 'ดวงรายปี'; $('t-today').textContent = PRO ? 'วันนี้ & ฤกษ์' : 'วันนี้';
-    $('t-analysis').hidden = !PRO;
   };
   const LV5 = ['ต้องระวัง', 'ติดขัด', 'กลาง', 'ดี', 'ดีมาก'];
   const plainHTML = (R) => `<div class="phero"><div class="pchips">${R.chips.map((c) => `<span class="pchip ${c.tone > 0 ? 'ok' : c.tone < 0 ? 'warn' : 'mid'}">${escH(c.t)}</span>`).join('')}</div><h3 class="ptitle">${escH(R.title)}</h3><p>${escH(R.lead)}</p></div>
     <div class="pdo"><div class="g"><h4>เหมาะทำ</h4><ul>${R.do.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div><div class="b"><h4>ควรเลี่ยง</h4><ul>${R.avoid.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div></div>
     <div class="pasp"><h4>แต่ละด้าน</h4>${R.aspects.map((a) => `<div class="asp"><span class="ic" aria-hidden="true">${a.icon}</span><div class="top"><b>${a.name}</b><span class="pbar${a.bars <= 2 ? ' lo' : ''}" role="img" aria-label="${a.bars} จาก 5">${[1, 2, 3, 4, 5].map((k) => `<i${k <= a.bars ? ' class="on"' : ''}></i>`).join('')}</span></div><p>${escH(a.text)}</p></div>`).join('')}</div>`;
+  const kongNote = (q) => window.BaziAlmanac && window.__chart && BaziAlmanac.isKong(window.__chart, q.branch) ? `<div class="lsum">ราศีล่าง ${BaziCore.BRANCHES[q.branch]} ตกกงหวั่ง (空亡) ของดวง ผลทั้งดีและร้ายของช่วงนี้จะเบาลง</div>` : '';
   const techOpen = () => PRO ? '' : '<details class="why"><summary>ดูเหตุผลทางดวง</summary>';
   const techClose = () => PRO ? '' : '</details>';
   let luckSel = null, yearSel = null, monthSel = null, readSel = null, buildPrint = null, drawMatch = null;
@@ -913,7 +919,7 @@ body.gen .why .src { display: block; }
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
   const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'today', 'match', 'manage'];
   function show(pg) {
-    if (!PAGES.includes(pg) || (!PRO && pg === 'analysis')) pg = 'chart';
+    if (!PAGES.includes(pg)) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
     try { localStorage.setItem('bazi.page', pg); } catch (e) {}
     try { history.replaceState(null, '', '#' + pg); } catch (e) {}
@@ -925,7 +931,7 @@ body.gen .why .src { display: block; }
     show(nx); $('t-' + nx).focus();
   });
   document.querySelector('.modesw').addEventListener('click', (ev) => { const b = ev.target.closest('[data-mode]'); if (!b) return; PRO = b.dataset.mode === 'pro'; try { localStorage.setItem('bazi.mode', PRO ? 'pro' : 'gen'); } catch (e) {}
-    applyMode(); const cur = PAGES.find((k) => !$('p-' + k).hidden) || 'chart'; render(); show(!PRO && cur === 'analysis' ? 'chart' : cur); });
+    applyMode(); const cur = PAGES.find((k) => !$('p-' + k).hidden) || 'chart'; render(); show(cur); });
   applyMode();
   document.querySelector('.tseg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-seg]'); if (!b) return; document.querySelectorAll('.tsegb').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); $('segDay').hidden = b.dataset.seg !== 'day'; $('segAusp').hidden = b.dataset.seg !== 'ausp'; });
   function render() {
@@ -960,7 +966,7 @@ body.gen .why .src { display: block; }
       }
       return out + '</div>';
     };
-    $('pillars').innerHTML = [['hour', 'ยาม'], ['day', 'ดิถี'], ['month', 'เดือน'], ['year', 'ปี']].map(([k, l]) => card(k, l, true)).join('');
+    $('pillars').innerHTML = (PRO ? [['hour', 'ยาม'], ['day', 'ดิถี'], ['month', 'เดือน'], ['year', 'ปี']] : [['hour', 'ยามเกิด'], ['day', 'วันเกิด (ตัวคุณ)'], ['month', 'เดือนเกิด'], ['year', 'ปีเกิด']]).map(([k, l]) => card(k, l, true)).join('');
     $('extras').innerHTML = `<div class="cap">หลักเสริม</div>${card('conception', 'ปฏิสนธิ', false)}${card('lifePalace', 'ลัคนา', false)}`;
 
     const dm = r.dayMaster, ct = r.calcTime, mt = r.monthTerm;
@@ -971,7 +977,7 @@ body.gen .why .src { display: block; }
       <dt>สารทถัดไป</dt><dd>${mt.next.th} ${mt.next.zh} <span class="mono">${fmt(mt.next)}</span></dd>
       <dt>เปลี่ยนปีที่</dt><dd>${OPT_TEXT[r.options.yearChange]}</dd>`;
 
-    const an = BaziAnalysis.analyze(r);
+    const an = BaziAnalysis.analyze(r); window.__chart = r;
     const dmEl = BaziCore.STEM_ELEMENT[dmStem];
     const polStem = (pol) => BaziCore.STEMS[pol === 'same' ? dmStem : dmStem ^ 1];
     const posTh = { stem: 'เฉพาะราศีบน', branch: 'เฉพาะราศีล่าง' };
@@ -979,7 +985,7 @@ body.gen .why .src { display: block; }
     const Z = [[0, 3.125, 'อ่อน', 'var(--w4)'], [3.125, 4.375, 'ค่อนอ่อน', 'var(--w0)'], [4.375, 4.875, 'สมดุล', 'var(--jade-wash)'], [4.875, 8, 'แข็งแรง', 'var(--w1)']];
     const pct = (v) => Math.max(0, Math.min(100, v / 8 * 100));
     const sc = an.score;
-    $('verdict').innerHTML = `
+    const verdictPro = `
       <div class="kind">${an.pattern ? 'ดวงพิเศษ' : 'ดวงปกติ · กำลังของดิถี'}</div>
       <div class="big">${an.pattern ? `${an.patternTh} <span class="han">${an.patternZh}</span>` : `ดวง${an.strengthTh}`}</div>
       <div class="gauge" role="img" aria-label="คะแนนฝ่ายช่วย ${sc.total}">
@@ -996,6 +1002,24 @@ body.gen .why .src { display: block; }
       <h2 style="margin-top:18px">กำลังธาตุตามฤดูเกิด</h2>
       <div class="bars">${(() => { const mx = Math.max(...an.seasonal.map((x) => x.value), 1); return [0, 1, 2, 3, 4].map((e) => { const v = an.seasonal.find((x) => x.element === e).value; return `<div class="bar e${e}"><span>${BaziCore.ELEMENTS[e]}</span><span class="track"><span class="fill" style="display:block;width:${v / mx * 100}%"></span></span><span class="mono" style="color:var(--ink)">${v}</span></div>`; }).join(''); })()}</div>
       <p class="note">จำนวนตัวในดวง ถ่วงน้ำหนักตามธาตุของเดือนเกิด · ยังไม่รวมการแปรธาตุจากภาคี/ชงของราศีล่าง</p>`;
+    if (PRO) $('verdict').innerHTML = verdictPro;
+    else {
+      // โหมดคนทั่วไป: ดวงแข็งหรืออ่อนแปลว่าอะไร · ธาตุที่ช่วยและวิธีใช้ · ส่วนคะแนนพับไว้
+      const SM = BaziNarrative.summary(r, an, BaziInteractions.natal(r)), get = (l) => SM.find((x) => x.label === l);
+      const st = get('กำลังดวง') || get('ลักษณะดวง'), fav = get('ธาตุที่ช่วยเสริม'), unf = get('ใช้แต่พอดี');
+      const EL = BaziNarrative.ELEMENT_LIFE, fe = an.favorable.map((x) => x.element).filter((e, i, a) => a.indexOf(e) === i);
+      $('verdict').innerHTML = `
+        <div class="kind">ดวงของคุณ</div>
+        <div class="big">${escH(st.text.split(' — ')[0])}</div>
+        <p style="margin:6px 0 10px">${escH(st.text.split(' — ')[1] || '')}</p>
+        ${st.more && st.more[0] ? `<p class="note" style="font-size:.92rem">${escH(st.more[0][1])}</p>` : ''}
+        <h3 style="margin:16px 0 6px">ธาตุที่ช่วยคุณ</h3>
+        <p style="margin:0 0 8px">${escH(fav ? fav.text : '—')}</p>
+        ${fe.map((e) => `<div class="eluse"><span class="pill w${e}"><span class="dot">${"木火土金水"[e]}</span>${BaziCore.ELEMENTS[e]}</span><div><b>สี</b> ${EL[e].colors} · <b>ทิศ</b> ${EL[e].dir}<br><b>งานที่เข้ากัน</b> ${EL[e].work}<br><b>สภาพแวดล้อม</b> ${EL[e].env}</div></div>`).join('')}
+        <h3 style="margin:16px 0 6px">ธาตุที่ควรใช้แต่พอดี</h3>
+        <p style="margin:0">${escH(unf ? unf.text : '—')}</p>
+        <details class="why"><summary>ดูเหตุผลทางดวง (คะแนนและกำลังธาตุ)</summary>${verdictPro}</details>`;
+    }
 
     // วงจรห้าธาตุ: เรียงตามวงให้กำเนิด ไม้ → ไฟ → ดิน → ทอง → น้ำ
     const REL = ['คู่ธาตุ', 'ธาตุถ่ายเท', 'ธาตุโชคลาภ', 'ธาตุอำนาจ', 'ธาตุส่งเสริม'];
@@ -1068,7 +1092,7 @@ body.gen .why .src { display: block; }
       const bg = BaziCore.tenGod(dmStem, q.hidden[0].stem);
       $('luckDetail').innerHTML = `
         <h2>${PRO ? 'วัยจรช่วงที่' : 'ดวง 10 ปี ช่วงที่'} ${luckSel + 1} <small>อายุ ${p.ageAtStart.years} ปี${p.ageAtStart.months ? ` ${p.ageAtStart.months} เดือน` : ''}${endAge ? ` – ${endAge}` : ''} · ${p.start.day}/${p.start.month}/${p.start.year} – ${p.end.day}/${p.end.month}/${p.end.year}</small></h2>
-        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'luck'))}${techOpen()}
+        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'luck'))}${techOpen()}${kongNote(q)}
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
@@ -1114,7 +1138,7 @@ body.gen .why .src { display: block; }
       if (lp) trans.unshift({ key: 'luck', label: 'วัยจร', stem: lp.stem, branch: lp.branch });
       $('yearDetail').innerHTML = `
         <h2>ปี ${a.year} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>ปี${q.animal} · อายุ ${a.age} ปี · ${a.start.day}/${a.start.month}/${a.start.year} – ${a.end.day}/${a.end.month}/${a.end.year}${lp ? ` · อยู่ใน${PRO ? 'วัยจร' : 'ช่วง 10 ปีของ'} ${lp.zh}` : (PRO ? ' · ยังไม่เข้าวัยจร' : '')}</small></h2>
-        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'year'))}${techOpen()}
+        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'year'))}${techOpen()}${kongNote(q)}
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
@@ -1169,7 +1193,7 @@ body.gen .why .src { display: block; }
       const rels = BaziInteractions.withTransit(r, tm, 'mo');
       $('monthDetail').innerHTML = `
         <h2>เดือน${q.animal} <span class="han" style="font-family:var(--f-han)">${q.zh}</span> <small>${x.term.th} ${x.term.zh} · ${x.start.day}/${x.start.month}/${x.start.year} – ${x.end.day}/${x.end.month}/${x.end.year}</small></h2>
-        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'month'))}${techOpen()}
+        ${PRO ? '' : plainHTML(BaziPlain.reading(r, an, q, 'month'))}${techOpen()}${kongNote(q)}
         <div class="lgrid">
           <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>
           <div class="lrows">
@@ -1204,7 +1228,7 @@ body.gen .why .src { display: block; }
         const t = BaziPlain.level3(h.clashDay ? Math.min(h.score, -1) : h.score);
         $('nowCard').innerHTML = `<div class="nowhead"><b>ตอนนี้</b> <span>${d.label} · ${String(NOW_H).padStart(2, '0')}.${String(nowD.getMinutes()).padStart(2, '0')} น.</span></div>
           <div class="nowline"><span class="htg ${t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm'}">${h.label} · ${t[0]}</span><p>${escH(BaziPlain.hourLine(r, an, h))}</p></div>
-          <p class="nowgood"><b>ยามดีที่เหลือของวันนี้:</b> ${left.length ? left.map((x) => x.time).join(' · ') : 'ไม่มียามที่ส่งเสริมชัดเจนเหลือแล้ว'}</p>`;
+          <p class="nowgood"><b>ยามดีที่เหลือของวันนี้:</b> ${left.length ? left.map((x) => x.time).join(' · ') : 'ไม่มียามที่ส่งเสริมชัดเจนเหลือแล้ว'}</p>${(() => { const o = BaziAlmanac.officer(r, TODAY.year, TODAY.month, TODAY.day); return o ? `<p class="nowgood"><b>วันนี้เป็น${o.name} ${o.zh}:</b> เหมาะ${o.good}</p>` : ''; })()}`;
         return;
       }
       $('nowCard').innerHTML = `
@@ -1232,7 +1256,7 @@ body.gen .why .src { display: block; }
       const hs = BaziYearly.hours(r, an, x.date.year, x.date.month, x.date.day);
       if (hourSel == null || hourSel >= hs.length) hourSel = today ? BaziYearly.hourIndex(hs, NOW_H) : hs.reduce((bi, h, i) => h.rank > hs[bi].rank ? i : bi, 0);
       const rels = BaziInteractions.withTransit(r, [{ key: 'dy', label: 'วันจร', stem: q.stem, branch: q.branch }], 'dy');
-      const W = today ? 'วันนี้' : 'วันนั้น', gh = goodHours(hs);
+      const W = today ? 'วันนี้' : 'วันนั้น', gh = goodHours(hs), OF = BaziAlmanac.officer(r, x.date.year, x.date.month, x.date.day);
       const h = hs[hourSel], hrt = RATE(h.score), hbg = BaziCore.tenGod(dmStem, h.pillar.hidden[0].stem);
       if (!PRO) {
         const R = BaziPlain.reading(r, an, q, today ? 'day' : 'dayx'), nowI = today ? BaziYearly.hourIndex(hs, NOW_H) : -1;
@@ -1242,6 +1266,7 @@ body.gen .why .src { display: block; }
         $('dayDetail').innerHTML = `
           <h2>${x.label} <small>วัน${q.animal}${today ? ' · วันนี้' : ''}</small></h2>
           ${plainHTML(R)}
+          ${OF ? `<div class="offbox"><b>เทพประจำวัน: ${OF.name} ${OF.zh}</b> <span class="htg ${OF.tone > 0 ? 'g' : OF.tone < 0 ? 'b' : 'm'}">${OF.tone > 0 ? 'วันใช้ได้' : OF.tone < 0 ? 'ไม่ควรใช้ทำเรื่องสำคัญ' : 'วันกลาง'}</span><p>เหมาะ: ${OF.good} · เลี่ยง: ${OF.bad}</p></div>` : ''}
           <div class="phours"><h4>ยามของ${W}</h4>
             <div class="best"><b>ยามดีที่สุด:</b> ${gh.length ? gh.filter((y) => y.from >= 5 && y.to <= 23).sort((a, b) => b.score - a.score).slice(0, 3).sort((a, b) => a.from - b.from).map((y) => y.time).join(' · ') || 'ช่วงกลางคืน' : 'ไม่มียามที่ส่งเสริมชัดเจน'}</div>
             ${day.map(([y, i]) => row(y, i)).join('')}
@@ -1271,6 +1296,7 @@ body.gen .why .src { display: block; }
           </div>
         </div>
         <div class="lsum">ภาพรวมจากธาตุ: <b class="${rt[0]}">${rt[1]}</b></div>
+        ${OF ? `<div class="offbox"><b>เทพประจำวัน: ${OF.name} ${OF.zh}</b> <span class="htg ${OF.tone > 0 ? 'g' : OF.tone < 0 ? 'b' : 'm'}">${OF.tone > 0 ? 'วันใช้ได้' : OF.tone < 0 ? 'ไม่ควรใช้ทำเรื่องสำคัญ' : 'วันกลาง'}</span><p>เหมาะ: ${OF.good} · เลี่ยง: ${OF.bad}</p></div>` : ''}
         <div class="hl dgo">${listCol(W + 'เหมาะกับ', 'good', x.good, 'งานประจำ เก็บรายละเอียด และวางแผน')}${listCol(W + 'ควรระวัง', 'bad', x.avoid, 'ไม่มีเรื่องที่ต้องระวังเป็นพิเศษ')}</div>
         <h3 class="rh" id="h-hours">12 ยามของ${W}</h3>
         <p class="nowgood"><b>ยามดีของ${W}:</b> ${gh.length ? gh.map((y) => `${y.label} ${y.time}`).join(' · ') : 'ไม่มียามที่ธาตุส่งเสริมชัดเจน'}</p>
@@ -1338,11 +1364,11 @@ body.gen .why .src { display: block; }
       const res = BaziAuspicious.find(people, pid, { year: fy, month: fm, day: fd }, { year: ty, month: tm, day: td });
       const who = people.length > 1 ? `${escH(people[0].name)} และ ${escH(people[1].name)}` : escH(people[0].name);
       out.innerHTML = `<h2>ฤกษ์${res.purpose.name}</h2>
-        <p class="sub" style="margin-top:0">ของ ${who} · ดู ${res.days} วัน${res.capped ? ' (จำกัดไว้ 3 เดือนแรกของช่วงที่เลือก)' : ''} · ตัดออก ${res.excluded} วันเพราะชงดวง</p>
+        <p class="sub" style="margin-top:0">ของ ${who} · ดู ${res.days} วัน${res.capped ? ' (จำกัดไว้ 3 เดือนแรกของช่วงที่เลือก)' : ''} · ตัดออก ${res.excluded} วัน (ชงดวง หรือเป็นวันต้องห้ามตามเทพประจำวัน ${res.excludedOfficer} วัน)</p>
         ${partNote}
         ${res.ranked.length ? res.ranked.map((x, i) => `<div class="rblock arank">
           <div class="mih"><h3><span class="anum">${i + 1}</span> ${x.label} <span class="han" style="font-family:var(--f-han)">${hanPair(x.pillar)}</span> <small>วัน${x.pillar.animal}</small></h3><span class="tlv ${x.level === 'พอใช้' ? 'r-mix' : 'r-good'}">${x.level} · ${x.score} คะแนน</span></div>
-          <p class="ahrs"><b>ยามที่แนะนำ:</b> ${x.hours.length ? x.hours.map((h) => `<span class="chip">${h.label} ${h.time}</span>`).join(' ') : 'ไม่มียามที่เด่นชัดในช่วง 05.00–21.00 ใช้ช่วงเวลาใดก็ได้ที่สะดวก ยกเว้นยามที่ชงวังคู่ครอง'}</p>
+          ${x.officer ? `<p class="ahrs"><b>เทพประจำวัน:</b> ${x.officer.name} ${x.officer.zh}${x.offAdj > 0 ? ' · เหมาะกับเรื่องนี้' : x.offAdj < 0 ? ' · ไม่ส่งเสริมเรื่องนี้' : ''}</p>` : ''}<p class="ahrs"><b>ยามที่แนะนำ:</b> ${x.hours.length ? x.hours.map((h) => `<span class="chip">${h.label} ${h.time}</span>`).join(' ') : 'ไม่มียามที่เด่นชัดในช่วง 05.00–21.00 ใช้ช่วงเวลาใดก็ได้ที่สะดวก ยกเว้นยามที่ชงวังคู่ครอง'}</p>
           ${x.per.map((p) => `<p class="areason">${x.per.length > 1 ? `<b>${escH(p.name)}:</b> ` : ''}<span class="r-good">ดี:</span> ${escH(p.plus.join(' · ') || '—')}${p.minus.length ? ` · <span class="r-bad">ข้อด้อย:</span> ${escH(p.minus.join(' · '))}` : ''}</p>`).join('')}
         </div>`).join('') : '<p>ในช่วงวันที่นี้ไม่มีวันที่ธาตุส่งเสริมพอจะแนะนำ ลองขยายช่วงวันที่ หรือเลือกช่วงอื่น</p>'}
         <p class="note">${escH(res.rule)}</p>`;
@@ -1363,7 +1389,8 @@ body.gen .why .src { display: block; }
     const favE = [...new Set(an.favorable.filter((x) => !x.position).map((x) => x.element))];
     const tipFull = DP ? `${DP.tip}${favE.length ? ` · ธาตุที่ช่วยเสริมดวงคุณคือ${favE.map((e) => BaziCore.ELEMENTS[e]).join(' ')} ใช้สี${favE.map((e) => BaziNarrative.ELEMENT_LIFE[e].colors.split(' ')[0]).join(' ')} และหันไปทาง${favE.map((e) => BaziNarrative.ELEMENT_LIFE[e].dir).join(' ')}` : ''}` : '';
     $('dpHero').innerHTML = DP ? `<button type="button" class="dphero" id="dpGo"><span class="dpimg">${BaziDayPillar.card(dpZh)}</span><span class="dptx"><small>บุคลิกตามเสาวัน ${dpZh}</small><b>${DP.img}</b><span>${DP.tag}</span><em>อ่านบุคลิกเต็ม ›</em></span></button>` : '';
-    { const ns = BaziShensha.natal(r); $('natStars').innerHTML = ns.length ? `<div class="nstars"><h3>ดาวพิเศษในดวงของคุณ</h3>${ns.map((x) => `<div class="nstar"><span class="ic" aria-hidden="true">${x.icon}</span><div><b>${x.th}</b>${PRO ? ` <span class="han">${x.zh}</span> <small>อยู่ที่${x.at.join(' ')}</small>` : ''}<p>${x.natal}</p></div></div>`).join('')}</div>` : ''; }
+    { const ns = BaziShensha.natal(r); $('natStars').innerHTML = ns.length ? `<div class="nstars"><h3>ดาวพิเศษในดวงของคุณ</h3>${ns.map((x) => `<div class="nstar"><span class="ic" aria-hidden="true">${x.icon}</span><div><b>${x.th}</b>${PRO ? ` <span class="han">${x.zh}</span> <small>อยู่ที่${x.at.join(' ')}</small>` : ''}<p>${x.natal}</p></div></div>`).join('')}</div>` : '';
+      const nk = BaziAlmanac.natalKong(r); $('natStars').innerHTML += `<div class="nstars"><h3>กงหวั่ง${PRO ? ' 空亡' : ' (ราศีที่ว่าง)'}</h3><div class="nstar"><span class="ic" aria-hidden="true">◌</span><div><b>${nk.branches.map((b) => BaziCore.BRANCHES[b] + ' ' + BaziCore.ANIMALS_TH[b]).join(' · ')}</b><p>${nk.hits.length ? nk.hits.map((h) => `${h.label}ตกกงหวั่ง: ${h.text}`).join(' · ') : 'ไม่มีเสาในดวงตกกงหวั่ง'} · ปี เดือน หรือวันที่ราศีล่างเป็น${nk.branches.map((b) => BaziCore.ANIMALS_TH[b]).join('หรือ')} ผลดีและร้ายจะเบาลง</p></div></div></div>`; }
     const dpHTML = DP ? `<section class="panel dpcard"><div class="dpbig">${BaziDayPillar.card(dpZh)}</div><div class="dphead"><h2>${DP.img}</h2><p>${DP.tag} · เสาวัน ${dpZh}</p></div>
       ${[['ตัวตนของคุณ', DP.self], ['จุดแข็ง', DP.strong], ['สิ่งที่ควรระวัง', DP.care], ['การงาน', secTxt('career', 3)], ['การเงิน', secTxt('money', 3)], ['ความรักและความสัมพันธ์', secTxt('love', 2)]].map(([k, v]) => v ? `<h3>${k}</h3><p>${esc(v)}</p>` : '').join('')}
       <div class="dptip"><b>เคล็ดลับเสริมดวง</b><p>${esc(tipFull)}</p></div>

@@ -2,9 +2,9 @@
 // ให้คะแนนแต่ละวันในช่วงที่เลือก จากธาตุของเสาวัน สิบเทพที่ตรงกับเรื่องที่จะทำ ความสัมพันธ์กับดวงเดิม และเดือนจร
 // แล้วเลือกยามดีของวันนั้นจากเกณฑ์เดียวกัน
 (function (root, factory) {
-    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'), require('./interactions.js'), require('./yearly.js'));
-    else root.BaziAuspicious = factory(root.BaziCore, root.BaziInteractions, root.BaziYearly);
-})(typeof self !== 'undefined' ? self : this, function (B, I, Y) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'), require('./interactions.js'), require('./yearly.js'), require('./almanac.js'));
+    else root.BaziAuspicious = factory(root.BaziCore, root.BaziInteractions, root.BaziYearly, root.BaziAlmanac);
+})(typeof self !== 'undefined' ? self : this, function (B, I, Y, AL) {
     'use strict';
     const TG_TH = { '比肩': 'คู่ธาตุ', '劫财': 'คู่แข่ง', '食神': 'ถ่ายเท', '伤官': 'กลยุทธ์', '偏财': 'โชคลอย', '正财': 'โชคลาภ', '七杀': 'พิฆาต', '正官': 'อำนาจ', '偏印': 'เสริมรอง', '正印': 'เสริมหลัก' };
     const G = Y.GROUP_OF;
@@ -79,14 +79,22 @@
         for (let k = 0; k < n; k++) {
             const t = new Date(a.getFullYear(), a.getMonth(), a.getDate() + k), y = t.getFullYear(), m = t.getMonth() + 1, d = t.getDate();
             const per = people.map((p) => Object.assign({ name: p.name }, scoreDay(p.chart, p.an, P, y, m, d)));
-            const blocked = per.some((x) => x.clashDay) || (P.calm || P.wedding ? per.some((x) => x.clashYear) : false);
-            const s = per.reduce((t2, x) => t2 + x.s, 0) / per.length;
-            all.push({ date: { year: y, month: m, day: d }, label: `วัน${WD[t.getDay()]}ที่ ${d} ${TH_M[m - 1]} ${y}`, pillar: per[0].pillar, score: Math.round(s * 10) / 10, per, blocked });
+            // 12 เทพประจำวัน: ตัดวันต้องห้ามของเรื่องนั้น · เทพที่เหมาะ +1.5 · กลุ่มกลาง (ดำ) ที่ไม่เหมาะกับเรื่อง −1
+            const off = AL ? AL.officer(people[0].chart, y, m, d) : null, rule = AL ? AL.PURPOSE[P.id] : null;
+            let adj = 0, offNote = null, offBad = false;
+            if (off && rule) {
+                if (rule.block.includes(off.zh)) { offBad = true; offNote = `${off.name} ${off.zh} เป็นวันต้องห้ามของเรื่องนี้`; }
+                else if (rule.plus.includes(off.zh)) { adj = 1.5; offNote = `${off.name} ${off.zh} เหมาะกับเรื่องนี้`; }
+                else if (off.tone === 0) { adj = -1; offNote = `${off.name} ${off.zh} ไม่ส่งเสริมเรื่องนี้`; }
+            }
+            const blocked = offBad || per.some((x) => x.clashDay) || (P.calm || P.wedding ? per.some((x) => x.clashYear) : false);
+            const s = per.reduce((t2, x) => t2 + x.s, 0) / per.length + adj;
+            all.push({ date: { year: y, month: m, day: d }, label: `วัน${WD[t.getDay()]}ที่ ${d} ${TH_M[m - 1]} ${y}`, pillar: per[0].pillar, score: Math.round(s * 10) / 10, per, blocked, officer: off, offNote, offAdj: adj });
         }
         const ok = all.filter((x) => !x.blocked).sort((p, q) => q.score - p.score || (p.date.year - q.date.year) || (p.date.month - q.date.month) || (p.date.day - q.date.day));
         const ranked = ok.slice(0, top).filter((x) => x.score > 0).map((x) => Object.assign(x, { hours: bestHours(people, P, x.date.year, x.date.month, x.date.day), level: x.score >= 6 ? 'ดีมาก' : x.score >= 3 ? 'ดี' : 'พอใช้' }));
-        return { purpose: P, days: n, capped, excluded: all.filter((x) => x.blocked).length, ranked, rule: RULE(P) };
+        return { purpose: P, days: n, capped, excluded: all.filter((x) => x.blocked).length, excludedOfficer: all.filter((x) => x.blocked && x.offNote && x.offNote.includes('ต้องห้าม')).length, ranked, rule: RULE(P) };
     }
-    const RULE = (P) => `เกณฑ์: ธาตุของราศีบนและราศีล่างของวันที่ดวงต้องการ +2 ที่ไม่ต้องการ −2 · สิบเทพของวันตรงกับเรื่อง${P.wedding ? ' (ดาวคู่ครอง)' : ''} +1.5 ถึง +2 · ภาคีกับวังคู่ครอง +${P.wedding ? 3 : 1} · เดือนจรที่ธาตุส่งเสริมหรือไม่ส่งเสริม ±0.5 ต่อแต้ม · ตัดวันที่ชงวังคู่ครองออก${P.calm || P.wedding ? ' และตัดวันที่ชงปีเกิด' : ' (วันที่ชงปีเกิดหัก 2)'}${P.wedding ? ' · คิดจากดวงทั้งสองคนแล้วเฉลี่ย วันที่ชงดวงคนใดคนหนึ่งจะถูกตัดออก' : ''} · ยามดีคือยามที่ธาตุให้คุณ ตรงกับเรื่อง และไม่ชงวังคู่ครอง เลือกเฉพาะช่วง 05.00–21.00`;
+    const RULE = (P) => `เกณฑ์: ธาตุของราศีบนและราศีล่างของวันที่ดวงต้องการ +2 ที่ไม่ต้องการ −2 · สิบเทพของวันตรงกับเรื่อง${P.wedding ? ' (ดาวคู่ครอง)' : ''} +1.5 ถึง +2 · ภาคีกับวังคู่ครอง +${P.wedding ? 3 : 1} · เดือนจรที่ธาตุส่งเสริมหรือไม่ส่งเสริม ±0.5 ต่อแต้ม · 12 เทพประจำวัน: เทพที่เหมาะกับเรื่อง +1.5 วันกลุ่มกลางที่ไม่เหมาะ −1 และตัดวัน${(AL ? AL.PURPOSE[P.id].block : ['破', '闭']).join(' ')} ออก · ตัดวันที่ชงวังคู่ครองออก${P.calm || P.wedding ? ' และตัดวันที่ชงปีเกิด' : ' (วันที่ชงปีเกิดหัก 2)'}${P.wedding ? ' · คิดจากดวงทั้งสองคนแล้วเฉลี่ย วันที่ชงดวงคนใดคนหนึ่งจะถูกตัดออก' : ''} · ยามดีคือยามที่ธาตุให้คุณ ตรงกับเรื่อง และไม่ชงวังคู่ครอง เลือกเฉพาะช่วง 05.00–21.00`;
     return { find, PURPOSES, MAX_DAYS };
 });

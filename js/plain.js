@@ -2,9 +2,9 @@
 // หัวเรื่อง → เหมาะทำ/ควรเลี่ยง → แต่ละด้าน (แถบ 5 ขีด) · ใช้กับวัยจร ปีจร เดือนจร วัน และยาม
 // คำนวณจากเกณฑ์เดียวกับโหมดมืออาชีพ (ธาตุให้คุณ/ให้โทษ สิบเทพ ความสัมพันธ์กับดวงเดิม ดาวพิเศษ) แล้วแปลเป็นภาษาชีวิตประจำวัน
 (function (root, factory) {
-    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'), require('./interactions.js'), require('./yearly.js'), require('./shensha.js'));
-    else root.BaziPlain = factory(root.BaziCore, root.BaziInteractions, root.BaziYearly, root.BaziShensha);
-})(typeof self !== 'undefined' ? self : this, function (B, I, Y, S) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'), require('./interactions.js'), require('./yearly.js'), require('./shensha.js'), require('./almanac.js'));
+    else root.BaziPlain = factory(root.BaziCore, root.BaziInteractions, root.BaziYearly, root.BaziShensha, root.BaziAlmanac);
+})(typeof self !== 'undefined' ? self : this, function (B, I, Y, S, AL) {
     'use strict';
     // [หัวเรื่อง, ประโยคนำ, ข้อดีสั้น, ข้อควรระวังสั้น, เหมาะทำ(ระยะสั้น), ควรเลี่ยง(ระยะสั้น), เหมาะทำ(ระยะยาว), ควรเลี่ยง(ระยะยาว)]
     const TG = {
@@ -159,6 +159,10 @@
         const ss = S.hits(chart, q.branch);
         for (const s of ss) { chips.push({ t: `${s.icon} ${s.th}`, tone: 1, star: s.id }); if (J.sum >= 0) doL.push(s.act); }
         if (ss.length) evt.push(ss.map((s) => `${s.th}มาถึง ${s.transit}`).join(' และ'));
+        if (AL && AL.isKong(chart, q.branch)) {
+            chips.push({ t: '◌ กงหวั่ง', tone: 0 });
+            evt.push(`ราศีล่างของ${W}ตกกงหวั่ง ผลทั้งดีและร้ายจะเบาลง เรื่องที่หวังไว้อาจไม่เต็มที่`);
+        }
         if (evt.length) lead += (J.sum >= 0 && rD && rD.type === 'clash' ? ' แต่' : ' ') + evt.join(' ');
         // แต่ละด้าน
         const tp = Y.topics(chart, an, q, kind === 'luck' ? 'luck' : kind === 'month' ? 'month' : kind === 'year' ? 'year' : kind === 'dayx' ? 'dayx' : 'day');
