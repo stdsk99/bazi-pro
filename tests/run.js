@@ -156,5 +156,14 @@ eq('ธาตุมีเงื่อนไข: ดวงกระแสทอ�
   return [a.pattern, a.unfavorable.map((x) => x.th + An.itemNote(x)).join(' '), b.strength, b.favorable.map((x) => x.th + An.itemNote(x)).join(' '), c.transformed.map((t) => `${t.pillar}/${t.part}/${t.to}`).join()]; })(),
   [3, 'ไฟ ไม้ถ้ามากับไฟ', 3, 'ทอง น้ำ ดินเฉพาะฉลู มะโรง', 'hour/stem/null']);
 
+
+const AIm = require('../js/ai.js');
+eq('AI: แฟ้มดวงมีผลวิเคราะห์ วัยจร ดวงรายปี และคำทำนายแม่แบบ · เครื่องมือของแอปคืนข้อมูลจริง · ข้อความถูกกรอง HTML', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r);
+  const c = AIm.context(r, an, { today: { year: 2026, month: 10, day: 30 } }); const T = AIm.tools(r, an); const t = (n) => T.find((x) => x.name === n);
+  return [c.includes('ธาตุให้คุณ: ไฟ, ไม้'), c.includes('← ช่วงปัจจุบัน'), c.includes('ปี 2027'), c.includes('[id: career]'), Buffer.byteLength(AIm.rewritePrompt(c, true)) < 200000,
+    /^ปี 2030 \(庚戌/.test(t('year_reading').execute({ year: 2030 })), t('month_readings').execute({ year: 2027 }).split('\n').length, /ยามดี/.test(t('day_reading').execute({ date: '2026-11-05' })),
+    (() => { try { t('day_reading').execute({ date: 'x' }); return false; } catch (e) { return true; } })(), AIm.md('## ก <b>\n- ข'), AIm.keyOf(r) === AIm.keyOf(calc(1990, 1, 15, 10, 30))]; })(),
+  [true, true, true, true, true, true, 12, true, true, '<h3>ก &lt;b&gt;</h3><ul><li>ข</li></ul>', true]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

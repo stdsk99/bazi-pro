@@ -503,6 +503,32 @@ body.gen .why .src { display: block; }
 @media (max-width: 600px) { .dphero { grid-template-columns: 120px 1fr; } }
 .bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
 #printView { display: none; }
+/* AI เรียบเรียงคำทำนาย และถามดวง */
+.aibox { display: grid; gap: 10px; }
+.aibox .aihead { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.aibox .aihead h2 { font-size: 1.1rem; margin: 0; }
+.aibtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.aitext { line-height: 1.75; }
+.aitext h3 { font-size: 1.08rem; margin: 18px 0 6px; color: var(--jade); }
+.aitext h3:first-child { margin-top: 2px; }
+.aitext h4 { font-size: 1rem; margin: 12px 0 4px; }
+.aitext p { margin: 0 0 10px; }
+.aitext ul { margin: 0 0 10px; padding-left: 1.3em; }
+.aitext li { margin: 3px 0; }
+.aisrc { color: var(--ink-soft); font-size: .85em; }
+.aistat { color: var(--ink-soft); font-size: .9rem; }
+.aistat.err { color: var(--bad); }
+.aicopy { width: 100%; min-height: 160px; font: inherit; font-size: .85rem; border: 1px solid var(--rule); border-radius: 8px; padding: 8px; background: var(--paper); color: var(--ink); }
+.chat { display: grid; gap: 12px; }
+.bub { max-width: 92%; border-radius: 12px; padding: 10px 14px; border: 1px solid var(--rule); }
+.bub.u { justify-self: end; background: var(--jade-wash); border-color: transparent; white-space: pre-wrap; }
+.bub.a { justify-self: start; background: var(--sheet); }
+.bub.a .aitext h3 { font-size: 1rem; margin-top: 12px; }
+.askform { display: grid; gap: 8px; }
+.askform textarea { width: 100%; min-height: 72px; font: inherit; border: 1px solid var(--rule); border-radius: 8px; padding: 10px; background: var(--sheet); color: var(--ink); resize: vertical; }
+.sugg { display: flex; flex-wrap: wrap; gap: 6px; }
+.sugg button { background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px; font-weight: 500; font-size: .9rem; }
+.sugg button:hover { border-color: var(--jade); color: var(--jade); }
 @media print {
   @page { size: A4; margin: 14mm 12mm; }
   body { background: #fff !important; }
@@ -577,6 +603,7 @@ body.gen .why .src { display: block; }
     <button type="button" role="tab" id="t-chart" data-page="chart" aria-controls="p-chart">ผังดวง</button>
     <button type="button" role="tab" id="t-analysis" data-page="analysis" aria-controls="p-analysis">วิเคราะห์ดวง</button>
     <button type="button" role="tab" id="t-read" data-page="read" aria-controls="p-read">คำทำนาย</button>
+    <button type="button" role="tab" id="t-ask" data-page="ask" aria-controls="p-ask">ถามดวง</button>
     <button type="button" role="tab" id="t-luck" data-page="luck" aria-controls="p-luck">วัยจร</button>
     <button type="button" role="tab" id="t-year" data-page="year" aria-controls="p-year">ปีจร</button>
     <button type="button" role="tab" id="t-today" data-page="today" aria-controls="p-today">วันนี้ & ฤกษ์</button>
@@ -637,8 +664,24 @@ body.gen .why .src { display: block; }
   </div>
 
   <div class="page" id="p-read" role="tabpanel" aria-labelledby="t-read" hidden>
+    <section class="panel aibox" id="aiRead" aria-live="polite"></section>
     <div class="decades" id="readNav" role="group" aria-label="หัวข้อคำทำนาย"></div>
     <div id="reading" class="reading"></div>
+  </div>
+
+  <div class="page" id="p-ask" role="tabpanel" aria-labelledby="t-ask" hidden>
+    <section class="panel aibox">
+      <div class="aihead"><h2>ถามดวง</h2><div class="aibtns"><button type="button" class="ghost" id="askClear">ล้างประวัติ</button></div></div>
+      <p class="aistat" id="askNote"></p>
+      <div class="chat" id="askLog" aria-live="polite"></div>
+      <div class="sugg" id="askSugg" role="group" aria-label="คำถามตัวอย่าง"></div>
+      <form class="askform" id="askForm">
+        <label class="label" for="askQ">พิมพ์คำถาม</label>
+        <textarea id="askQ" placeholder="เช่น ปีหน้างานของฉันเป็นอย่างไร"></textarea>
+        <div class="aibtns"><button type="submit" id="askSend">ถาม</button><button type="button" class="ghost" id="askStop" hidden>หยุด</button></div>
+        <p class="aistat" id="askStat"></p>
+      </form>
+    </section>
   </div>
 
   <div class="page" id="p-luck" role="tabpanel" aria-labelledby="t-luck" hidden>
@@ -756,6 +799,7 @@ body.gen .why .src { display: block; }
 <script src="js/shensha.js"></script>
 <script src="js/structure.js"></script>
 <script src="js/plain.js"></script>
+<script src="js/ai.js"></script>
 <script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
@@ -919,7 +963,7 @@ body.gen .why .src { display: block; }
     window.print();
   });
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
-  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'today', 'match', 'manage'];
+  const PAGES = ['chart', 'analysis', 'read', 'ask', 'luck', 'year', 'today', 'match', 'manage'];
   function show(pg) {
     if (!PAGES.includes(pg)) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
@@ -936,6 +980,112 @@ body.gen .why .src { display: block; }
     applyMode(); const cur = PAGES.find((k) => !$('p-' + k).hidden) || 'chart'; render(); show(cur); });
   applyMode();
   document.querySelector('.tseg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-seg]'); if (!b) return; document.querySelectorAll('.tsegb').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); $('segDay').hidden = b.dataset.seg !== 'day'; $('segAusp').hidden = b.dataset.seg !== 'ausp'; });
+  // ---------- AI: เรียบเรียงคำทำนาย และถามดวง ----------
+  // บน claude.ai เรียก Claude ผ่านบัญชีผู้ใช้ · ที่อื่นใช้ปุ่มคัดลอกไปวางใน AI ตัวไหนก็ได้
+  let AIP = null, aiCur = null, aiCtl = null, askCtl = null, showTpl = false;
+  const lsGet = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const aiKey = (kind) => `bazi.ai.${kind}.${BaziAI.keyOf(aiCur.r)}.${PRO ? 'p' : 'g'}`;
+  const chatKey = () => `bazi.ai.chat.${BaziAI.keyOf(aiCur.r)}`;
+  const chartFromRec = (o) => { const [yy, mm, dd] = o.date.split('-').map(Number), [hh, mi] = o.time.split(':').map(Number);
+    return BaziCore.calculate({ name: o.name || '', year: yy, month: mm, day: dd, hour: hh, minute: mi, gender: o.g, tz: 7, longitude: Number(o.place) || 100.5, options: aiCur.r.options }); };
+  const aiTools = () => BaziAI.tools(aiCur.r, aiCur.an, { saved: () => St.list(), chartOf: (id) => { const o = St.get(id); return o ? chartFromRec(o) : null; } });
+  // คัดลอกข้อความ ถ้าเบราว์เซอร์ไม่ยอมให้คัดลอก แสดงกล่องข้อความให้คัดลอกเอง
+  async function copyOut(text, box, msg) {
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
+    if (ok) { msg.textContent = 'คัดลอกแล้ว นำไปวางในแอป AI ที่ใช้ เช่น Claude, ChatGPT หรือ Gemini'; msg.className = 'aistat'; box.innerHTML = ''; return; }
+    box.innerHTML = '<textarea class="aicopy" readonly></textarea>'; const ta = box.querySelector('textarea'); ta.value = text; ta.focus(); ta.select();
+    msg.textContent = 'คัดลอกอัตโนมัติไม่ได้ เลือกข้อความในกล่องนี้ทั้งหมดแล้วคัดลอกเอง'; msg.className = 'aistat';
+  }
+  function drawAiRead(stream) {
+    if (!aiCur) return;
+    const box = $('aiRead'), saved = lsGet(aiKey('read')), busy = !!aiCtl;
+    const tplHidden = !!saved && !showTpl && !busy;
+    $('readNav').hidden = tplHidden; $('reading').hidden = tplHidden;
+    const head = `<div class="aihead"><h2>${saved || busy ? 'คำทำนายฉบับเรียบเรียง' : 'ให้ AI เรียบเรียงคำทำนาย'}</h2><div class="aibtns">`;
+    if (busy) {
+      box.innerHTML = `${head}<button type="button" class="ghost" id="aiStop">หยุด</button></div></div><div class="aitext" id="aiOut">${stream ? BaziAI.md(stream) : ''}</div><p class="aistat" id="aiMsg">${stream ? 'กำลังเขียน…' : 'กำลังเรียบเรียง ใช้เวลาราว 1 นาที…'}</p>`;
+      $('aiStop').onclick = () => aiCtl && aiCtl.abort();
+      return;
+    }
+    const goBtn = AIP ? `<button type="button" id="aiGo">${saved ? 'เรียบเรียงใหม่' : 'เรียบเรียงด้วย AI'}</button>` : '';
+    const copyBtn = `<button type="button" class="ghost" id="aiCopy">คัดลอกไปให้ AI ตัวอื่น</button>`;
+    const tplBtn = saved ? `<button type="button" class="ghost" id="aiTpl">${showTpl ? 'ซ่อนคำทำนายแบบเดิม' : 'ดูคำทำนายแบบเดิม'}</button>` : '';
+    if (saved) {
+      const t = new Date(saved.at);
+      box.innerHTML = `${head}${goBtn}${tplBtn}${copyBtn}</div></div><div class="aitext">${BaziAI.md(saved.text)}</div>
+        <p class="aistat" id="aiMsg">เรียบเรียงเมื่อ ${t.getDate()}/${t.getMonth() + 1}/${t.getFullYear() + 543} ด้วย ${escH(saved.by || 'AI')} จากผลวิเคราะห์ของแอป${saved.truncated ? ' · ข้อความถูกตัดตอนท้าย กดเรียบเรียงใหม่ได้' : ''} · ใช้ประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์ การเงิน หรือกฎหมาย</p><div id="aiCopyBox"></div>`;
+    } else {
+      box.innerHTML = `${head}${goBtn}${copyBtn}</div></div>
+        <p class="aistat" id="aiMsg">${AIP ? `AI จะเขียนคำทำนายทั้งหน้าใหม่เป็นเรื่องเดียวที่อ่านลื่น ${PRO ? 'ละเอียดแบบซินแส' : 'อ่านง่าย'} จากผลวิเคราะห์ของแอป ไม่ได้ตีความใหม่ · ใช้ Claude ผ่านบัญชี claude.ai ของคุณ ครั้งแรกจะมีหน้าต่างขออนุญาต`
+          : 'เรียก AI จากหน้านี้ไม่ได้ (ใช้ได้เมื่อเปิดแอปบน claude.ai) กดคัดลอกแล้วนำไปวางใน AI ตัวไหนก็ได้ ข้อความมีข้อมูลดวงและกติกาครบแล้ว'}</p><div id="aiCopyBox"></div>`;
+    }
+    if ($('aiGo')) $('aiGo').onclick = runAiRead;
+    if ($('aiTpl')) $('aiTpl').onclick = () => { showTpl = !showTpl; drawAiRead(); };
+    $('aiCopy').onclick = () => copyOut(BaziAI.copyText(BaziAI.context(aiCur.r, aiCur.an), PRO), $('aiCopyBox'), $('aiMsg'));
+  }
+  async function runAiRead() {
+    if (!AIP || aiCtl) return;
+    const cur = aiCur, key = aiKey('read');
+    aiCtl = new AbortController(); drawAiRead();
+    try {
+      const prompt = BaziAI.rewritePrompt(BaziAI.context(cur.r, cur.an), PRO);
+      const res = await AIP.call(prompt, { signal: aiCtl.signal, fresh: true, onText: ({ text }) => { if (aiCur === cur && $('aiOut')) { $('aiOut').innerHTML = BaziAI.md(text); $('aiMsg').textContent = 'กำลังเขียน…'; } } });
+      lsSet(key, { text: res.text, at: Date.now(), by: AIP.name, truncated: res.truncated });
+      aiCtl = null; showTpl = false; if (aiCur === cur) drawAiRead();
+    } catch (e) {
+      aiCtl = null; if (aiCur !== cur) return;
+      drawAiRead();
+      if (e && e.text && e.code !== 'cancelled') { $('aiCopyBox').innerHTML = `<div class="aitext">${BaziAI.md(e.text)}</div>`; }
+      $('aiMsg').textContent = BaziAI.errText(e); $('aiMsg').className = 'aistat' + (e && e.code === 'cancelled' ? '' : ' err');
+    }
+  }
+  // ---------- ถามดวง ----------
+  const SUGG_GEN = ['ปีหน้างานของฉันเป็นอย่างไร', 'เดือนไหนของปีนี้เหมาะเริ่มเรื่องใหม่', 'ช่วงนี้ควรระวังเรื่องอะไร', 'ฉันเหมาะกับงานแบบไหน', 'หาฤกษ์เปิดร้านใน 2 เดือนข้างหน้า', 'การเงินช่วง 10 ปีนี้เป็นอย่างไร'];
+  const SUGG_PRO = ['วิเคราะห์วัยจรปัจจุบันกับดวงเดิมอย่างละเอียด', 'ปีจรปีหน้ากระทบเสาไหนบ้าง', 'ธาตุให้คุณควรใช้อย่างไรในชีวิตจริง', 'ดวงนี้ควรระวังปีไหนใน 10 ปีข้างหน้า', 'หาฤกษ์เซ็นสัญญาเดือนหน้า', 'สิบเทพเด่นของดวงนี้บอกอะไร'];
+  function drawAsk() {
+    if (!aiCur) return;
+    const hist = lsGet(chatKey()) || [];
+    $('askNote').textContent = AIP ? `ถามเรื่องดวงของ${(aiCur.r.input.name || '').trim() || 'ดวงนี้'}ได้อิสระ AI ตอบจากผลวิเคราะห์ของแอป และเรียกดูดวงรายปี รายเดือน รายวัน หาฤกษ์ หรือดวงคู่กับดวงที่บันทึกไว้ได้เอง · ใช้ Claude ผ่านบัญชี claude.ai ของคุณ`
+      : 'เรียก AI จากหน้านี้ไม่ได้ (ใช้ได้เมื่อเปิดแอปบน claude.ai) พิมพ์คำถามแล้วกดคัดลอก นำไปวางใน AI ตัวไหนก็ได้ ข้อความมีข้อมูลดวงครบแล้ว';
+    $('askLog').innerHTML = hist.map((m) => m.role === 'user' ? `<div class="bub u">${escH(m.content)}</div>` : `<div class="bub a"><div class="aitext">${BaziAI.md(m.content)}</div></div>`).join('');
+    $('askSugg').innerHTML = hist.length ? '' : (PRO ? SUGG_PRO : SUGG_GEN).map((q) => `<button type="button" data-q="${escH(q)}">${escH(q)}</button>`).join('');
+    $('askSend').textContent = AIP ? 'ถาม' : 'คัดลอกคำถามไปถาม AI';
+    $('askClear').hidden = !hist.length;
+  }
+  async function sendAsk(q) {
+    q = (q || '').trim(); if (!q || askCtl) return;
+    const cur = aiCur, ck = chatKey();
+    if (!AIP) { $('askStat').className = 'aistat'; return copyOut(BaziAI.copyText(BaziAI.context(cur.r, cur.an), PRO, q), $('askLog'), $('askStat')); }
+    const hist = lsGet(ck) || [];
+    hist.push({ role: 'user', content: q }); lsSet(ck, hist); $('askQ').value = ''; drawAsk();
+    const bub = document.createElement('div'); bub.className = 'bub a'; bub.innerHTML = '<div class="aitext"><p class="aistat">กำลังคิด…</p></div>'; $('askLog').appendChild(bub);
+    bub.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    askCtl = new AbortController(); $('askStop').hidden = false; $('askSend').disabled = true; $('askStat').textContent = ''; $('askStat').className = 'aistat';
+    const tools = aiTools().map((t) => Object.assign({}, t, { execute: (i, c) => { $('askStat').textContent = `กำลังดูข้อมูล: ${{ year_reading: 'ดวงรายปี', month_readings: 'ดวงรายเดือน', day_reading: 'ดวงรายวัน', find_auspicious: 'หาฤกษ์', natal_section: 'คำทำนายพื้นดวง', saved_charts: 'ดวงที่บันทึก', compatibility: 'ดวงคู่' }[t.name] || t.name}${i && (i.year || i.date || i.from) ? ' ' + (i.year || i.date || i.from) : ''}…`; return t.execute(i, c); } }));
+    const turns = hist.slice(-12);
+    const input = [{ role: 'user', content: BaziAI.chatIntro(BaziAI.context(cur.r, cur.an), PRO) }].concat(turns);
+    try {
+      const res = await AIP.call(input, { signal: askCtl.signal, tools, onText: ({ text }) => { bub.innerHTML = `<div class="aitext">${BaziAI.md(text)}</div>`; } });
+      const h2 = lsGet(ck) || []; h2.push({ role: 'assistant', content: res.text }); lsSet(ck, h2.slice(-40));
+      $('askStat').textContent = res.truncated ? 'คำตอบถูกตัดตอนท้าย ลองถามให้แคบลง' : '';
+    } catch (e) {
+      if (e && e.text && e.code !== 'cancelled') { const h2 = lsGet(ck) || []; h2.push({ role: 'assistant', content: e.text + '\n\n(คำตอบไม่ครบ)' }); lsSet(ck, h2.slice(-40)); }
+      else bub.remove();
+      $('askStat').textContent = BaziAI.errText(e); $('askStat').className = 'aistat' + (e && e.code === 'cancelled' ? '' : ' err');
+    } finally {
+      askCtl = null; $('askStop').hidden = true; $('askSend').disabled = false;
+      if (aiCur === cur) { const st = $('askStat').textContent, cls = $('askStat').className; drawAsk(); $('askStat').textContent = st; $('askStat').className = cls; }
+    }
+  }
+  $('askForm').addEventListener('submit', (ev) => { ev.preventDefault(); sendAsk($('askQ').value); });
+  $('askQ').addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); sendAsk($('askQ').value); } });
+  $('askSugg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-q]'); if (!b) return; if (AIP) sendAsk(b.dataset.q); else { $('askQ').value = b.dataset.q; $('askQ').focus(); } });
+  $('askStop').addEventListener('click', () => askCtl && askCtl.abort());
+  $('askClear').addEventListener('click', () => { if (askCtl) return; lsSet(chatKey(), null); $('askStat').textContent = ''; drawAsk(); });
+  const aiSet = (r, an) => { const changed = !aiCur || BaziAI.keyOf(aiCur.r) !== BaziAI.keyOf(r); if (changed && aiCtl) aiCtl.abort(); if (changed && askCtl) askCtl.abort(); aiCur = { r, an }; if (changed) showTpl = false; drawAiRead(); drawAsk(); };
+  BaziAI.provider().then((p) => { AIP = p; drawAiRead(); drawAsk(); });
   function render() {
     const [y, m, d] = $('date').value.split('-').map(Number);
     const [h, mi] = $('time').value.split(':').map(Number);
@@ -1450,6 +1600,7 @@ body.gen .why .src { display: block; }
       try { localStorage.setItem('bazi.p2', JSON.stringify({ n: $('name2').value, d: $('date2').value, t: $('time2').value, g: g2 })); } catch (e) {}
     };
     drawMatch();
+    aiSet(r, an);
     $('readNav').onclick = (ev) => { const bt = ev.target.closest('button[data-r]'); if (!bt) return; readSel = bt.dataset.r; drawRead(); };
   }
 

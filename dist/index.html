@@ -503,6 +503,32 @@ body.gen .why .src { display: block; }
 @media (max-width: 600px) { .dphero { grid-template-columns: 120px 1fr; } }
 .bbtn { display: flex; flex-wrap: wrap; gap: 8px; }
 #printView { display: none; }
+/* AI เรียบเรียงคำทำนาย และถามดวง */
+.aibox { display: grid; gap: 10px; }
+.aibox .aihead { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.aibox .aihead h2 { font-size: 1.1rem; margin: 0; }
+.aibtns { display: flex; flex-wrap: wrap; gap: 8px; }
+.aitext { line-height: 1.75; }
+.aitext h3 { font-size: 1.08rem; margin: 18px 0 6px; color: var(--jade); }
+.aitext h3:first-child { margin-top: 2px; }
+.aitext h4 { font-size: 1rem; margin: 12px 0 4px; }
+.aitext p { margin: 0 0 10px; }
+.aitext ul { margin: 0 0 10px; padding-left: 1.3em; }
+.aitext li { margin: 3px 0; }
+.aisrc { color: var(--ink-soft); font-size: .85em; }
+.aistat { color: var(--ink-soft); font-size: .9rem; }
+.aistat.err { color: var(--bad); }
+.aicopy { width: 100%; min-height: 160px; font: inherit; font-size: .85rem; border: 1px solid var(--rule); border-radius: 8px; padding: 8px; background: var(--paper); color: var(--ink); }
+.chat { display: grid; gap: 12px; }
+.bub { max-width: 92%; border-radius: 12px; padding: 10px 14px; border: 1px solid var(--rule); }
+.bub.u { justify-self: end; background: var(--jade-wash); border-color: transparent; white-space: pre-wrap; }
+.bub.a { justify-self: start; background: var(--sheet); }
+.bub.a .aitext h3 { font-size: 1rem; margin-top: 12px; }
+.askform { display: grid; gap: 8px; }
+.askform textarea { width: 100%; min-height: 72px; font: inherit; border: 1px solid var(--rule); border-radius: 8px; padding: 10px; background: var(--sheet); color: var(--ink); resize: vertical; }
+.sugg { display: flex; flex-wrap: wrap; gap: 6px; }
+.sugg button { background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px; font-weight: 500; font-size: .9rem; }
+.sugg button:hover { border-color: var(--jade); color: var(--jade); }
 @media print {
   @page { size: A4; margin: 14mm 12mm; }
   body { background: #fff !important; }
@@ -577,6 +603,7 @@ body.gen .why .src { display: block; }
     <button type="button" role="tab" id="t-chart" data-page="chart" aria-controls="p-chart">ผังดวง</button>
     <button type="button" role="tab" id="t-analysis" data-page="analysis" aria-controls="p-analysis">วิเคราะห์ดวง</button>
     <button type="button" role="tab" id="t-read" data-page="read" aria-controls="p-read">คำทำนาย</button>
+    <button type="button" role="tab" id="t-ask" data-page="ask" aria-controls="p-ask">ถามดวง</button>
     <button type="button" role="tab" id="t-luck" data-page="luck" aria-controls="p-luck">วัยจร</button>
     <button type="button" role="tab" id="t-year" data-page="year" aria-controls="p-year">ปีจร</button>
     <button type="button" role="tab" id="t-today" data-page="today" aria-controls="p-today">วันนี้ & ฤกษ์</button>
@@ -637,8 +664,24 @@ body.gen .why .src { display: block; }
   </div>
 
   <div class="page" id="p-read" role="tabpanel" aria-labelledby="t-read" hidden>
+    <section class="panel aibox" id="aiRead" aria-live="polite"></section>
     <div class="decades" id="readNav" role="group" aria-label="หัวข้อคำทำนาย"></div>
     <div id="reading" class="reading"></div>
+  </div>
+
+  <div class="page" id="p-ask" role="tabpanel" aria-labelledby="t-ask" hidden>
+    <section class="panel aibox">
+      <div class="aihead"><h2>ถามดวง</h2><div class="aibtns"><button type="button" class="ghost" id="askClear">ล้างประวัติ</button></div></div>
+      <p class="aistat" id="askNote"></p>
+      <div class="chat" id="askLog" aria-live="polite"></div>
+      <div class="sugg" id="askSugg" role="group" aria-label="คำถามตัวอย่าง"></div>
+      <form class="askform" id="askForm">
+        <label class="label" for="askQ">พิมพ์คำถาม</label>
+        <textarea id="askQ" placeholder="เช่น ปีหน้างานของฉันเป็นอย่างไร"></textarea>
+        <div class="aibtns"><button type="submit" id="askSend">ถาม</button><button type="button" class="ghost" id="askStop" hidden>หยุด</button></div>
+        <p class="aistat" id="askStat"></p>
+      </form>
+    </section>
   </div>
 
   <div class="page" id="p-luck" role="tabpanel" aria-labelledby="t-luck" hidden>
@@ -3632,6 +3675,204 @@ body.gen .why .src { display: block; }
 
 </script>
 <script>
+// ai.js — ให้ AI เรียบเรียงคำทำนายและตอบคำถามเรื่องดวง
+// แอปคำนวณทุกอย่างเอง แล้วส่ง "แฟ้มดวง" (ข้อมูลที่คำนวณแล้ว + คำทำนายแม่แบบ) ให้ AI เขียนเป็นภาษาคน
+// AI ห้ามคำนวณหรือเปลี่ยนผลวิเคราะห์เอง ถ้าต้องการข้อมูลปี/เดือน/วัน/ฤกษ์อื่น ให้เรียกเครื่องมือของแอป
+// ผู้ให้บริการ: Claude ผ่านบัญชีผู้ใช้ (เมื่อเปิดบน claude.ai) · ที่อื่นใช้ปุ่มคัดลอกไปถาม AI ตัวไหนก็ได้
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'), require('./analysis.js'), require('./interactions.js'), require('./narrative.js'), require('./yearly.js'), require('./auspicious.js'), require('./compat.js'), require('./structure.js'), require('./shensha.js'), require('./almanac.js'));
+    else root.BaziAI = factory(root.BaziCore, root.BaziAnalysis, root.BaziInteractions, root.BaziNarrative, root.BaziYearly, root.BaziAuspicious, root.BaziCompat, root.BaziStructure, root.BaziShensha, root.BaziAlmanac);
+})(typeof self !== 'undefined' ? self : this, function (B, An, I, N, Y, AU, C, ST, SS, AL) {
+    'use strict';
+    const MTH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+    const POS = { hour: 'ยาม', day: 'วัน (ดิถี)', month: 'เดือน', year: 'ปี' };
+    const dstr = (d) => `${d.day} ${MTH[d.month - 1]} ${d.year}`;
+    const elList = (l) => l.map((x) => { const n = An.itemNote(x); return x.th + (x.polarity ? (x.polarity === 'same' ? ' (ขั้วเดียวกับดิถี)' : ' (ขั้วตรงข้ามดิถี)') : '') + (n ? ` (${n})` : ''); }).join(', ') || '—';
+    const blockText = (b) => [b.title, b.sub, b.text, (b.items || []).map(([k, v]) => `${k}: ${v}`).join(' · '), b.source ? `[ที่มา: ${b.source}]` : ''].filter(Boolean).join(' — ');
+    const todayOf = (now) => { const t = now || new Date(); return { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() }; };
+
+    // ---------- แฟ้มดวง ----------
+    function pillarLine(chart, k) {
+        const p = chart.pillars[k], dm = chart.pillars.day.stem;
+        const tg = k === 'day' ? 'ดิถี (ตัวเจ้าชะตา)' : `${p.tenGod.code} ${p.tenGod.th}`;
+        const hid = p.hidden.map((h) => { const g = B.tenGod(dm, h.stem); return `${h.zh}${h.element} ${g.code}`; }).join(' ');
+        return `- ${POS[k]}: ${p.zh} · ราศีบน ${B.STEMS[p.stem]} ${p.stemElement}${p.stemYang ? '+' : '−'} (${tg}) · ราศีล่าง ${B.BRANCHES[p.branch]} ${p.branchElement} ปี${p.animal} · ราศีแฝง ${hid}`;
+    }
+    function luckLines(chart, an, today) {
+        const R = Y.judgeFn(chart, an), y = today.year;
+        return chart.luck.periods.slice(0, 9).map((lp) => {
+            const r = R(lp.pillar), cur = lp.start.year <= y && y < lp.end.year;
+            return `- ${lp.pillar.zh} อายุ ${lp.ageAtStart.years}–${lp.ageAtStart.years + 10} ปี (${dstr(lp.start)} – ${dstr(lp.end)}) · ${Y.LEVEL(r.sum)} (ราศีบน ${r.a > 0 ? 'ให้คุณ' : r.a < 0 ? 'ให้โทษ' : 'กลาง'} ราศีล่าง ${r.b > 0 ? 'ให้คุณ' : r.b < 0 ? 'ให้โทษ' : 'กลาง'})${cur ? ' ← ช่วงปัจจุบัน' : ''}`;
+        }).join('\n');
+    }
+    function yearBrief(chart, an, year) {
+        const s = Y.summary(chart, an, year), r = Y.judgeFn(chart, an)(s.pillar);
+        const ts = s.taisui[0];
+        return `ปี ${year} (${s.pillar.zh} ปี${s.pillar.animal}) ภาพรวม ${Y.LEVEL(r.sum)} · ` + s.topics.map((t) => `${t.name}: ${t.level} — ${t.text} (ควรทำ: ${t.todo})`).join(' | ') +
+            ` · เดือนเด่น: ${s.months.best.map((m) => m.label).join(', ')} · ไท้ส่วย: ${ts.status}${ts.hits.length ? ' — ' + ts.hits.map((h) => h.name).join(', ') : ''}`;
+    }
+    // ข้อมูลดวงที่คำนวณแล้ว เป็นข้อความ (ภาษาไทย) — ใช้ทั้งการเรียบเรียงและการถามดวง
+    function context(chart, an, opt) {
+        opt = opt || {};
+        const today = opt.today || todayOf(), inp = chart.input || {};
+        const age = today.year - inp.year - ((today.month < inp.month || (today.month === inp.month && today.day < inp.day)) ? 1 : 0);
+        const rels = I.natal(chart), secs = N.natal(chart, an, rels), basis = N.summary(chart, an, rels);
+        const G = ST.structure(chart), stars = SS.natal(chart), kong = AL.natalKong(chart);
+        const L = [];
+        L.push('## ผู้ถาม');
+        L.push(`${(inp.name || '').trim() || 'ไม่ระบุชื่อ'} · ${inp.gender === 'F' ? 'หญิง' : 'ชาย'} · เกิด ${inp.day} ${MTH[inp.month - 1]} ${inp.year} เวลา ${String(inp.hour).padStart(2, '0')}:${String(inp.minute || 0).padStart(2, '0')} น. · อายุ ${age} ปี · วันนี้ ${dstr(today)}`);
+        L.push('## ผังดวง (ยาม วัน เดือน ปี)');
+        ['hour', 'day', 'month', 'year'].forEach((k) => L.push(pillarLine(chart, k)));
+        L.push('## ผลวิเคราะห์ (ห้ามเปลี่ยน)');
+        L.push(`- ${an.pattern ? `ดวงพิเศษ: ${an.patternTh} ${an.patternZh}` : `ดวงปกติ: ${an.strengthTh}`} · คะแนนฝ่ายช่วย ${an.score.total}`);
+        L.push(`- ธาตุให้คุณ: ${elList(an.favorable)}`);
+        L.push(`- ธาตุให้โทษ: ${elList(an.unfavorable)}`);
+        if (an.neutral && an.neutral.length) L.push(`- ธาตุกลาง: ${elList(an.neutral)}`);
+        L.push(`- เหตุผล: ${an.reasons.join(' · ')}`);
+        L.push(`- โครงสร้างดวง (ข้อมูลประกอบ ไม่เปลี่ยนธาตุดี/ร้าย): ${G.zh} ${G.th} — ${G.mean}`);
+        L.push(`- ความสัมพันธ์ในดวง: ${rels.length ? rels.map((x) => `${x.th} ${x.zh} (${x.members.map((m) => m.label).join('-')})`).join(', ') : 'ไม่มี'}`);
+        L.push(`- ดาวพิเศษ: ${stars.length ? stars.map((s) => `${s.th} ${s.zh} ที่${s.at.join(' ')} — ${s.natal}`).join(' | ') : 'ไม่มี'}`);
+        L.push(`- กงหวั่ง: ${kong.branches.map((b) => B.BRANCHES[b] + ' ' + B.ANIMALS_TH[b]).join(', ')}${kong.hits.length ? ' · ' + kong.hits.map((h) => `${h.label}ตกกงหวั่ง: ${h.text}`).join(' | ') : ''}`);
+        L.push('## วัยจร (ดวง 10 ปี)');
+        L.push(luckLines(chart, an, today));
+        L.push('## ดวงรายปี');
+        L.push('- ' + yearBrief(chart, an, today.year));
+        L.push('- ' + yearBrief(chart, an, today.year + 1));
+        L.push('## พื้นดวง (สรุป)');
+        basis.forEach((x) => L.push(`- ${x.label}: ${x.text}${x.more && x.more.length ? ' · ' + x.more.map(([k, v]) => `${k}: ${v}`).join(' · ') : ''}`));
+        L.push('## คำทำนายแม่แบบ (ความหมายที่ตรวจทานแล้ว ใช้เป็นเนื้อหาหลัก)');
+        secs.forEach((s) => { L.push(`### ${s.title} [id: ${s.id}]`); s.blocks.forEach((b) => L.push('- ' + blockText(b))); });
+        return L.join('\n');
+    }
+
+    // ---------- กติกา ----------
+    const TERMS_PRO = 'ใช้ศัพท์ของแอปได้เต็มที่: ดิถี ราศีบน ราศีล่าง ราศีแฝง คู่ธาตุ ธาตุถ่ายเท ธาตุโชคลาภ ธาตุอำนาจ ธาตุส่งเสริม สิบเทพ (เขียนชื่อจีนกำกับได้) วัยจร ปีจร เดือนจร ภาคี ชง เฮ้ง ไห่ ผั่ว และอ้างตำแหน่งเสาได้';
+    const TERMS_GEN = 'เขียนให้คนทั่วไปอ่านเข้าใจ ไม่ใช้ศัพท์เทคนิค ถ้าจำเป็นต้องใช้ให้อธิบายสั้นๆ ในวงเล็บ เรียกดิถีว่า "ตัวคุณ" เรียกวัยจรว่า "ดวง 10 ปี" ปีจรว่า "ดวงรายปี" เน้นว่าชีวิตเป็นอย่างไรและควรทำอะไร';
+    function rules(pro) {
+        return [
+            'คุณคือผู้ช่วยเรียบเรียงคำทำนายดวงจีนสี่เสา (ปาจื้อ) ในแอป Bazi Pro ตอบเป็นภาษาไทยเสมอ',
+            'กติกา:',
+            '1. ใช้เฉพาะข้อมูลใน "แฟ้มดวง" และผลจากเครื่องมือของแอปเท่านั้น ห้ามผูกดวงหรือคำนวณเสาเอง ห้ามเปลี่ยนลักษณะดวง กำลังดิถี หรือธาตุให้คุณ/ให้โทษ ถ้าข้อมูลไม่พอให้บอกตรงๆ',
+            '2. ความหมายต้องตรงกับคำทำนายแม่แบบในแฟ้มดวง เรียบเรียงใหม่ด้วยคำของตัวเอง เชื่อมโยงให้เป็นเรื่องเดียว ไม่ลอกประโยคเดิมทั้งประโยค',
+            '3. ห้ามกล่าวถึงชื่ออาจารย์ สำนัก โปรแกรม หรือแหล่งอ้างอิงภายนอก และห้ามบอกว่ามีข้อความแม่แบบ',
+            '4. ธาตุที่มีเงื่อนไข (เช่น เฉพาะราศีบน เฉพาะบางกิ่ง ถ้ามากับธาตุอื่น บางตัว) ต้องคงเงื่อนไขนั้นไว้',
+            '5. เรื่องสุขภาพ การเงิน กฎหมาย ให้เป็นแนวทาง ไม่ฟันธง และแนะนำให้ปรึกษาผู้เชี่ยวชาญเมื่อเป็นเรื่องสำคัญ ไม่ขู่ให้กลัว',
+            '6. ทุกข้อสรุปสำคัญให้ต่อท้ายที่มาในดวงสั้นๆ ในวงเล็บ เช่น (ที่มา: ธาตุไฟให้คุณ ปีจรราศีบนเป็นไฟ)',
+            '7. ' + (pro ? TERMS_PRO : TERMS_GEN),
+            '8. รูปแบบ: หัวข้อขึ้นต้นด้วย "## " ย่อหน้าสั้น รายการขึ้นต้นด้วย "- " เน้นคำด้วย **ตัวหนา** ได้ ไม่ใช้ตาราง'
+        ].join('\n');
+    }
+    function rewritePrompt(ctx, pro) {
+        return `${rules(pro)}\n\nงาน: เรียบเรียงคำทำนายพื้นดวงทั้งหมดของคนนี้เป็นบทความเดียวที่อ่านลื่น ${pro ? 'ละเอียดระดับซินแส' : 'อ่านง่ายสำหรับคนทั่วไป'} ความยาวราว ${pro ? '1,500–2,500' : '1,000–1,800'} คำ เรียงหัวข้อดังนี้:\n` +
+            '## ภาพรวมชีวิต (คุณเป็นคนแบบไหน จุดแข็ง สิ่งที่ต้องระวัง)\n## ธาตุที่ช่วยและธาตุที่ควรเลี่ยง (ใช้ในชีวิตประจำวันอย่างไร)\n## การงานและการเงิน\n## ความรักและครอบครัว\n## สุขภาพ\n## ช่วงชีวิตตอนนี้ (ดวง 10 ปีปัจจุบัน ปีนี้ และปีหน้า)\n## คำแนะนำ 5 ข้อ\n\n' +
+            `แฟ้มดวง:\n${ctx}`;
+    }
+    function chatIntro(ctx, pro) {
+        return `${rules(pro)}\n\nงาน: ตอบคำถามเรื่องดวงของคนนี้ ตอบตรงคำถามก่อน แล้วให้เหตุผลทางดวงและคำแนะนำที่ทำได้จริง ความยาวพอเหมาะกับคำถาม ` +
+            'ถ้าคำถามเกี่ยวกับปี เดือน วัน ฤกษ์ หรือดวงคู่ที่ไม่มีในแฟ้มดวง ให้เรียกเครื่องมือของแอปก่อนตอบ ห้ามเดา\n\nแฟ้มดวง:\n' + ctx;
+    }
+    // สำหรับคัดลอกไปวางใน AI ตัวอื่น (ไม่มีเครื่องมือ)
+    function copyText(ctx, pro, question) {
+        return question ? `${rules(pro)}\n\nตอบคำถามเรื่องดวงของคนนี้ ถ้าต้องใช้ข้อมูลปี เดือน วัน หรือฤกษ์ที่ไม่มีในแฟ้มดวง ให้บอกว่าข้อมูลไม่พอ ห้ามคำนวณเอง\n\nแฟ้มดวง:\n${ctx}\n\nคำถาม: ${question}` : rewritePrompt(ctx, pro);
+    }
+
+    // ---------- เครื่องมือของแอปที่ AI เรียกได้ ----------
+    const num = (v, d) => { const n = Number(v); return Number.isFinite(n) ? Math.trunc(n) : d; };
+    const parseDate = (s) => { const m = String(s || '').match(/(\d{4})-(\d{1,2})-(\d{1,2})/); if (!m) throw new Error('รูปแบบวันที่ต้องเป็น YYYY-MM-DD'); return { year: +m[1], month: +m[2], day: +m[3] }; };
+    function tools(chart, an, opt) {
+        opt = opt || {};
+        const yr = (v) => { const y = num(v, NaN); if (!(y >= 1900 && y <= 2150)) throw new Error('ปีต้องอยู่ระหว่าง ค.ศ. 1900–2150'); return y; };
+        const list = [
+            { name: 'year_reading', description: 'ดวงรายปีของปี ค.ศ. ที่ระบุ: ภาพรวม งาน เงิน ความรัก สุขภาพ เดือนเด่น ไท้ส่วย และดวง 10 ปีที่ครอบปีนั้น',
+                inputSchema: { type: 'object', properties: { year: { type: 'integer', description: 'ปี ค.ศ.' } }, required: ['year'] },
+                execute: (i) => { const y = yr(i.year); const lp = chart.luck.periods.find((p) => p.start.year <= y && y < p.end.year); const R = Y.judgeFn(chart, an);
+                    return yearBrief(chart, an, y) + (lp ? ` · ดวง 10 ปีที่ครอบ: ${lp.pillar.zh} (${dstr(lp.start)} – ${dstr(lp.end)}) ${Y.LEVEL(R(lp.pillar).sum)}` : ''); } },
+            { name: 'month_readings', description: 'ดวงรายเดือนทั้ง 12 เดือนของปี ค.ศ. ที่ระบุ (เดือนจีนตามสารท): ระดับดวงและเรื่องที่เหมาะทำ',
+                inputSchema: { type: 'object', properties: { year: { type: 'integer' } }, required: ['year'] },
+                execute: (i) => { const m = Y.months(chart, an, yr(i.year)); return m.months.map((x) => `${x.label}: ${x.level}${x.clashDay ? ' (ชงวังคู่ครอง)' : ''} · เหมาะ: ${x.good.join(', ') || '—'}`).join('\n'); } },
+            { name: 'day_reading', description: 'ดวงรายวันของวันที่ระบุ: ระดับ เหมาะทำ ควรเลี่ยง 4 ด้าน และยามดี',
+                inputSchema: { type: 'object', properties: { date: { type: 'string', description: 'YYYY-MM-DD' } }, required: ['date'] },
+                execute: (i) => { const d = parseDate(i.date); const x = Y.day(chart, an, d.year, d.month, d.day, false), hs = Y.hours(chart, an, d.year, d.month, d.day).filter((h) => h.from >= 5 && h.to <= 23).sort((a, b) => b.rank - a.rank).slice(0, 3);
+                    const off = AL.officer(chart, d.year, d.month, d.day);
+                    return `${x.label} (${x.pillar.zh}): ${x.level}${off ? ` · ${off.name} ${off.zh}` : ''} · เหมาะ: ${x.good.join(', ') || '—'} · ควรเลี่ยง: ${x.avoid.join(', ') || '—'} · ` + x.topics.map((t) => `${t.name} ${t.level}`).join(', ') + ` · ยามดี: ${hs.map((h) => `${h.label} ${h.time}`).join(', ')}`; } },
+            { name: 'find_auspicious', description: 'หาฤกษ์ตามดวงของคนนี้ ในช่วงไม่เกิน 92 วัน คืน 5 วันที่ดีที่สุดพร้อมยามดี · purpose: contract (เซ็นสัญญา ซื้อบ้าน) business (เปิดร้าน เริ่มธุรกิจ) deal (เจรจา ลงทุน) job (สมัครงาน สอบ ราชการ) move (ย้ายบ้าน เดินทางไกล) wedding (แต่งงาน หมั้น)',
+                inputSchema: { type: 'object', properties: { purpose: { type: 'string', enum: AU.PURPOSES.map((p) => p.id) }, from: { type: 'string', description: 'YYYY-MM-DD' }, to: { type: 'string', description: 'YYYY-MM-DD' } }, required: ['purpose', 'from', 'to'] },
+                execute: (i) => { const res = AU.find([{ chart, an, name: 'ผู้ถาม' }], String(i.purpose), parseDate(i.from), parseDate(i.to));
+                    if (!res.ranked.length) return `ไม่พบวันที่เหมาะสำหรับ${res.purpose.name}ในช่วงนี้ (ตัดวันต้องห้าม ${res.excluded} วัน)`;
+                    return `${res.purpose.name} (ตรวจ ${res.days} วัน${res.capped ? ' ตัดเหลือ 92 วัน' : ''}):\n` + res.ranked.map((x) => `- ${x.label} ${x.pillar.zh}: ${x.level} · ${x.offNote || ''} · ยามดี ${x.hours.map((h) => h.time || h.label).join(', ')}`).join('\n'); } },
+            { name: 'natal_section', description: 'ข้อความคำทำนายแม่แบบเต็มของหัวข้อพื้นดวง (id: self elements house gods stages career money love health season zodiac)',
+                inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
+                execute: (i) => { const s = N.natal(chart, an, I.natal(chart)).find((x) => x.id === String(i.id)); if (!s) throw new Error('ไม่พบหัวข้อนี้'); return s.blocks.map(blockText).join('\n'); } }
+        ];
+        if (opt.saved) {
+            list.push({ name: 'saved_charts', description: 'รายชื่อดวงอื่นที่ผู้ใช้บันทึกไว้ในแอป (id ชื่อ วันเกิด) ใช้ก่อนเรียก compatibility',
+                execute: () => opt.saved().map((o) => `${o.id}: ${o.name || 'ไม่ระบุชื่อ'} · ${o.date} ${o.time} · ${o.g === 'F' ? 'หญิง' : 'ชาย'}`).join('\n') || 'ยังไม่มีดวงที่บันทึก' });
+            list.push({ name: 'compatibility', description: 'ดวงคู่ระหว่างผู้ถามกับดวงที่บันทึกไว้ (ใส่ id จาก saved_charts): คะแนน 6 ด้าน คำทำนาย จังหวะเวลา คำแนะนำ',
+                inputSchema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] },
+                execute: (i) => { const o = opt.chartOf ? opt.chartOf(String(i.id)) : null; if (!o) throw new Error('ไม่พบดวงนี้');
+                    const res = C.compare(chart, o);
+                    return `${res.names.join(' กับ ')}: ${res.total}/100 ${res.level}\n` + res.items.map((x) => `- ${x.name} ${x.pts}/${x.max}: ${x.text} · ${x.pred}`).join('\n') +
+                        `\nปีดีร่วมกัน: ${res.timing.good.map(([k]) => k).join(', ') || '—'} · ปีที่ควรประคอง: ${res.timing.caution.map(([k]) => k).join(', ') || '—'}\nคำแนะนำ: ${res.advice.join(' · ')}`; } });
+        }
+        return list;
+    }
+
+    // ---------- แสดงผลข้อความ (Markdown แบบย่อ) ----------
+    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    function md(text) {
+        const out = []; let list = false, para = [];
+        const inline = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\(ที่มา: ([^)]+)\)/g, '<span class="aisrc">(ที่มา: $1)</span>');
+        const flush = () => { if (para.length) { out.push(`<p>${inline(para.join(' '))}</p>`); para = []; } if (list) { out.push('</ul>'); list = false; } };
+        for (const raw of String(text).split('\n')) {
+            const l = raw.trim();
+            if (!l) { flush(); continue; }
+            let m;
+            if ((m = l.match(/^#{1,2}\s+(.*)/))) { flush(); out.push(`<h3>${inline(m[1])}</h3>`); }
+            else if ((m = l.match(/^#{3,}\s+(.*)/))) { flush(); out.push(`<h4>${inline(m[1])}</h4>`); }
+            else if ((m = l.match(/^(?:[-*•]|\d+[.)])\s+(.*)/))) { if (para.length) { out.push(`<p>${inline(para.join(' '))}</p>`); para = []; } if (!list) { out.push('<ul>'); list = true; } out.push(`<li>${inline(m[1])}</li>`); }
+            else { if (list) { out.push('</ul>'); list = false; } para.push(l); }
+        }
+        flush();
+        return out.join('');
+    }
+
+    // ---------- ผู้ให้บริการ ----------
+    // คืน { name, hasTools, call(input, {onText, signal, tools}) } หรือ null เมื่อเรียก AI จากหน้านี้ไม่ได้
+    async function provider() {
+        try {
+            if (typeof window === 'undefined' || !window.claude || typeof window.claude.use !== 'function') return null;
+            const sample = await window.claude.use('sample');
+            if (!sample) return null;
+            let hasTools = false;
+            try { const lim = await sample.limits(); hasTools = !!(lim && lim.tools); } catch (e) { hasTools = false; }
+            return {
+                name: 'Claude', hasTools,
+                call: (input, o) => {
+                    const opts = { onText: o.onText, signal: o.signal };
+                    if (o.tools && hasTools) opts.tools = o.tools;
+                    if (o.tools || o.fresh) opts.cache = false;
+                    return sample(input, opts);
+                }
+            };
+        } catch (e) { return null; }
+    }
+    const ERR = {
+        not_granted: 'ยังไม่ได้อนุญาตให้หน้านี้ใช้ Claude', sampling_disabled: 'บัญชีนี้ใช้ Claude จากหน้านี้ไม่ได้', rate_limited: 'ใช้งานถี่เกินหรือถึงโควตาแล้ว ลองใหม่ภายหลัง',
+        session_expired: 'ต้องเข้าสู่ระบบ claude.ai ใหม่', refused: 'AI ไม่ตอบคำถามนี้ ลองถามแบบอื่น', empty_completion: 'AI ไม่ได้ตอบกลับ ลองใหม่อีกครั้ง',
+        prompt_too_large: 'ข้อมูลยาวเกินไป ลองล้างประวัติการถาม', cancelled: 'หยุดแล้ว'
+    };
+    const errText = (e) => (e && ERR[e.code]) || 'เชื่อมต่อ AI ไม่สำเร็จ ลองใหม่อีกครั้ง';
+    // รหัสสำหรับเก็บผลแยกตามดวง
+    function keyOf(chart) {
+        const i = chart.input || {}, s = JSON.stringify([i.year, i.month, i.day, i.hour, i.minute, i.gender, i.longitude, chart.options]);
+        let h = 0; for (let k = 0; k < s.length; k++) h = (h * 31 + s.charCodeAt(k)) | 0;
+        return (h >>> 0).toString(36);
+    }
+    return { context, rules, rewritePrompt, chatIntro, copyText, tools, md, provider, errText, keyOf };
+});
+
+</script>
+<script>
 (function () {
   const PLACES = [['กรุงเทพมหานคร', 100.50], ['เชียงใหม่', 98.99], ['เชียงราย', 99.83], ['พิษณุโลก', 100.26], ['นครสวรรค์', 100.12], ['ขอนแก่น', 102.84], ['อุดรธานี', 102.79], ['นครราชสีมา', 102.10], ['อุบลราชธานี', 104.85], ['ชลบุรี', 100.98], ['ระยอง', 101.25], ['สุราษฎร์ธานี', 99.33], ['นครศรีธรรมราช', 99.96], ['ภูเก็ต', 98.39], ['สงขลา (หาดใหญ่)', 100.47]];
   const $ = (id) => document.getElementById(id);
@@ -3794,7 +4035,7 @@ body.gen .why .src { display: block; }
     window.print();
   });
   $('edit').addEventListener('click', () => { setForm(true); $('name').focus(); });
-  const PAGES = ['chart', 'analysis', 'read', 'luck', 'year', 'today', 'match', 'manage'];
+  const PAGES = ['chart', 'analysis', 'read', 'ask', 'luck', 'year', 'today', 'match', 'manage'];
   function show(pg) {
     if (!PAGES.includes(pg)) pg = 'chart';
     PAGES.forEach((k) => { $('p-' + k).hidden = k !== pg; $('t-' + k).setAttribute('aria-selected', String(k === pg)); $('t-' + k).tabIndex = k === pg ? 0 : -1; });
@@ -3811,6 +4052,112 @@ body.gen .why .src { display: block; }
     applyMode(); const cur = PAGES.find((k) => !$('p-' + k).hidden) || 'chart'; render(); show(cur); });
   applyMode();
   document.querySelector('.tseg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-seg]'); if (!b) return; document.querySelectorAll('.tsegb').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); $('segDay').hidden = b.dataset.seg !== 'day'; $('segAusp').hidden = b.dataset.seg !== 'ausp'; });
+  // ---------- AI: เรียบเรียงคำทำนาย และถามดวง ----------
+  // บน claude.ai เรียก Claude ผ่านบัญชีผู้ใช้ · ที่อื่นใช้ปุ่มคัดลอกไปวางใน AI ตัวไหนก็ได้
+  let AIP = null, aiCur = null, aiCtl = null, askCtl = null, showTpl = false;
+  const lsGet = (k) => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const aiKey = (kind) => `bazi.ai.${kind}.${BaziAI.keyOf(aiCur.r)}.${PRO ? 'p' : 'g'}`;
+  const chatKey = () => `bazi.ai.chat.${BaziAI.keyOf(aiCur.r)}`;
+  const chartFromRec = (o) => { const [yy, mm, dd] = o.date.split('-').map(Number), [hh, mi] = o.time.split(':').map(Number);
+    return BaziCore.calculate({ name: o.name || '', year: yy, month: mm, day: dd, hour: hh, minute: mi, gender: o.g, tz: 7, longitude: Number(o.place) || 100.5, options: aiCur.r.options }); };
+  const aiTools = () => BaziAI.tools(aiCur.r, aiCur.an, { saved: () => St.list(), chartOf: (id) => { const o = St.get(id); return o ? chartFromRec(o) : null; } });
+  // คัดลอกข้อความ ถ้าเบราว์เซอร์ไม่ยอมให้คัดลอก แสดงกล่องข้อความให้คัดลอกเอง
+  async function copyOut(text, box, msg) {
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
+    if (ok) { msg.textContent = 'คัดลอกแล้ว นำไปวางในแอป AI ที่ใช้ เช่น Claude, ChatGPT หรือ Gemini'; msg.className = 'aistat'; box.innerHTML = ''; return; }
+    box.innerHTML = '<textarea class="aicopy" readonly></textarea>'; const ta = box.querySelector('textarea'); ta.value = text; ta.focus(); ta.select();
+    msg.textContent = 'คัดลอกอัตโนมัติไม่ได้ เลือกข้อความในกล่องนี้ทั้งหมดแล้วคัดลอกเอง'; msg.className = 'aistat';
+  }
+  function drawAiRead(stream) {
+    if (!aiCur) return;
+    const box = $('aiRead'), saved = lsGet(aiKey('read')), busy = !!aiCtl;
+    const tplHidden = !!saved && !showTpl && !busy;
+    $('readNav').hidden = tplHidden; $('reading').hidden = tplHidden;
+    const head = `<div class="aihead"><h2>${saved || busy ? 'คำทำนายฉบับเรียบเรียง' : 'ให้ AI เรียบเรียงคำทำนาย'}</h2><div class="aibtns">`;
+    if (busy) {
+      box.innerHTML = `${head}<button type="button" class="ghost" id="aiStop">หยุด</button></div></div><div class="aitext" id="aiOut">${stream ? BaziAI.md(stream) : ''}</div><p class="aistat" id="aiMsg">${stream ? 'กำลังเขียน…' : 'กำลังเรียบเรียง ใช้เวลาราว 1 นาที…'}</p>`;
+      $('aiStop').onclick = () => aiCtl && aiCtl.abort();
+      return;
+    }
+    const goBtn = AIP ? `<button type="button" id="aiGo">${saved ? 'เรียบเรียงใหม่' : 'เรียบเรียงด้วย AI'}</button>` : '';
+    const copyBtn = `<button type="button" class="ghost" id="aiCopy">คัดลอกไปให้ AI ตัวอื่น</button>`;
+    const tplBtn = saved ? `<button type="button" class="ghost" id="aiTpl">${showTpl ? 'ซ่อนคำทำนายแบบเดิม' : 'ดูคำทำนายแบบเดิม'}</button>` : '';
+    if (saved) {
+      const t = new Date(saved.at);
+      box.innerHTML = `${head}${goBtn}${tplBtn}${copyBtn}</div></div><div class="aitext">${BaziAI.md(saved.text)}</div>
+        <p class="aistat" id="aiMsg">เรียบเรียงเมื่อ ${t.getDate()}/${t.getMonth() + 1}/${t.getFullYear() + 543} ด้วย ${escH(saved.by || 'AI')} จากผลวิเคราะห์ของแอป${saved.truncated ? ' · ข้อความถูกตัดตอนท้าย กดเรียบเรียงใหม่ได้' : ''} · ใช้ประกอบการตัดสินใจ ไม่ใช่คำแนะนำทางการแพทย์ การเงิน หรือกฎหมาย</p><div id="aiCopyBox"></div>`;
+    } else {
+      box.innerHTML = `${head}${goBtn}${copyBtn}</div></div>
+        <p class="aistat" id="aiMsg">${AIP ? `AI จะเขียนคำทำนายทั้งหน้าใหม่เป็นเรื่องเดียวที่อ่านลื่น ${PRO ? 'ละเอียดแบบซินแส' : 'อ่านง่าย'} จากผลวิเคราะห์ของแอป ไม่ได้ตีความใหม่ · ใช้ Claude ผ่านบัญชี claude.ai ของคุณ ครั้งแรกจะมีหน้าต่างขออนุญาต`
+          : 'เรียก AI จากหน้านี้ไม่ได้ (ใช้ได้เมื่อเปิดแอปบน claude.ai) กดคัดลอกแล้วนำไปวางใน AI ตัวไหนก็ได้ ข้อความมีข้อมูลดวงและกติกาครบแล้ว'}</p><div id="aiCopyBox"></div>`;
+    }
+    if ($('aiGo')) $('aiGo').onclick = runAiRead;
+    if ($('aiTpl')) $('aiTpl').onclick = () => { showTpl = !showTpl; drawAiRead(); };
+    $('aiCopy').onclick = () => copyOut(BaziAI.copyText(BaziAI.context(aiCur.r, aiCur.an), PRO), $('aiCopyBox'), $('aiMsg'));
+  }
+  async function runAiRead() {
+    if (!AIP || aiCtl) return;
+    const cur = aiCur, key = aiKey('read');
+    aiCtl = new AbortController(); drawAiRead();
+    try {
+      const prompt = BaziAI.rewritePrompt(BaziAI.context(cur.r, cur.an), PRO);
+      const res = await AIP.call(prompt, { signal: aiCtl.signal, fresh: true, onText: ({ text }) => { if (aiCur === cur && $('aiOut')) { $('aiOut').innerHTML = BaziAI.md(text); $('aiMsg').textContent = 'กำลังเขียน…'; } } });
+      lsSet(key, { text: res.text, at: Date.now(), by: AIP.name, truncated: res.truncated });
+      aiCtl = null; showTpl = false; if (aiCur === cur) drawAiRead();
+    } catch (e) {
+      aiCtl = null; if (aiCur !== cur) return;
+      drawAiRead();
+      if (e && e.text && e.code !== 'cancelled') { $('aiCopyBox').innerHTML = `<div class="aitext">${BaziAI.md(e.text)}</div>`; }
+      $('aiMsg').textContent = BaziAI.errText(e); $('aiMsg').className = 'aistat' + (e && e.code === 'cancelled' ? '' : ' err');
+    }
+  }
+  // ---------- ถามดวง ----------
+  const SUGG_GEN = ['ปีหน้างานของฉันเป็นอย่างไร', 'เดือนไหนของปีนี้เหมาะเริ่มเรื่องใหม่', 'ช่วงนี้ควรระวังเรื่องอะไร', 'ฉันเหมาะกับงานแบบไหน', 'หาฤกษ์เปิดร้านใน 2 เดือนข้างหน้า', 'การเงินช่วง 10 ปีนี้เป็นอย่างไร'];
+  const SUGG_PRO = ['วิเคราะห์วัยจรปัจจุบันกับดวงเดิมอย่างละเอียด', 'ปีจรปีหน้ากระทบเสาไหนบ้าง', 'ธาตุให้คุณควรใช้อย่างไรในชีวิตจริง', 'ดวงนี้ควรระวังปีไหนใน 10 ปีข้างหน้า', 'หาฤกษ์เซ็นสัญญาเดือนหน้า', 'สิบเทพเด่นของดวงนี้บอกอะไร'];
+  function drawAsk() {
+    if (!aiCur) return;
+    const hist = lsGet(chatKey()) || [];
+    $('askNote').textContent = AIP ? `ถามเรื่องดวงของ${(aiCur.r.input.name || '').trim() || 'ดวงนี้'}ได้อิสระ AI ตอบจากผลวิเคราะห์ของแอป และเรียกดูดวงรายปี รายเดือน รายวัน หาฤกษ์ หรือดวงคู่กับดวงที่บันทึกไว้ได้เอง · ใช้ Claude ผ่านบัญชี claude.ai ของคุณ`
+      : 'เรียก AI จากหน้านี้ไม่ได้ (ใช้ได้เมื่อเปิดแอปบน claude.ai) พิมพ์คำถามแล้วกดคัดลอก นำไปวางใน AI ตัวไหนก็ได้ ข้อความมีข้อมูลดวงครบแล้ว';
+    $('askLog').innerHTML = hist.map((m) => m.role === 'user' ? `<div class="bub u">${escH(m.content)}</div>` : `<div class="bub a"><div class="aitext">${BaziAI.md(m.content)}</div></div>`).join('');
+    $('askSugg').innerHTML = hist.length ? '' : (PRO ? SUGG_PRO : SUGG_GEN).map((q) => `<button type="button" data-q="${escH(q)}">${escH(q)}</button>`).join('');
+    $('askSend').textContent = AIP ? 'ถาม' : 'คัดลอกคำถามไปถาม AI';
+    $('askClear').hidden = !hist.length;
+  }
+  async function sendAsk(q) {
+    q = (q || '').trim(); if (!q || askCtl) return;
+    const cur = aiCur, ck = chatKey();
+    if (!AIP) { $('askStat').className = 'aistat'; return copyOut(BaziAI.copyText(BaziAI.context(cur.r, cur.an), PRO, q), $('askLog'), $('askStat')); }
+    const hist = lsGet(ck) || [];
+    hist.push({ role: 'user', content: q }); lsSet(ck, hist); $('askQ').value = ''; drawAsk();
+    const bub = document.createElement('div'); bub.className = 'bub a'; bub.innerHTML = '<div class="aitext"><p class="aistat">กำลังคิด…</p></div>'; $('askLog').appendChild(bub);
+    bub.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    askCtl = new AbortController(); $('askStop').hidden = false; $('askSend').disabled = true; $('askStat').textContent = ''; $('askStat').className = 'aistat';
+    const tools = aiTools().map((t) => Object.assign({}, t, { execute: (i, c) => { $('askStat').textContent = `กำลังดูข้อมูล: ${{ year_reading: 'ดวงรายปี', month_readings: 'ดวงรายเดือน', day_reading: 'ดวงรายวัน', find_auspicious: 'หาฤกษ์', natal_section: 'คำทำนายพื้นดวง', saved_charts: 'ดวงที่บันทึก', compatibility: 'ดวงคู่' }[t.name] || t.name}${i && (i.year || i.date || i.from) ? ' ' + (i.year || i.date || i.from) : ''}…`; return t.execute(i, c); } }));
+    const turns = hist.slice(-12);
+    const input = [{ role: 'user', content: BaziAI.chatIntro(BaziAI.context(cur.r, cur.an), PRO) }].concat(turns);
+    try {
+      const res = await AIP.call(input, { signal: askCtl.signal, tools, onText: ({ text }) => { bub.innerHTML = `<div class="aitext">${BaziAI.md(text)}</div>`; } });
+      const h2 = lsGet(ck) || []; h2.push({ role: 'assistant', content: res.text }); lsSet(ck, h2.slice(-40));
+      $('askStat').textContent = res.truncated ? 'คำตอบถูกตัดตอนท้าย ลองถามให้แคบลง' : '';
+    } catch (e) {
+      if (e && e.text && e.code !== 'cancelled') { const h2 = lsGet(ck) || []; h2.push({ role: 'assistant', content: e.text + '\n\n(คำตอบไม่ครบ)' }); lsSet(ck, h2.slice(-40)); }
+      else bub.remove();
+      $('askStat').textContent = BaziAI.errText(e); $('askStat').className = 'aistat' + (e && e.code === 'cancelled' ? '' : ' err');
+    } finally {
+      askCtl = null; $('askStop').hidden = true; $('askSend').disabled = false;
+      if (aiCur === cur) { const st = $('askStat').textContent, cls = $('askStat').className; drawAsk(); $('askStat').textContent = st; $('askStat').className = cls; }
+    }
+  }
+  $('askForm').addEventListener('submit', (ev) => { ev.preventDefault(); sendAsk($('askQ').value); });
+  $('askQ').addEventListener('keydown', (ev) => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); sendAsk($('askQ').value); } });
+  $('askSugg').addEventListener('click', (ev) => { const b = ev.target.closest('[data-q]'); if (!b) return; if (AIP) sendAsk(b.dataset.q); else { $('askQ').value = b.dataset.q; $('askQ').focus(); } });
+  $('askStop').addEventListener('click', () => askCtl && askCtl.abort());
+  $('askClear').addEventListener('click', () => { if (askCtl) return; lsSet(chatKey(), null); $('askStat').textContent = ''; drawAsk(); });
+  const aiSet = (r, an) => { const changed = !aiCur || BaziAI.keyOf(aiCur.r) !== BaziAI.keyOf(r); if (changed && aiCtl) aiCtl.abort(); if (changed && askCtl) askCtl.abort(); aiCur = { r, an }; if (changed) showTpl = false; drawAiRead(); drawAsk(); };
+  BaziAI.provider().then((p) => { AIP = p; drawAiRead(); drawAsk(); });
   function render() {
     const [y, m, d] = $('date').value.split('-').map(Number);
     const [h, mi] = $('time').value.split(':').map(Number);
@@ -4325,6 +4672,7 @@ body.gen .why .src { display: block; }
       try { localStorage.setItem('bazi.p2', JSON.stringify({ n: $('name2').value, d: $('date2').value, t: $('time2').value, g: g2 })); } catch (e) {}
     };
     drawMatch();
+    aiSet(r, an);
     $('readNav').onclick = (ev) => { const bt = ev.target.closest('button[data-r]'); if (!bt) return; readSel = bt.dataset.r; drawRead(); };
   }
 
