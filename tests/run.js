@@ -183,8 +183,25 @@ eq('ถ้อยคำ 3 แบบ: วันเดิมได้ข้อค�
   const hs = Yr.hours(r, an, 2026, 11, 19), h0 = DY.hour(r, an, hs[5], { y: 2026, m: 11, d: 19 });
   return [txt(a) === txt(b), txt(a) !== txt(c), seen.size > 3, all3, h0.text === a.hours[5].text && h0.now === a.hours[5].now]; })(),
   [true, true, true, true, true]);
+eq('ฉบับบรรยาย: ทุกด้านมีเพราะอะไรและเคล็ด ทุกยามมีเพราะอะไรและวิธีใช้ยาม คำลงท้ายมาครั้งเดียวต่อย่อหน้า ทุกตารางใหม่มี 3 แบบไม่ซ้ำ (60 วัน × 3 ดวง)', (() => {
+  const v3 = (a) => Array.isArray(a) && a.length === 3 && new Set(a).size === 3;
+  const tables = [...Object.values(DY.WHY).flatMap((T) => Object.entries(T).flatMap(([k, v]) => k === 'gen' ? v : [v])), ...Object.values(DY.STATUS).flat(),
+    ...Object.values(DY.HOURX).flatMap((o) => [o.good, o.bad]), DY.HOURX_CLASH, DY.HLEAD_MID, DY.CONN, DY.CONNH, DY.TIPC, DY.TIME_LOVE('x'), DY.TIME_REST('x'), DY.ELH('ไม้', 1), DY.ELH('ไม้', 0), DY.MCONN('ไม้'), DY.WHY_CLASH('ยามจอ')];
+  let ok = tables.every(v3) && Object.keys(DY.MEAN).length === 10, bad = '';
+  const cnt = (s) => s.split(DY.K).length - 1;
+  for (const [y, m, d, h, g] of [[1990, 1, 15, 10, 'M'], [1975, 7, 3, 22, 'F'], [2001, 11, 30, 5, 'M']]) {
+    const r = calc(y, m, d, h, 0, g), an = An.analyze(r);
+    for (let k = 0; k < 60; k++) {
+      const t = new Date(2026, 10, 1 + k), x = DY.day(r, an, t.getFullYear(), t.getMonth() + 1, t.getDate(), k === 0);
+      const aOk = x.aspects.every((a) => DY.CONN.some((c) => a.text.includes(c)) && DY.TIPC.some((c) => a.text.includes(c)) && cnt(a.text) === 1 && a.text.length > 150);
+      const hOk = x.hours.every((z) => DY.CONNH.some((c) => z.text.includes(c)) && cnt(z.text) === 1 && !/undefined/.test(z.text));
+      if (!(aOk && hOk) && !bad) bad = `${y}/${t.toISOString().slice(0, 10)} ${aOk} ${hOk}`;
+      ok = ok && aOk && hOk;
+    }
+  }
+  return bad || ok; })(), true);
 eq('ดวงวันนี้ฉบับลูกดวง: ช่วงเช้า บ่าย ค่ำ เคล็ดแต่ละด้าน เคล็ดเสริมดวง คำส่งท้าย ครบ ไม่มีศัพท์วิชาในเนื้อคำทำนาย และทิศมงคลไม่ชนทิศที่ควรเลี่ยง (60 วัน × 3 ดวง)', (() => {
-  const JARGON = /ราศีบน|ราศีล่าง|ให้โทษ|ให้คุณ|กงหวั่ง|ชงวังคู่ครอง|ภาคีวังคู่ครอง|สิบเทพ/;
+  const JARGON = /ราศีบน|ราศีล่าง|ให้โทษ|ที่ให้คุณ|เป็นให้คุณ|กงหวั่ง|ชงวังคู่ครอง|ภาคีวังคู่ครอง|สิบเทพ/;
   let ok = true, bad = '';
   for (const [y, m, d, h] of [[1990, 1, 15, 10], [1975, 7, 3, 22], [2001, 11, 30, 5]]) {
     const r = calc(y, m, d, h, 0), an = An.analyze(r);
