@@ -464,5 +464,5 @@
         return { date: D.date, label: D.label, pillar: q, title: R.title, overviewMore, periods, lucky, closing, favEl, level: R.level, tone: R.tone, balance: bal, overview, src, chips: R.chips,
             rhythm: rhythm(hs, pk).map((z) => Object.assign(z, { text: z.text.replace(/วันนี้/g, W) })), aspects, do: [...new Set(doL)].slice(0, 4), avoid: [...new Set(avL)].slice(0, 4), officer: OF, hours, top };
     }
-    return { day, hour, rhythm, balance, picker, ASP, ASP_SPECIAL, HOUR, HOUR_CLASH, HOUR_SHORT, SIDE_GOOD, SIDE_BAD, NEUTRAL, MIXED, EV, ADD, RHY, EXTRA, WEATHER };
+    return { ATMOS, LEAD_GOOD, LEAD_BAD, GOOD_LONG, BAD_LONG, KEY_BAD, KEY_GOOD, KEY_FLAT, PER, TIP, COLOR, DIR, ACT, LUCK, CLOSE, DOMAIN, HLEAD, day, hour, rhythm, balance, picker, ASP, ASP_SPECIAL, HOUR, HOUR_CLASH, HOUR_SHORT, SIDE_GOOD, SIDE_BAD, NEUTRAL, MIXED, EV, ADD, RHY, EXTRA, WEATHER };
 });
