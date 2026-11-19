@@ -454,6 +454,11 @@ body.gen .why .src { display: block; }
 .asp .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .asp p { margin: 0; color: var(--ink-soft); line-height: 1.45; }
 .pbar { display: inline-flex; gap: 3px; } .pbar i { width: 18px; height: 6px; border-radius: 3px; background: var(--rule); } .pbar i.on { background: var(--jade); } .pbar.lo i.on { background: var(--bad); }
+.pbal { margin: 2px 0 6px !important; }
+.prhy .rz { padding: 8px 0 8px 12px; border-left: 4px solid var(--rule); margin: 6px 0; } .prhy .rz.g { border-color: var(--good); } .prhy .rz.b { border-color: var(--bad); } .prhy .rz span { color: var(--ink-soft); } .prhy .rz p { margin: 2px 0 0; }
+.hdo { margin: 4px 0 0 !important; font-size: .92rem; }
+.hmore summary { cursor: pointer; color: var(--ink-soft); list-style-position: inside; }
+.hr .src { margin: 4px 0 0; }
 .phours .best { background: var(--jade-wash); border-radius: 10px; padding: 7px 12px; margin-bottom: 8px; }
 .hr { display: grid; grid-template-columns: 4px 1fr; gap: 0 12px; padding: 9px 0; border-top: 1px solid var(--rule); }
 .hr .ln { border-radius: 2px; } .hr.g .ln { background: var(--good); } .hr.m .ln { background: var(--rule); } .hr.b .ln { background: var(--bad); }
@@ -3675,6 +3680,203 @@ body.gen .why .src { display: block; }
 
 </script>
 <script>
+// daily.js — ดวงรายวันและรายยามแบบละเอียด (โหมดคนทั่วไป)
+// ภาพรวมสองด้าน (ราศีบน/ราศีล่าง) → จังหวะของวัน (สรุปจาก 12 ยาม) → 4 ด้าน ด้านละ 2–3 ประโยค → เหมาะทำ/ควรเลี่ยง
+// รายยาม: ข้อความ 1–2 ประโยค + "ทำเลย/ระวัง" (ยามดี) หรือ "ทำแทน/เลี่ยง" (ยามไม่ดี) + ที่มา
+// ใช้เกณฑ์เดียวกับหน้าอื่น: ธาตุให้คุณ/ให้โทษ (BaziYearly.judgeFn) สิบเทพ ความสัมพันธ์กับราศีล่างดิถี ดาวพิเศษ กงหวั่ง
+(function (root, factory) {
+    if (typeof module === 'object' && module.exports) module.exports = factory(require('./bazi-core.js'), require('./yearly.js'), require('./plain.js'), require('./narrative.js'), require('./almanac.js'), require('./shensha.js'));
+    else root.BaziDaily = factory(root.BaziCore, root.BaziYearly, root.BaziPlain, root.BaziNarrative, root.BaziAlmanac, root.BaziShensha);
+})(typeof self !== 'undefined' ? self : this, function (B, Y, P, N, AL, S) {
+    'use strict';
+    const pad = (h) => String(h).padStart(2, '0') + '.00';
+    const tone = (j) => j > 0 ? 'ที่ให้คุณ' : j < 0 ? 'ที่ให้โทษ' : 'ที่เป็นกลาง';
+    // สมดุลของวัน จากราศีบน (a) และราศีล่าง (b)
+    function balance(a, b) {
+        if (a > 0 && b > 0) return 'ดีทั้งวัน';
+        if ((a > 0 && b < 0) || (a < 0 && b > 0)) return 'ดีครึ่งหนึ่ง ระวังครึ่งหนึ่ง';
+        if (a > 0 || b > 0) return 'ค่อนไปทางดี';
+        if (a < 0 && b < 0) return 'ควรระวังทั้งวัน';
+        if (a < 0 || b < 0) return 'ค่อนไปทางต้องระวัง';
+        return 'เรียบๆ ไม่มีเรื่องเด่น';
+    }
+    // ด้านที่วันนี้หนุนหรือฉุด ตามกลุ่มสิบเทพ (0 คู่ธาตุ 1 ถ่ายเท 2 โชคลาภ 3 อำนาจ 4 ส่งเสริม)
+    const SIDE_GOOD = ['มีเพื่อนและทีมคอยหนุน', 'ความคิดและฝีมือได้แสดงออก', 'เรื่องเงินและโอกาสเปิดทางดี', 'ด้านงานและชื่อเสียงเปิดทางดี ผู้ใหญ่มองเห็นความสามารถของคุณ', 'มีคนช่วยเหลือ เรื่องเรียนและเอกสารราบรื่น'];
+    const SIDE_BAD = ['ด้านเงินควรระวัง เพราะคนรอบตัวอาจมาขอแบ่งหรือขอยืม', 'คำพูดและอารมณ์อาจพาไปขัดใจคนอื่น', 'เงินออกง่ายกว่าที่คิด', 'มีแรงกดดันจากงานหรือผู้มีอำนาจ', 'ใจไม่นิ่ง เอกสารตกหล่นง่าย'];
+    const SIDE_MID = ['', '', '', '', ''];
+
+    // 4 ด้าน: ข้อความตามจำนวนขีด 1–5
+    const ASP = {
+        work: ['งานติดขัด มีเรื่องขัดแย้งหรือความเปลี่ยนแปลงที่ไม่ได้เลือก วันนี้ไม่ใช่วันเริ่มเรื่องใหม่ ให้ประคองงานเดิม ตรวจงานซ้ำ และเก็บหลักฐานการทำงานไว้',
+            'งานมีแรงกดดันหรือมีคนจับผิด ทำตามขั้นตอนให้ครบและอย่าใช้อารมณ์ตอบโต้ ถ้าต้องคุยเรื่องสำคัญ ให้เตรียมข้อมูลให้พร้อม',
+            'งานเดินตามปกติ ไม่มีเรื่องใหญ่ เหมาะเก็บงานค้าง จัดระเบียบ และวางแผน เรื่องที่ต้องการแรงส่งมากรอวันที่ดีกว่านี้ได้',
+            'เป็นวันที่ผลงานเป็นที่เห็น เหมาะส่งงาน นำเสนอ หรือคุยกับหัวหน้า',
+            'งานเด่น มีโอกาสก้าวหน้าและได้รับการยอมรับ เหมาะเสนอโครงการ ขอเลื่อนตำแหน่ง หรือรับงานที่ท้าทาย อย่าปล่อยโอกาสผ่านไป'],
+        money: ['ระวังเสียเงินก้อน ไม่ลงทุน ไม่ค้ำประกัน และไม่ตัดสินใจซื้อของแพง ตรวจบิลและรายการโอนให้ละเอียด',
+            'เงินออกง่ายกว่าที่คิด คุมรายจ่ายให้ใกล้ชิด ซื้อเฉพาะของที่วางแผนไว้ และเลื่อนเรื่องเงินก้อนไปวันอื่น',
+            'เงินทรงตัว รายรับรายจ่ายใกล้เคียงเดิม เหมาะจัดการบัญชี จ่ายบิล หรือวางแผนการเงินโดยไม่ต้องตัดสินใจเรื่องใหญ่',
+            'เงินเข้าดี มีโอกาสได้รายได้หรือปิดการขาย รับไว้ได้ แต่กันส่วนหนึ่งไว้เก็บก่อนใช้',
+            'เงินเด่น มีรายได้เพิ่มหรือโอกาสทางการเงินชัดเจน เหมาะเจรจาราคา ตามเงินที่ค้าง หรือปิดดีล แต่ยังควรอ่านเงื่อนไขให้ครบ'],
+        love: ['ความสัมพันธ์สั่นคลอน อารมณ์ปะทะง่าย อย่าตัดสินใจเรื่องใหญ่ตอนโกรธ ถ้ามีเรื่องค้างใจ รอให้ใจเย็นก่อนค่อยคุย',
+            'ใจไม่ค่อยตรงกัน ระวังคำพูดตอนเหนื่อย ฟังให้มากกว่าพูด และอย่าเอาเรื่องงานมาลงกับคนใกล้ตัว',
+            'ความรักราบรื่นตามปกติ ไม่มีเรื่องให้กังวล ทักทายหรือถามไถ่คนสำคัญสักนิดก็ช่วยให้ใกล้กันขึ้น',
+            'ความรักอบอุ่น เหมาะใช้เวลาด้วยกัน คนโสดเปิดใจคุยกับคนใหม่ได้',
+            'ความรักเด่น คนมีคู่ใกล้ชิดกันมากขึ้น คนโสดมีโอกาสพบคนถูกใจ เหมาะนัดเดตหรือพาไปพบครอบครัว'],
+        health: ['ระวังสุขภาพและอุบัติเหตุ ขับรถช้าลง ไม่ทำงานหักโหม ถ้ามีอาการผิดปกติควรไปพบแพทย์',
+            'เหนื่อยง่าย ความเครียดสะสม นอนให้พอและพักสายตาระหว่างวัน',
+            'สุขภาพปกติ พักผ่อนให้พอและดื่มน้ำสม่ำเสมอ',
+            'สุขภาพดี มีแรง เหมาะออกกำลังกายหรือเริ่มกิจวัตรสุขภาพใหม่',
+            'ร่างกายแข็งแรง มีพลังเต็มที่ ใช้พลังวันนี้กับเรื่องที่ต้องใช้แรง']
+    };
+    const ASP_META = { work: ['การงาน', '💼'], money: ['การเงิน', '💰'], love: ['ความรัก', '❤️'], health: ['สุขภาพ', '🌿'] };
+    // ประโยคเสริมตามสิบเทพที่มาถึง [ด้าน, กลุ่ม, ดี/ร้าย, ข้อความ]
+    const EXTRA = [
+        ['work', 0, -1, 'ระวังเพื่อนร่วมงานที่อยากแชร์ผลงานหรือแย่งพื้นที่'],
+        ['work', 1, -1, 'ระวังคำพูดกับหัวหน้า คิดก่อนพูดหรือเขียน'],
+        ['work', 3, 1, 'ถ้ามีเรื่องค้างกับหัวหน้าหรือต้องยื่นเอกสารราชการ วันนี้เหมาะ'],
+        ['work', 3, -1, 'ทำตามระเบียบให้ครบ แม้เรื่องเล็ก'],
+        ['work', 4, 1, 'มีผู้ใหญ่หรือคนเก่งคอยช่วย กล้าขอคำแนะนำ'],
+        ['money', 2, -1, 'ระวังค่าใช้จ่ายที่ไม่ได้วางแผนและข้อเสนอที่เร่งให้ตัดสินใจ'],
+        ['money', 1, 1, 'ฝีมือหรือผลงานแปลงเป็นรายได้ได้'],
+        ['health', 3, -1, 'แรงกดดันสูง ระวังอารมณ์ร้อนและอุบัติเหตุ'],
+        ['health', 1, 1, 'อารมณ์ดี เหมาะกินอาหารดีๆ และพักผ่อน']
+    ];
+    // ดินฟ้าอากาศของไทยตามเดือน
+    const WEATHER = (m) => m >= 11 || m <= 2 ? 'อากาศเย็นและแห้งช่วงนี้ อย่าตากลมหรือนอนดึก' : m <= 5 ? 'อากาศร้อนช่วงนี้ ดื่มน้ำให้พอและเลี่ยงแดดจัด' : 'ช่วงฝน ระวังหวัดและพื้นลื่น';
+
+    // ยาม: [ข้อความ, ทำ, ระวัง] ตามสิบเทพ × ดี/ร้าย
+    const HOUR = {
+        '比肩': { good: ['มีเพื่อนหรือทีมคอยช่วย งานที่ทำร่วมกันเดินเร็ว เหมาะประชุมทีมหรือขอแรงคนรอบตัว', 'ชวนทีมเคลียร์งาน ขอความช่วยเหลือ', 'ทำเองทุกอย่างจนเหนื่อย'],
+            bad: ['มีคนแย่งพื้นที่หรือแย่งพูด ความเห็นไม่ตรงกันง่าย ทำงานของตัวเองให้เสร็จดีกว่าไปถกเถียง', 'ทำงานส่วนตัวให้เสร็จ', 'เถียงเอาชนะ แบ่งงานหรือแบ่งเงินแบบไม่ชัด'] },
+        '劫财': { good: ['มีแรงฮึดและกล้าลงมือ เหมาะเรื่องที่ต้องใช้ความกล้าหรือการแข่งขัน', 'ยื่นข้อเสนอ ลงแข่ง ขอสิ่งที่ต้องการ', 'ใจร้อนจนลืมรายละเอียด'],
+            bad: ['เงินและโอกาสรั่วไหลง่าย ทั้งจากการใช้จ่ายตามอารมณ์และคนรอบตัวที่มาขอแบ่ง', 'จดรายจ่าย เลื่อนเรื่องเงินไปยามอื่น', 'ให้ยืมเงิน ซื้อของแพงตามอารมณ์'] },
+        '食神': { good: ['อารมณ์ดี ความคิดลื่นไหล เหมาะงานสร้างสรรค์ งานฝีมือ หรือพบปะผู้คน', 'คิดงานใหม่ นัดกินข้าวคุยงาน', 'เพลินจนงานหลักไม่เดิน'],
+            bad: ['ใจลอยและอยากพัก งานคืบช้า ระวังกินดื่มเพลินหรือผัดงานไปเรื่อยๆ', 'ทำงานเล็กให้เสร็จทีละชิ้น', 'ผัดงาน กินดื่มหนัก'] },
+        '伤官': { good: ['หัวไวและพูดเก่ง เหมาะนำเสนอ ขายงาน หรือแก้ปัญหาด้วยวิธีใหม่', 'นำเสนองาน โพสต์หรือขายของ', 'พูดตรงเกินจนกระทบใจคน'],
+            bad: ['อารมณ์หงุดหงิดง่าย คำพูดอาจไปกระทบผู้ใหญ่หรือกฎระเบียบ', 'คิดก่อนพูด อ่านทวนก่อนส่ง', 'เถียงหัวหน้า วิจารณ์คนอื่นต่อหน้า'] },
+        '偏财': { good: ['มีโอกาสเงินจรหรือดีลใหม่ เหมาะเจรจาขาย ตามลูกค้า หรือปิดดีลเล็ก', 'โทรหาลูกค้า ตามเงินค้าง', 'รับปากเงื่อนไขที่ยังไม่ได้อ่าน'],
+            bad: ['เงินมาไวไปไว มีโอกาสเสียเงินโดยไม่ได้วางแผน หรือถูกชวนลงทุนแบบเร่งรีบ', 'ตรวจบิลก่อนจ่าย', 'ลงทุนหรือซื้อของตามอารมณ์'] },
+        '正财': { good: ['งานได้เงินชัดเจน เหมาะเรื่องเงิน บัญชี และปิดงานที่ได้ผลตอบแทน', 'ส่งงาน เก็บเงิน ปิดการขาย', 'ใช้จ่ายเกินงบเพราะรู้สึกว่าได้เงิน'],
+            bad: ['เงินตึงมือ งานหนักแต่ผลตอบแทนไม่คุ้ม เลี่ยงตัดสินใจเรื่องเงินในยามนี้', 'ทำงานประจำให้เสร็จ', 'ตัดสินใจเรื่องเงินก้อน'] },
+        '七杀': { good: ['แรงกดดันที่ดี ทำให้คิดชัดและกล้าตัดสินใจ เหมาะเคลียร์งานยากหรือปัญหาที่ค้าง', 'ประชุมตัดสินใจ แก้ปัญหาค้าง', 'น้ำเสียงแข็งจนคนรอบตัวอึดอัด'],
+            bad: ['ความกดดันสูง อารมณ์ร้อนง่าย และเสี่ยงอุบัติเหตุ', 'ทำงานตามขั้นตอนช้าๆ', 'เผชิญหน้าผู้มีอำนาจ ขับรถเร็ว'] },
+        '正官': { good: ['ผู้ใหญ่และระบบหนุน เหมาะติดต่องาน ราชการ หรือคุยกับหัวหน้า', 'ยื่นเอกสาร ขอพบผู้ใหญ่', 'มาสายหรือผิดนัด'],
+            bad: ['กฎระเบียบรัดตัว มีคนจับผิดง่าย ระวังทำผิดขั้นตอนแม้เรื่องเล็ก', 'ทำตามระเบียบให้ครบ', 'ขัดคำสั่งหัวหน้า ทำผิดกฎ'] },
+        '偏印': { good: ['สมาธิดีและคิดได้ลึก เหมาะวางแผน ศึกษา หรืออ่านเอกสาร', 'วางแผน อ่าน ทบทวนงาน', 'คิดมากจนไม่ลงมือ'],
+            bad: ['ความคิดวนเวียนและใจไม่นิ่ง ไม่เหมาะตัดสินใจเรื่องสำคัญ', 'พักใจ เขียนสิ่งที่กังวลลงกระดาษ', 'ตัดสินใจตอนกังวล'] },
+        '正印': { good: ['มีคนช่วยเหลือ ใจสงบ เหมาะขอคำปรึกษา ทำเอกสาร หรือเรียนรู้', 'ทำเอกสาร ขอคำแนะนำ', 'รอคนอื่นช่วยจนไม่ลงมือ'],
+            bad: ['ความช่วยเหลือมาพร้อมเงื่อนไข เอกสารตกหล่นง่าย และรู้สึกเฉื่อย', 'ตรวจเอกสารให้ครบ', 'เซ็นเอกสารที่ยังไม่ได้อ่าน'] }
+    };
+    const HOUR_CLASH = ['ยามนี้ชงวังคู่ครอง อารมณ์กับคนใกล้ตัวปะทะง่าย และไม่เหมาะเริ่มเรื่องสำคัญ', 'พักผ่อน ทำงานคนเดียว', 'ทะเลาะ คุยเรื่องเงินกับคนในบ้าน ตัดสินใจเรื่องใหญ่'];
+    const HOUR_SHORT = P.HOUR;
+
+    const partsOf = (chart, q, J) => {
+        const dm = chart.pillars.day.stem;
+        const cS = B.tenGod(dm, q.stem), cB = B.tenGod(dm, q.hidden[0].stem);
+        return [{ c: cS.code, th: cS.th, j: J.a, g: Y.GROUP_OF[cS.code], ch: B.STEMS[q.stem], el: q.stemElement, pos: 'ราศีบน' },
+            { c: cB.code, th: cB.th, j: J.b, g: Y.GROUP_OF[cB.code], ch: B.BRANCHES[q.branch], el: q.branchElement, pos: 'ราศีล่าง' }];
+    };
+    const srcOf = (ps) => ps.map((p) => `${p.pos} ${p.ch} ${p.el} เป็น${p.th}${tone(p.j)}`).join(' · ');
+
+    // รายละเอียดของยามหนึ่ง (h จาก BaziYearly.hours)
+    function hour(chart, an, h) {
+        const J = { a: h.a, b: h.b }, ps = partsOf(chart, h.pillar, J);
+        const pi = Math.abs(J.b) > Math.abs(J.a) ? 1 : 0, pri = ps[pi], sec = ps[1 - pi];
+        const good = h.clashDay ? false : (h.score > 0 || (h.score === 0 && pri.j >= 0));
+        let text, now, care;
+        if (h.clashDay) [text, now, care] = HOUR_CLASH;
+        else {
+            const T = HOUR[pri.c][pri.j < 0 ? 'bad' : 'good'];
+            [text, now, care] = T;
+            if (sec.c !== pri.c && pri.j >= 0 && sec.j < 0) text += ` แต่${HOUR_SHORT[sec.c][1]}`;
+            else if (sec.c !== pri.c && pri.j < 0 && sec.j > 0) text += ` ข้อดีคือ${HOUR_SHORT[sec.c][0]}`;
+        }
+        const P0 = chart.pillars;
+        const lv = P.level3(h.clashDay ? Math.min(h.score, -1) : h.score);
+        const src = srcOf(ps) + (h.clashDay ? ` · ${B.BRANCHES[h.pillar.branch]} ชง ${B.BRANCHES[P0.day.branch]} ราศีล่างดิถี` : '');
+        return { time: h.time, label: h.label, zh: h.pillar.zh, level: lv[0], tone: lv[1], text, doLabel: good ? 'ทำเลย' : 'ทำแทน', careLabel: good ? 'ระวัง' : 'เลี่ยง', now, care, src, score: h.score, rank: h.rank, from: h.from, to: h.to, clashDay: h.clashDay };
+    }
+
+    // จังหวะของวัน: ช่วงต่อเนื่องของยามดี / ยามที่ควรเบาลง (05.00–23.00)
+    function rhythm(hs) {
+        const day = hs.filter((h) => h.from >= 5 && h.to <= 23);
+        const runs = (pred) => { const out = []; let cur = null; for (const h of day) { if (pred(h)) { if (cur && cur.to === h.from) cur.to = h.to; else out.push(cur = { from: h.from, to: h.to }); } else cur = null; } return out; };
+        const span = (r) => `${pad(r.from)}–${pad(r.to)}`;
+        const good = runs((h) => h.rank >= 1), bad = runs((h) => h.rank <= -1 && !h.clashDay), clash = day.filter((h) => h.clashDay);
+        const out = [];
+        if (good.length) out.push({ tone: 1, head: 'ช่วงที่ดีที่สุด', when: good.map(span).join(' และ '), text: 'เหมาะทำเรื่องสำคัญ นัดคุยงาน หรือตัดสินใจ' });
+        else out.push({ tone: 0, head: 'ช่วงที่ดีที่สุด', when: '—', text: 'วันนี้ไม่มียามที่หนุนชัดเจน ทำงานประจำและเก็บรายละเอียดตามปกติ' });
+        if (bad.length) out.push({ tone: -1, head: 'ช่วงที่ควรเบาลง', when: bad.map(span).join(' และ '), text: 'แรงตก เลี่ยงเรื่องเงินก้อนและการตัดสินใจใหญ่ ใช้ทำงานเบาๆ หรือพักผ่อน' });
+        clash.forEach((h) => out.push({ tone: -1, head: 'ยามชงวังคู่ครอง', when: h.time, text: 'อารมณ์กับคนใกล้ตัวปะทะง่าย พักผ่อน ไม่คุยเรื่องหนัก' }));
+        return out;
+    }
+
+    // ดวงรายวันฉบับละเอียด
+    function day(chart, an, y, m, d, isToday) {
+        const D = Y.day(chart, an, y, m, d, isToday), q = D.pillar, W = isToday ? 'วันนี้' : 'วันนั้น';
+        const R = P.reading(chart, an, q, isToday ? 'day' : 'dayx');
+        const ps = partsOf(chart, q, { a: D.a, b: D.b });
+        const hs = Y.hours(chart, an, y, m, d);
+        // ภาพรวม
+        const bal = balance(D.a, D.b);
+        const sides = ps.map((p) => p.j > 0 ? SIDE_GOOD[p.g] : p.j < 0 ? SIDE_BAD[p.g] : SIDE_MID[p.g]).filter(Boolean);
+        let overview;
+        if (D.a * D.b < 0) { const g = ps.find((p) => p.j > 0), b = ps.find((p) => p.j < 0); overview = `${W}ให้ผลสองด้านชัดเจน ${SIDE_GOOD[g.g]} แต่${SIDE_BAD[b.g]}`; }
+        else if (sides.length) overview = `${W}${[...new Set(sides)].join(' และ')}`;
+        else overview = `${W}ธาตุของวันเป็นกลางกับดวงของคุณ ไม่มีเรื่องเด่นทั้งดีและร้าย เหมาะทำงานประจำตามแผน`;
+        const extra = [];
+        if (R.chips.some((c) => c.t.includes('ชงวังคู่ครอง'))) extra.push(`${W}ชงวังคู่ครอง อารมณ์กับคนใกล้ตัวปะทะง่าย ไม่เหมาะตัดสินใจเรื่องใหญ่`);
+        if (R.chips.some((c) => c.t.includes('ภาคีวังคู่ครอง'))) extra.push('เรื่องคนใกล้ตัวราบรื่น มีแรงดึงดูดเข้าหากัน');
+        if (R.chips.some((c) => c.t.includes('ชงปีเกิด'))) extra.push('ระวังเรื่องในครอบครัวและผู้ใหญ่');
+        R.stars.forEach((s) => extra.push(`${s.th}มาถึง ${s.transit}`));
+        const kong = AL.isKong(chart, q.branch);
+        if (kong) extra.push(`ราศีล่างของ${W}ตกกงหวั่ง ทั้งเรื่องดีและเรื่องร้ายจึงมาแบบเบาๆ อย่าคาดหวังผลสุดทาง และไม่ต้องกังวลเกินไป`);
+        if (extra.length) overview += ' · ' + extra.join(' · ');
+        const src = srcOf(ps) + (kong ? ` · ${B.BRANCHES[q.branch]} ตกกงหวั่ง` : '');
+        // 4 ด้าน
+        const rD = R.chips;
+        const clash = rD.some((c) => c.t.includes('ชงวังคู่ครอง')), combo = rD.some((c) => c.t.includes('ภาคีวังคู่ครอง'));
+        const taohua = R.stars.some((s) => s.id === 'taohua');
+        const clashH = hs.find((h) => h.clashDay && h.from >= 5 && h.to <= 23);
+        const bestFor = (groups) => { const c = hs.filter((h) => h.from >= 5 && h.to <= 23 && !h.clashDay && h.rank >= 1 && partsOf(chart, h.pillar, h).some((p) => groups.includes(p.g) && p.j > 0)); c.sort((a, b) => b.rank - a.rank || a.from - b.from); return c[0]; };
+        const bad = ps.filter((p) => p.j < 0);
+        const aspects = R.aspects.map((A) => {
+            const b = A.bars; let text = ASP[A.id][b - 1];
+            const add = [];
+            if (A.id === 'money' && b <= 2 && ps.some((p) => p.g === 0 && p.j < 0)) text = 'เงินออกง่ายเพราะคนใกล้ตัว ไม่ใช่เพราะซื้อของ ถ้ามีคนมาขอยืมหรือชวนลงขัน ให้ปฏิเสธอย่างสุภาพหรือเลื่อนไปคุยวันอื่น ซื้อของเฉพาะที่วางแผนไว้';
+            if (A.id === 'love' && clash && b <= 3) text = `${W}ชงวังคู่ครอง ใจไม่นิ่ง คนมีคู่ระวังคำพูดตอนเหนื่อย คนโสดคุยได้แต่อย่าเพิ่งผูกมัด`;
+            if (A.id === 'love' && combo && b >= 4) text = `ราศีล่างของ${W}ภาคีกับวังคู่ครอง จึงมีแรงดึงดูดกับคนใกล้ตัว คนมีคู่เหมาะหาเวลาอยู่ด้วยกัน คนโสดมีโอกาสได้รู้จักคนใหม่ผ่านที่ทำงานหรือคนรู้จัก`;
+            if (A.id === 'health' && clash && b <= 3) text = 'ความเครียดสะสมง่าย นอนให้พอ และระวังอุบัติเหตุเล็กๆ ระหว่างเดินทาง';
+            for (const [asp, g, t, s] of EXTRA) if (asp === A.id && ps.some((p) => p.g === g && Math.sign(p.j) === t)) add.push(s);
+            if (A.id === 'love' && taohua) add.push('ดอกท้อมาถึง มีเสน่ห์ เหมาะพบปะผู้คน');
+            if (A.id === 'love' && clashH) add.push(`เลี่ยงคุยเรื่องหนักช่วง ${clashH.time}`);
+            if (A.id === 'work' && b >= 3) { const h = bestFor([3, 4, 1]); if (h) add.push(`ทำเรื่องสำคัญให้เสร็จช่วง ${h.time}`); }
+            if (A.id === 'money' && b >= 3) { const h = bestFor([2]); if (h) add.push(`ยามที่เหมาะกับเรื่องเงิน ${h.time}`); }
+            if (A.id === 'health') {
+                const els = [...new Set(bad.map((p) => p.el))];
+                if (els.length && N && N.ORGAN) add.push(`${els.join('และ')}ที่ให้โทษมาถึง ควรดูแล${els.map((e) => N.ORGAN[B.ELEMENTS.indexOf(e)].sys.split(' ').slice(0, 3).join(' ')).join(' และ')}`);
+                add.push(WEATHER(m));
+            }
+            return { id: A.id, name: ASP_META[A.id][0], icon: ASP_META[A.id][1], bars: b, text: [text, ...add].join(' ') };
+        });
+        // เหมาะทำ / ควรเลี่ยง
+        const OF = AL.officer(chart, y, m, d);
+        const doL = R.do.slice(), avL = R.avoid.slice();
+        if (OF && OF.tone > 0) doL.push(`${OF.good.split(' ').slice(0, 2).join(' ')} (${OF.name} ${OF.zh})`);
+        if (OF && OF.tone < 0) avL.push(`${OF.bad.split(' ').slice(0, 2).join(' ')} (${OF.name} ${OF.zh})`);
+        if (clashH) avL.push(`ตัดสินใจเรื่องใหญ่ช่วง ${clashH.time}`);
+        // ยาม
+        const hours = hs.map((h) => hour(chart, an, h));
+        const dayH = hours.map((h, i) => [h, i]).filter(([h]) => h.from >= 5 && h.to <= 23);
+        const top = dayH.filter(([h]) => h.rank >= 1).sort((a, b) => b[0].rank - a[0].rank || a[0].from - b[0].from).slice(0, 3).map(([, i]) => i).sort((a, b) => a - b);
+        return { date: D.date, label: D.label, pillar: q, title: R.title, level: R.level, tone: R.tone, balance: bal, overview, src, chips: R.chips,
+            rhythm: rhythm(hs), aspects, do: [...new Set(doL)].slice(0, 4), avoid: [...new Set(avL)].slice(0, 4), officer: OF, hours, top };
+    }
+    return { day, hour, rhythm, balance, ASP, HOUR, HOUR_CLASH, SIDE_GOOD, SIDE_BAD, EXTRA, WEATHER };
+});
+
+</script>
+<script>
 // ai.js — ให้ AI เรียบเรียงคำทำนายและตอบคำถามเรื่องดวง
 // แอปคำนวณทุกอย่างเอง แล้วส่ง "แฟ้มดวง" (ข้อมูลที่คำนวณแล้ว + คำทำนายแม่แบบ) ให้ AI เขียนเป็นภาษาคน
 // AI ห้ามคำนวณหรือเปลี่ยนผลวิเคราะห์เอง ถ้าต้องการข้อมูลปี/เดือน/วัน/ฤกษ์อื่น ให้เรียกเครื่องมือของแอป
@@ -4452,7 +4654,7 @@ body.gen .why .src { display: block; }
       if (!PRO) {
         const t = BaziPlain.level3(h.clashDay ? Math.min(h.score, -1) : h.score);
         $('nowCard').innerHTML = `<div class="nowhead"><b>ตอนนี้</b> <span>${d.label} · ${String(NOW_H).padStart(2, '0')}.${String(nowD.getMinutes()).padStart(2, '0')} น.</span></div>
-          <div class="nowline"><span class="htg ${t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm'}">${h.label} · ${t[0]}</span><p>${escH(BaziPlain.hourLine(r, an, h))}</p></div>
+          ${(() => { const H = BaziDaily.hour(r, an, h); return `<div class="nowline"><span class="htg ${t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm'}">${h.label} · ${t[0]}</span><p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p></div>`; })()}
           <p class="nowgood"><b>ยามดีที่เหลือของวันนี้:</b> ${left.length ? left.map((x) => x.time).join(' · ') : 'ไม่มียามที่ส่งเสริมชัดเจนเหลือแล้ว'}</p>${(() => { const o = BaziAlmanac.officer(r, TODAY.year, TODAY.month, TODAY.day); return o ? `<p class="nowgood"><b>วันนี้เป็น${o.name} ${o.zh}:</b> เหมาะ${o.good}</p>` : ''; })()}`;
         return;
       }
@@ -4484,18 +4686,26 @@ body.gen .why .src { display: block; }
       const W = today ? 'วันนี้' : 'วันนั้น', gh = goodHours(hs), OF = BaziAlmanac.officer(r, x.date.year, x.date.month, x.date.day);
       const h = hs[hourSel], hrt = RATE(h.score), hbg = BaziCore.tenGod(dmStem, h.pillar.hidden[0].stem);
       if (!PRO) {
-        const R = BaziPlain.reading(r, an, q, today ? 'day' : 'dayx'), nowI = today ? BaziYearly.hourIndex(hs, NOW_H) : -1;
-        const row = (y, i) => { const t = BaziPlain.level3(y.clashDay ? Math.min(y.score, -1) : y.score), c = t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm';
-          return `<div class="hr ${c}${i === nowI ? ' now' : ''}"><span class="ln"></span><div><div class="t"><b>${y.time}</b><span class="htg ${c}">${t[1] > 0 ? 'ยามดี' : t[1] < 0 ? 'ควรเลี่ยง' : 'ยามกลาง'}</span>${i === nowI ? '<span class="htg nw">ตอนนี้</span>' : ''}<small>${y.label}</small></div><p>${escH(BaziPlain.hourLine(r, an, y))}</p></div></div>`; };
-        const day = hs.map((y, i) => [y, i]).filter(([y]) => y.from >= 5 && y.to <= 23), night = hs.map((y, i) => [y, i]).filter(([y]) => !(y.from >= 5 && y.to <= 23));
+        const DD = BaziDaily.day(r, an, x.date.year, x.date.month, x.date.day, today), nowI = today ? BaziYearly.hourIndex(hs, NOW_H) : -1;
+        const cls = (t) => t > 0 ? 'g' : t < 0 ? 'b' : 'm';
+        const hcard = (H, i, open) => `<div class="hr ${cls(H.tone)}${i === nowI ? ' now' : ''}"><span class="ln"></span><div>
+          <div class="t"><b>${H.time}</b><span class="htg ${cls(H.tone)}">${H.tone > 0 ? 'ยามดี' : H.tone < 0 ? 'ควรเลี่ยง' : 'ยามกลาง'}</span>${i === nowI ? '<span class="htg nw">ตอนนี้</span>' : ''}<small>${H.label}</small></div>
+          ${open ? `<p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p><p class="src">ที่มา: ${escH(H.src)}</p>`
+            : `<details class="hmore"><summary>${escH(H.text.split(' ').slice(0, 4).join(' '))}…</summary><p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p><p class="src">ที่มา: ${escH(H.src)}</p></details>`}</div></div>`;
+        const dayH = DD.hours.map((y, i) => [y, i]).filter(([y]) => y.from >= 5 && y.to <= 23), nightH = DD.hours.map((y, i) => [y, i]).filter(([y]) => !(y.from >= 5 && y.to <= 23));
+        const isOpen = (i) => DD.top.includes(i) || i === nowI;
         $('dayDetail').innerHTML = `
           <h2>${x.label} <small>วัน${q.animal}${today ? ' · วันนี้' : ''}</small></h2>
-          ${plainHTML(R)}
+          <div class="phero"><div class="pchips">${DD.chips.map((c) => `<span class="pchip ${c.tone > 0 ? 'ok' : c.tone < 0 ? 'warn' : 'mid'}">${escH(c.t)}</span>`).join('')}</div>
+            <h3 class="ptitle">${escH(DD.title)}</h3><p class="pbal"><b>ภาพรวม${W}: ${escH(DD.level)}</b> (${escH(DD.balance)})</p><p>${escH(DD.overview)}</p><p class="src">ที่มา: ${escH(DD.src)}</p></div>
+          <div class="pasp prhy"><h4>จังหวะของ${W}</h4>${DD.rhythm.map((z) => `<div class="rz ${cls(z.tone)}"><b>${escH(z.head)}</b> <span>${escH(z.when)}</span><p>${escH(z.text)}</p></div>`).join('')}</div>
+          <div class="pasp"><h4>แต่ละด้าน</h4>${DD.aspects.map((a) => `<div class="asp"><span class="ic" aria-hidden="true">${a.icon}</span><div class="top"><b>${a.name}</b><span class="pbar${a.bars <= 2 ? ' lo' : ''}" role="img" aria-label="${a.bars} จาก 5">${[1, 2, 3, 4, 5].map((k) => `<i${k <= a.bars ? ' class="on"' : ''}></i>`).join('')}</span></div><p>${escH(a.text)}</p></div>`).join('')}</div>
+          <div class="pdo"><div class="g"><h4>เหมาะทำ</h4><ul>${DD.do.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div><div class="b"><h4>ควรเลี่ยง</h4><ul>${DD.avoid.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div></div>
           ${OF ? `<div class="offbox"><b>เทพประจำวัน: ${OF.name} ${OF.zh}</b> <span class="htg ${OF.tone > 0 ? 'g' : OF.tone < 0 ? 'b' : 'm'}">${OF.tone > 0 ? 'วันใช้ได้' : OF.tone < 0 ? 'ไม่ควรใช้ทำเรื่องสำคัญ' : 'วันกลาง'}</span><p>เหมาะ: ${OF.good} · เลี่ยง: ${OF.bad}</p></div>` : ''}
           <div class="phours"><h4>ยามของ${W}</h4>
-            <div class="best"><b>ยามดีที่สุด:</b> ${gh.length ? gh.filter((y) => y.from >= 5 && y.to <= 23).sort((a, b) => b.score - a.score).slice(0, 3).sort((a, b) => a.from - b.from).map((y) => y.time).join(' · ') || 'ช่วงกลางคืน' : 'ไม่มียามที่ส่งเสริมชัดเจน'}</div>
-            ${day.map(([y, i]) => row(y, i)).join('')}
-            <details class="night"><summary>ช่วงกลางคืน 23.00–05.00</summary>${night.map(([y, i]) => row(y, i)).join('')}</details>
+            <div class="best"><b>ยามเด่น:</b> ${DD.top.length ? DD.top.map((i) => `${DD.hours[i].label} ${DD.hours[i].time}`).join(' · ') : 'ไม่มียามที่ส่งเสริมชัดเจน'}</div>
+            ${dayH.map(([y, i]) => hcard(y, i, isOpen(i))).join('')}
+            <details class="night"><summary>ช่วงกลางคืน 23.00–05.00</summary>${nightH.map(([y, i]) => hcard(y, i, true)).join('')}</details>
           </div>
           <details class="why"><summary>ดูเหตุผลทางดวง</summary>
             <div class="lgrid">

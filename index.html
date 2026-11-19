@@ -454,6 +454,11 @@ body.gen .why .src { display: block; }
 .asp .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .asp p { margin: 0; color: var(--ink-soft); line-height: 1.45; }
 .pbar { display: inline-flex; gap: 3px; } .pbar i { width: 18px; height: 6px; border-radius: 3px; background: var(--rule); } .pbar i.on { background: var(--jade); } .pbar.lo i.on { background: var(--bad); }
+.pbal { margin: 2px 0 6px !important; }
+.prhy .rz { padding: 8px 0 8px 12px; border-left: 4px solid var(--rule); margin: 6px 0; } .prhy .rz.g { border-color: var(--good); } .prhy .rz.b { border-color: var(--bad); } .prhy .rz span { color: var(--ink-soft); } .prhy .rz p { margin: 2px 0 0; }
+.hdo { margin: 4px 0 0 !important; font-size: .92rem; }
+.hmore summary { cursor: pointer; color: var(--ink-soft); list-style-position: inside; }
+.hr .src { margin: 4px 0 0; }
 .phours .best { background: var(--jade-wash); border-radius: 10px; padding: 7px 12px; margin-bottom: 8px; }
 .hr { display: grid; grid-template-columns: 4px 1fr; gap: 0 12px; padding: 9px 0; border-top: 1px solid var(--rule); }
 .hr .ln { border-radius: 2px; } .hr.g .ln { background: var(--good); } .hr.m .ln { background: var(--rule); } .hr.b .ln { background: var(--bad); }
@@ -799,6 +804,7 @@ body.gen .why .src { display: block; }
 <script src="js/shensha.js"></script>
 <script src="js/structure.js"></script>
 <script src="js/plain.js"></script>
+<script src="js/daily.js"></script>
 <script src="js/ai.js"></script>
 <script>
 (function () {
@@ -1380,7 +1386,7 @@ body.gen .why .src { display: block; }
       if (!PRO) {
         const t = BaziPlain.level3(h.clashDay ? Math.min(h.score, -1) : h.score);
         $('nowCard').innerHTML = `<div class="nowhead"><b>ตอนนี้</b> <span>${d.label} · ${String(NOW_H).padStart(2, '0')}.${String(nowD.getMinutes()).padStart(2, '0')} น.</span></div>
-          <div class="nowline"><span class="htg ${t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm'}">${h.label} · ${t[0]}</span><p>${escH(BaziPlain.hourLine(r, an, h))}</p></div>
+          ${(() => { const H = BaziDaily.hour(r, an, h); return `<div class="nowline"><span class="htg ${t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm'}">${h.label} · ${t[0]}</span><p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p></div>`; })()}
           <p class="nowgood"><b>ยามดีที่เหลือของวันนี้:</b> ${left.length ? left.map((x) => x.time).join(' · ') : 'ไม่มียามที่ส่งเสริมชัดเจนเหลือแล้ว'}</p>${(() => { const o = BaziAlmanac.officer(r, TODAY.year, TODAY.month, TODAY.day); return o ? `<p class="nowgood"><b>วันนี้เป็น${o.name} ${o.zh}:</b> เหมาะ${o.good}</p>` : ''; })()}`;
         return;
       }
@@ -1412,18 +1418,26 @@ body.gen .why .src { display: block; }
       const W = today ? 'วันนี้' : 'วันนั้น', gh = goodHours(hs), OF = BaziAlmanac.officer(r, x.date.year, x.date.month, x.date.day);
       const h = hs[hourSel], hrt = RATE(h.score), hbg = BaziCore.tenGod(dmStem, h.pillar.hidden[0].stem);
       if (!PRO) {
-        const R = BaziPlain.reading(r, an, q, today ? 'day' : 'dayx'), nowI = today ? BaziYearly.hourIndex(hs, NOW_H) : -1;
-        const row = (y, i) => { const t = BaziPlain.level3(y.clashDay ? Math.min(y.score, -1) : y.score), c = t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm';
-          return `<div class="hr ${c}${i === nowI ? ' now' : ''}"><span class="ln"></span><div><div class="t"><b>${y.time}</b><span class="htg ${c}">${t[1] > 0 ? 'ยามดี' : t[1] < 0 ? 'ควรเลี่ยง' : 'ยามกลาง'}</span>${i === nowI ? '<span class="htg nw">ตอนนี้</span>' : ''}<small>${y.label}</small></div><p>${escH(BaziPlain.hourLine(r, an, y))}</p></div></div>`; };
-        const day = hs.map((y, i) => [y, i]).filter(([y]) => y.from >= 5 && y.to <= 23), night = hs.map((y, i) => [y, i]).filter(([y]) => !(y.from >= 5 && y.to <= 23));
+        const DD = BaziDaily.day(r, an, x.date.year, x.date.month, x.date.day, today), nowI = today ? BaziYearly.hourIndex(hs, NOW_H) : -1;
+        const cls = (t) => t > 0 ? 'g' : t < 0 ? 'b' : 'm';
+        const hcard = (H, i, open) => `<div class="hr ${cls(H.tone)}${i === nowI ? ' now' : ''}"><span class="ln"></span><div>
+          <div class="t"><b>${H.time}</b><span class="htg ${cls(H.tone)}">${H.tone > 0 ? 'ยามดี' : H.tone < 0 ? 'ควรเลี่ยง' : 'ยามกลาง'}</span>${i === nowI ? '<span class="htg nw">ตอนนี้</span>' : ''}<small>${H.label}</small></div>
+          ${open ? `<p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p><p class="src">ที่มา: ${escH(H.src)}</p>`
+            : `<details class="hmore"><summary>${escH(H.text.split(' ').slice(0, 4).join(' '))}…</summary><p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p><p class="src">ที่มา: ${escH(H.src)}</p></details>`}</div></div>`;
+        const dayH = DD.hours.map((y, i) => [y, i]).filter(([y]) => y.from >= 5 && y.to <= 23), nightH = DD.hours.map((y, i) => [y, i]).filter(([y]) => !(y.from >= 5 && y.to <= 23));
+        const isOpen = (i) => DD.top.includes(i) || i === nowI;
         $('dayDetail').innerHTML = `
           <h2>${x.label} <small>วัน${q.animal}${today ? ' · วันนี้' : ''}</small></h2>
-          ${plainHTML(R)}
+          <div class="phero"><div class="pchips">${DD.chips.map((c) => `<span class="pchip ${c.tone > 0 ? 'ok' : c.tone < 0 ? 'warn' : 'mid'}">${escH(c.t)}</span>`).join('')}</div>
+            <h3 class="ptitle">${escH(DD.title)}</h3><p class="pbal"><b>ภาพรวม${W}: ${escH(DD.level)}</b> (${escH(DD.balance)})</p><p>${escH(DD.overview)}</p><p class="src">ที่มา: ${escH(DD.src)}</p></div>
+          <div class="pasp prhy"><h4>จังหวะของ${W}</h4>${DD.rhythm.map((z) => `<div class="rz ${cls(z.tone)}"><b>${escH(z.head)}</b> <span>${escH(z.when)}</span><p>${escH(z.text)}</p></div>`).join('')}</div>
+          <div class="pasp"><h4>แต่ละด้าน</h4>${DD.aspects.map((a) => `<div class="asp"><span class="ic" aria-hidden="true">${a.icon}</span><div class="top"><b>${a.name}</b><span class="pbar${a.bars <= 2 ? ' lo' : ''}" role="img" aria-label="${a.bars} จาก 5">${[1, 2, 3, 4, 5].map((k) => `<i${k <= a.bars ? ' class="on"' : ''}></i>`).join('')}</span></div><p>${escH(a.text)}</p></div>`).join('')}</div>
+          <div class="pdo"><div class="g"><h4>เหมาะทำ</h4><ul>${DD.do.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div><div class="b"><h4>ควรเลี่ยง</h4><ul>${DD.avoid.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div></div>
           ${OF ? `<div class="offbox"><b>เทพประจำวัน: ${OF.name} ${OF.zh}</b> <span class="htg ${OF.tone > 0 ? 'g' : OF.tone < 0 ? 'b' : 'm'}">${OF.tone > 0 ? 'วันใช้ได้' : OF.tone < 0 ? 'ไม่ควรใช้ทำเรื่องสำคัญ' : 'วันกลาง'}</span><p>เหมาะ: ${OF.good} · เลี่ยง: ${OF.bad}</p></div>` : ''}
           <div class="phours"><h4>ยามของ${W}</h4>
-            <div class="best"><b>ยามดีที่สุด:</b> ${gh.length ? gh.filter((y) => y.from >= 5 && y.to <= 23).sort((a, b) => b.score - a.score).slice(0, 3).sort((a, b) => a.from - b.from).map((y) => y.time).join(' · ') || 'ช่วงกลางคืน' : 'ไม่มียามที่ส่งเสริมชัดเจน'}</div>
-            ${day.map(([y, i]) => row(y, i)).join('')}
-            <details class="night"><summary>ช่วงกลางคืน 23.00–05.00</summary>${night.map(([y, i]) => row(y, i)).join('')}</details>
+            <div class="best"><b>ยามเด่น:</b> ${DD.top.length ? DD.top.map((i) => `${DD.hours[i].label} ${DD.hours[i].time}`).join(' · ') : 'ไม่มียามที่ส่งเสริมชัดเจน'}</div>
+            ${dayH.map(([y, i]) => hcard(y, i, isOpen(i))).join('')}
+            <details class="night"><summary>ช่วงกลางคืน 23.00–05.00</summary>${nightH.map(([y, i]) => hcard(y, i, true)).join('')}</details>
           </div>
           <details class="why"><summary>ดูเหตุผลทางดวง</summary>
             <div class="lgrid">

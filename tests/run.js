@@ -165,5 +165,14 @@ eq('AI: แฟ้มดวงมีผลวิเคราะห์ วัย�
     (() => { try { t('day_reading').execute({ date: 'x' }); return false; } catch (e) { return true; } })(), AIm.md('## ก <b>\n- ข'), AIm.keyOf(r) === AIm.keyOf(calc(1990, 1, 15, 10, 30))]; })(),
   [true, true, true, true, true, true, 12, true, true, '<h3>ก &lt;b&gt;</h3><ul><li>ข</li></ul>', true]);
 
+
+const DY = require('../js/daily.js');
+eq('ดวงรายวันฉบับละเอียด: ภาพรวมสองด้าน จังหวะของวัน 4 ด้าน ยามเด่น 3 ยาม และทุกยามมีข้อความครบ (ทุกวันใน 60 วัน)', (() => { const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r);
+  const x = DY.day(r, an, 2026, 11, 19, true); let ok = true;
+  for (let k = 0; k < 60; k++) { const t = new Date(2026, 0, 1 + k), d = DY.day(r, an, t.getFullYear(), t.getMonth() + 1, t.getDate(), false);
+    ok = ok && d.overview.length > 40 && d.aspects.length === 4 && d.aspects.every((a) => a.text.length > 30) && d.hours.every((h) => h.text && h.now && h.care) && d.rhythm.length >= 1 && d.top.length <= 3; }
+  return [x.balance, x.rhythm.map((z) => z.when).join(' | '), x.top.map((i) => x.hours[i].time).join(','), x.hours.find((h) => h.clashDay).doLabel, ok]; })(),
+  ['ดีครึ่งหนึ่ง ระวังครึ่งหนึ่ง', '07.00–15.00 | 15.00–19.00 และ 21.00–23.00 | 19.00–21.00', '07.00–09.00,09.00–11.00,11.00–13.00', 'ทำแทน', true]);
+
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
