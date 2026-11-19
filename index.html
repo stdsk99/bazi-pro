@@ -458,6 +458,10 @@ body.gen .why .src { display: block; }
 .prhy .rz { padding: 8px 0 8px 12px; border-left: 4px solid var(--rule); margin: 6px 0; } .prhy .rz.g { border-color: var(--good); } .prhy .rz.b { border-color: var(--bad); } .prhy .rz span { color: var(--ink-soft); } .prhy .rz p { margin: 2px 0 0; }
 .hdo { margin: 4px 0 0 !important; font-size: .92rem; }
 .hmore summary { cursor: pointer; color: var(--ink-soft); list-style-position: inside; }
+.hmore summary .full { display: none; }
+.hmore[open] summary { color: inherit; }
+.hmore[open] summary .pv { display: none; }
+.hmore[open] summary .full { display: inline; }
 .hr .src { margin: 4px 0 0; }
 .phours .best { background: var(--jade-wash); border-radius: 10px; padding: 7px 12px; margin-bottom: 8px; }
 .hr { display: grid; grid-template-columns: 4px 1fr; gap: 0 12px; padding: 9px 0; border-top: 1px solid var(--rule); }
@@ -1423,7 +1427,7 @@ body.gen .why .src { display: block; }
         const hcard = (H, i, open) => `<div class="hr ${cls(H.tone)}${i === nowI ? ' now' : ''}"><span class="ln"></span><div>
           <div class="t"><b>${H.time}</b><span class="htg ${cls(H.tone)}">${H.tone > 0 ? 'ยามดี' : H.tone < 0 ? 'ควรเลี่ยง' : 'ยามกลาง'}</span>${i === nowI ? '<span class="htg nw">ตอนนี้</span>' : ''}<small>${H.label}</small></div>
           ${open ? `<p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p><p class="src">ที่มา: ${escH(H.src)}</p>`
-            : `<details class="hmore"><summary>${escH(H.text.split(' ').slice(0, 4).join(' '))}…</summary><p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p><p class="src">ที่มา: ${escH(H.src)}</p></details>`}</div></div>`;
+            : `<details class="hmore"><summary><span class="pv">${escH(H.text.split(' ').slice(0, 4).join(' '))}…</span><span class="full">${escH(H.text)}</span></summary><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p><p class="src">ที่มา: ${escH(H.src)}</p></details>`}</div></div>`;
         const dayH = DD.hours.map((y, i) => [y, i]).filter(([y]) => y.from >= 5 && y.to <= 23), nightH = DD.hours.map((y, i) => [y, i]).filter(([y]) => !(y.from >= 5 && y.to <= 23));
         const isOpen = (i) => DD.top.includes(i) || i === nowI;
         $('dayDetail').innerHTML = `

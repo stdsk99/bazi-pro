@@ -171,8 +171,8 @@ eq('ดวงรายวันฉบับละเอียด: ภาพร�
   const x = DY.day(r, an, 2026, 11, 19, true); let ok = true;
   for (let k = 0; k < 60; k++) { const t = new Date(2026, 0, 1 + k), d = DY.day(r, an, t.getFullYear(), t.getMonth() + 1, t.getDate(), false);
     ok = ok && d.overview.length > 40 && d.aspects.length === 4 && d.aspects.every((a) => a.text.length > 30) && d.hours.every((h) => h.text && h.now && h.care) && d.rhythm.length >= 1 && d.top.length <= 3; }
-  return [x.balance, x.rhythm.map((z) => z.when).join(' | '), x.top.map((i) => x.hours[i].time).join(','), x.hours.find((h) => h.clashDay).doLabel, ok]; })(),
-  ['ดีครึ่งหนึ่ง ระวังครึ่งหนึ่ง', '07.00–15.00 | 15.00–19.00 และ 21.00–23.00 | 19.00–21.00', '07.00–09.00,09.00–11.00,11.00–13.00', 'ทำแทน', true]);
+  return [x.balance, x.rhythm.map((z) => z.when).join(' | '), x.top.map((i) => x.hours[i].time).join(','), x.hours.find((h) => h.clashDay).careLabel, ok]; })(),
+  ['ดีครึ่งหนึ่ง ระวังครึ่งหนึ่ง', '07.00–15.00 | 15.00–19.00 และ 21.00–23.00 | 19.00–21.00', '07.00–09.00,09.00–11.00,11.00–13.00', 'ควรเลี่ยง', true]);
 eq('ถ้อยคำ 3 แบบ: วันเดิมได้ข้อความเดิม วันต่างกันหมุนแบบ ดวงต่างกันได้คนละแบบ ทุกชุดมี 3 แบบ และยามบนการ์ด "ตอนนี้" ตรงกับรายการยาม', (() => {
   const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r), r2 = calc(1990, 1, 15, 10, 31), an2 = An.analyze(r2);
   const a = DY.day(r, an, 2026, 11, 19, true), b = DY.day(r, an, 2026, 11, 19, true), c = DY.day(r2, an2, 2026, 11, 19, true);

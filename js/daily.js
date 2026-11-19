@@ -1,6 +1,6 @@
 // daily.js — ดวงรายวันและรายยามแบบละเอียด (โหมดคนทั่วไป)
 // ภาพรวมสองด้าน (ราศีบน/ราศีล่าง) → จังหวะของวัน (สรุปจาก 12 ยาม) → 4 ด้าน ด้านละ 2–3 ประโยค → เหมาะทำ/ควรเลี่ยง
-// รายยาม: ข้อความ 1–2 ประโยค + "ทำเลย/ระวัง" (ยามดี) หรือ "ทำแทน/เลี่ยง" (ยามไม่ดี) + ที่มา
+// รายยาม: ข้อความ 1–2 ประโยค + "ควรทำ/ระวัง" (ยามดี) หรือ "ควรทำ/ควรเลี่ยง" (ยามไม่ดี) + ที่มา
 // ใช้เกณฑ์เดียวกับหน้าอื่น: ธาตุให้คุณ/ให้โทษ (BaziYearly.judgeFn) สิบเทพ ความสัมพันธ์กับราศีล่างดิถี ดาวพิเศษ กงหวั่ง
 // ถ้อยคำ: แต่ละกรณีมี 3 แบบที่ความหมายเท่ากัน เลือกแบบจากวันเกิดของดวง + วันที่ดู (เปิดซ้ำวันเดิมได้ข้อความเดิม วันถัดไปหมุนแบบ)
 (function (root, factory) {
@@ -270,7 +270,7 @@
         const P0 = chart.pillars;
         const lv = P.level3(h.clashDay ? Math.min(h.score, -1) : h.score);
         const src = srcOf(ps) + (h.clashDay ? ` · ${B.BRANCHES[h.pillar.branch]} ชง ${B.BRANCHES[P0.day.branch]} ราศีล่างดิถี` : '');
-        return { time: h.time, label: h.label, zh: h.pillar.zh, level: lv[0], tone: lv[1], text, doLabel: good ? 'ทำเลย' : 'ทำแทน', careLabel: good ? 'ระวัง' : 'เลี่ยง', now, care, src, score: h.score, rank: h.rank, from: h.from, to: h.to, clashDay: h.clashDay };
+        return { time: h.time, label: h.label, zh: h.pillar.zh, level: lv[0], tone: lv[1], text, doLabel: 'ควรทำ', careLabel: good ? 'ระวัง' : 'ควรเลี่ยง', now, care, src, score: h.score, rank: h.rank, from: h.from, to: h.to, clashDay: h.clashDay };
     }
 
     // จังหวะของวัน: ช่วงต่อเนื่องของยามดี / ยามที่ควรเบาลง (05.00–23.00)
