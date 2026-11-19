@@ -173,6 +173,16 @@ eq('ดวงรายวันฉบับละเอียด: ภาพร�
     ok = ok && d.overview.length > 40 && d.aspects.length === 4 && d.aspects.every((a) => a.text.length > 30) && d.hours.every((h) => h.text && h.now && h.care) && d.rhythm.length >= 1 && d.top.length <= 3; }
   return [x.balance, x.rhythm.map((z) => z.when).join(' | '), x.top.map((i) => x.hours[i].time).join(','), x.hours.find((h) => h.clashDay).doLabel, ok]; })(),
   ['ดีครึ่งหนึ่ง ระวังครึ่งหนึ่ง', '07.00–15.00 | 15.00–19.00 และ 21.00–23.00 | 19.00–21.00', '07.00–09.00,09.00–11.00,11.00–13.00', 'ทำแทน', true]);
+eq('ถ้อยคำ 3 แบบ: วันเดิมได้ข้อความเดิม วันต่างกันหมุนแบบ ดวงต่างกันได้คนละแบบ ทุกชุดมี 3 แบบ และยามบนการ์ด "ตอนนี้" ตรงกับรายการยาม', (() => {
+  const r = calc(1990, 1, 15, 10, 30), an = An.analyze(r), r2 = calc(1990, 1, 15, 10, 31), an2 = An.analyze(r2);
+  const a = DY.day(r, an, 2026, 11, 19, true), b = DY.day(r, an, 2026, 11, 19, true), c = DY.day(r2, an2, 2026, 11, 19, true);
+  const txt = (x) => JSON.stringify([x.overview, x.aspects.map((z) => z.text), x.hours.map((h) => h.text + h.now + h.care), x.rhythm.map((z) => z.text)]);
+  const seen = new Set(); for (let k = 0; k < 90; k++) { const t = new Date(2026, 0, 1 + k); seen.add(DY.day(r, an, t.getFullYear(), t.getMonth() + 1, t.getDate(), false).aspects[2].text); }
+  const all3 = Object.values(DY.ASP).every((L) => L.every((v) => v.length === 3 && new Set(v).size === 3)) && Object.values(DY.HOUR).every((o) => o.good.length === 3 && o.bad.length === 3 && o.good.every((x) => x.length === 3) && o.bad.every((x) => x.length === 3))
+    && DY.SIDE_GOOD.every((v) => v.length === 3) && DY.SIDE_BAD.every((v) => v.length === 3) && DY.HOUR_CLASH.length === 3 && Object.values(DY.RHY).every((v) => v.length === 3);
+  const hs = Yr.hours(r, an, 2026, 11, 19), h0 = DY.hour(r, an, hs[5], { y: 2026, m: 11, d: 19 });
+  return [txt(a) === txt(b), txt(a) !== txt(c), seen.size > 3, all3, h0.text === a.hours[5].text && h0.now === a.hours[5].now]; })(),
+  [true, true, true, true, true]);
 
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);

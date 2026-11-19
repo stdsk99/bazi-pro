@@ -1386,7 +1386,7 @@ body.gen .why .src { display: block; }
       if (!PRO) {
         const t = BaziPlain.level3(h.clashDay ? Math.min(h.score, -1) : h.score);
         $('nowCard').innerHTML = `<div class="nowhead"><b>ตอนนี้</b> <span>${d.label} · ${String(NOW_H).padStart(2, '0')}.${String(nowD.getMinutes()).padStart(2, '0')} น.</span></div>
-          ${(() => { const H = BaziDaily.hour(r, an, h); return `<div class="nowline"><span class="htg ${t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm'}">${h.label} · ${t[0]}</span><p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p></div>`; })()}
+          ${(() => { const H = BaziDaily.hour(r, an, h, { y: TODAY.year, m: TODAY.month, d: TODAY.day }); return `<div class="nowline"><span class="htg ${t[1] > 0 ? 'g' : t[1] < 0 ? 'b' : 'm'}">${h.label} · ${t[0]}</span><p>${escH(H.text)}</p><p class="hdo"><b>${H.doLabel}:</b> ${escH(H.now)} · <b>${H.careLabel}:</b> ${escH(H.care)}</p></div>`; })()}
           <p class="nowgood"><b>ยามดีที่เหลือของวันนี้:</b> ${left.length ? left.map((x) => x.time).join(' · ') : 'ไม่มียามที่ส่งเสริมชัดเจนเหลือแล้ว'}</p>${(() => { const o = BaziAlmanac.officer(r, TODAY.year, TODAY.month, TODAY.day); return o ? `<p class="nowgood"><b>วันนี้เป็น${o.name} ${o.zh}:</b> เหมาะ${o.good}</p>` : ''; })()}`;
         return;
       }
