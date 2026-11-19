@@ -453,12 +453,18 @@ body.gen .why .src { display: block; }
 .asp .ic { grid-row: 1 / 3; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--jade-wash); font-size: 1.1rem; }
 .asp .top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .asp p { margin: 0; color: var(--ink-soft); line-height: 1.45; }
+.asp p.tip { grid-column: 2; margin-top: 4px; }
 .pbar { display: inline-flex; gap: 3px; } .pbar i { width: 18px; height: 6px; border-radius: 3px; background: var(--rule); } .pbar i.on { background: var(--jade); } .pbar.lo i.on { background: var(--bad); }
 .pbal { margin: 2px 0 6px !important; }
 .prhy .rz { padding: 8px 0 8px 12px; border-left: 4px solid var(--rule); margin: 6px 0; } .prhy .rz.g { border-color: var(--good); } .prhy .rz.b { border-color: var(--bad); } .prhy .rz span { color: var(--ink-soft); } .prhy .rz p { margin: 2px 0 0; }
 .hdo { margin: 4px 0 0 !important; font-size: .92rem; }
 .hmore summary { cursor: pointer; color: var(--ink-soft); list-style-position: inside; }
 .hmore summary .full { display: none; }
+
+.plk ul { margin: 6px 0 0; padding-left: 1.2em; }
+.plk li { margin: 4px 0; }
+.pend { margin: 14px 0; padding: 12px 14px; border-radius: 12px; background: var(--jade-wash); border-left: 4px solid var(--jade); }
+.pend h4 { margin: 0 0 6px; }
 .hmore[open] summary { color: inherit; }
 .hmore[open] summary .pv { display: none; }
 .hmore[open] summary .full { display: inline; }
@@ -1433,9 +1439,10 @@ body.gen .why .src { display: block; }
         $('dayDetail').innerHTML = `
           <h2>${x.label} <small>วัน${q.animal}${today ? ' · วันนี้' : ''}</small></h2>
           <div class="phero"><div class="pchips">${DD.chips.map((c) => `<span class="pchip ${c.tone > 0 ? 'ok' : c.tone < 0 ? 'warn' : 'mid'}">${escH(c.t)}</span>`).join('')}</div>
-            <h3 class="ptitle">${escH(DD.title)}</h3><p class="pbal"><b>ภาพรวม${W}: ${escH(DD.level)}</b> (${escH(DD.balance)})</p><p>${escH(DD.overview)}</p><p class="src">ที่มา: ${escH(DD.src)}</p></div>
-          <div class="pasp prhy"><h4>จังหวะของ${W}</h4>${DD.rhythm.map((z) => `<div class="rz ${cls(z.tone)}"><b>${escH(z.head)}</b> <span>${escH(z.when)}</span><p>${escH(z.text)}</p></div>`).join('')}</div>
-          <div class="pasp"><h4>แต่ละด้าน</h4>${DD.aspects.map((a) => `<div class="asp"><span class="ic" aria-hidden="true">${a.icon}</span><div class="top"><b>${a.name}</b><span class="pbar${a.bars <= 2 ? ' lo' : ''}" role="img" aria-label="${a.bars} จาก 5">${[1, 2, 3, 4, 5].map((k) => `<i${k <= a.bars ? ' class="on"' : ''}></i>`).join('')}</span></div><p>${escH(a.text)}</p></div>`).join('')}</div>
+            <h3 class="ptitle">${escH(DD.title)}</h3><p class="pbal"><b>ภาพรวม${W}: ${escH(DD.level)}</b> (${escH(DD.balance)})</p><p>${escH(DD.overview)}</p>${DD.overviewMore ? `<p>${escH(DD.overviewMore)}</p>` : ''}<p class="src">ที่มา: ${escH(DD.src)}</p></div>
+          <div class="pasp prhy"><h4>จังหวะของ${W}</h4>${DD.periods.map((z) => `<div class="rz ${cls(z.tone)}"><b>${escH(z.name)}</b> <span>${escH(z.span)}</span><p>${escH(z.text)}</p></div>`).join('')}</div>
+          <div class="pasp"><h4>แต่ละด้าน</h4>${DD.aspects.map((a) => `<div class="asp"><span class="ic" aria-hidden="true">${a.icon}</span><div class="top"><b>${a.name}</b><span class="pbar${a.bars <= 2 ? ' lo' : ''}" role="img" aria-label="${a.bars} จาก 5">${[1, 2, 3, 4, 5].map((k) => `<i${k <= a.bars ? ' class="on"' : ''}></i>`).join('')}</span></div><p>${escH(a.text)}</p><p class="tip"><b>เคล็ด:</b> ${escH(a.tip)}</p></div>`).join('')}</div>
+          <div class="pasp plk"><h4>เคล็ดเสริมดวง${W}</h4><ul>${DD.lucky.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div>
           <div class="pdo"><div class="g"><h4>เหมาะทำ</h4><ul>${DD.do.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div><div class="b"><h4>ควรเลี่ยง</h4><ul>${DD.avoid.map((t) => `<li>${escH(t)}</li>`).join('')}</ul></div></div>
           ${OF ? `<div class="offbox"><b>เทพประจำวัน: ${OF.name} ${OF.zh}</b> <span class="htg ${OF.tone > 0 ? 'g' : OF.tone < 0 ? 'b' : 'm'}">${OF.tone > 0 ? 'วันใช้ได้' : OF.tone < 0 ? 'ไม่ควรใช้ทำเรื่องสำคัญ' : 'วันกลาง'}</span><p>เหมาะ: ${OF.good} · เลี่ยง: ${OF.bad}</p></div>` : ''}
           <div class="phours"><h4>ยามของ${W}</h4>
@@ -1443,6 +1450,7 @@ body.gen .why .src { display: block; }
             ${dayH.map(([y, i]) => hcard(y, i, isOpen(i))).join('')}
             <details class="night"><summary>ช่วงกลางคืน 23.00–05.00</summary>${nightH.map(([y, i]) => hcard(y, i, true)).join('')}</details>
           </div>
+          <div class="pend"><h4>คำส่งท้าย</h4><p>${escH(DD.closing)}</p></div>
           <details class="why"><summary>ดูเหตุผลทางดวง</summary>
             <div class="lgrid">
               <div class="lpill">${tile(BaziCore.STEMS[q.stem], q.stemElement, q.stemYang)}${tile(BaziCore.BRANCHES[q.branch], q.branchElement, q.branchYang)}</div>

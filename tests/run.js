@@ -183,6 +183,21 @@ eq('ถ้อยคำ 3 แบบ: วันเดิมได้ข้อค�
   const hs = Yr.hours(r, an, 2026, 11, 19), h0 = DY.hour(r, an, hs[5], { y: 2026, m: 11, d: 19 });
   return [txt(a) === txt(b), txt(a) !== txt(c), seen.size > 3, all3, h0.text === a.hours[5].text && h0.now === a.hours[5].now]; })(),
   [true, true, true, true, true]);
+eq('ดวงวันนี้ฉบับลูกดวง: ช่วงเช้า บ่าย ค่ำ เคล็ดแต่ละด้าน เคล็ดเสริมดวง คำส่งท้าย ครบ ไม่มีศัพท์วิชาในเนื้อคำทำนาย และทิศมงคลไม่ชนทิศที่ควรเลี่ยง (60 วัน × 3 ดวง)', (() => {
+  const JARGON = /ราศีบน|ราศีล่าง|ให้โทษ|ให้คุณ|กงหวั่ง|ชงวังคู่ครอง|ภาคีวังคู่ครอง|สิบเทพ/;
+  let ok = true, bad = '';
+  for (const [y, m, d, h] of [[1990, 1, 15, 10], [1975, 7, 3, 22], [2001, 11, 30, 5]]) {
+    const r = calc(y, m, d, h, 0), an = An.analyze(r);
+    for (let k = 0; k < 60; k++) {
+      const t = new Date(2026, 10, 1 + k), x = DY.day(r, an, t.getFullYear(), t.getMonth() + 1, t.getDate(), k === 0);
+      const body = [x.overview, ...x.periods.map((p) => p.text), ...x.aspects.map((a) => a.text + a.tip), ...x.lucky, x.closing, ...x.hours.map((z) => z.text)].join(' ');
+      const dirOk = !x.lucky.some((l) => /ทิศ(ที่ดี|มงคล)/.test(l) && x.lucky.some((a) => /ควรเลี่ยง/.test(a) && a.match(/ทิศ(\S+)/)[1] && l.includes('ทิศ' + a.match(/ทิศ(\S+)/)[1].replace(/ในวัน\S*$/, ''))));
+      const fine = x.periods.length === 3 && x.lucky.length >= 1 && x.closing.length > 20 && x.aspects.every((a) => a.tip) && !JARGON.test(body) && dirOk && !/\{[a-z]+\}/.test(body);
+      if (!fine && !bad) bad = `${y}/${t.toISOString().slice(0, 10)} ${(body.match(JARGON) || [''])[0]}`;
+      ok = ok && fine;
+    }
+  }
+  return bad || ok; })(), true);
 
 console.log(`\nผ่าน ${pass} / ${pass + fail}`);
 process.exit(fail ? 1 : 0);
